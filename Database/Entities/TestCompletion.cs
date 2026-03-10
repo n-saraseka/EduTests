@@ -3,6 +3,8 @@ namespace EduTests.Database.Entities;
 public class TestCompletion
 {
     public int Id { get; set; }
+    public User User { get; set; }
+    public Test Test { get; set; }
     public required int CorrectAnswers { get; set; }
     public required float CompletionPercentage { get; set; }
     public required TimeSpan CompletionTime { get; set; }
