@@ -6,6 +6,7 @@ public class Question
 {
     public int Id { get; set; }
     public required Test Test { get; set; }
+    public required int TestId { get; set; }
     public required int OrderIndex { get; set; }
     public required QuestionType Type { get; set; }
     public required string Description { get; set; }

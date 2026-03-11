@@ -6,6 +6,7 @@ public class Test
 {
     public int Id { get; set; }
     public required User User { get; set; }
+    public required int UserId { get; set; }
     public List<Tag> Tags { get; set; } = new();
     public required string Name { get; set; }
     public string? Description { get; set; }
