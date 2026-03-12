@@ -6,5 +6,6 @@ public class UserAnswer
     public required TestCompletion Completion { get; set; }
     public required int TestCompletionId { get; set; }
     public required Question Question { get; set; }
+    public required int QuestionId { get; set; }
     public required QuestionData Answers { get; set; }
 }

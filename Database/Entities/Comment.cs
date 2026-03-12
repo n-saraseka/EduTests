@@ -4,7 +4,7 @@ public class Comment
 {
     public int Id { get; set; }
     public required User Commenter { get; set; }
-    public required int UserId { get; set; }
+    public required int CommenterId { get; set; }
     public User? UserProfile { get; set; }
     public int? UserProfileId { get; set; }
     public Test? Test { get; set; }
