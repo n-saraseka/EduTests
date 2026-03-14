@@ -1,6 +1,16 @@
+using EduTests.Database;
+using EduTests.Database.Enums;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContextPool<DatabaseContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+        o => o.MapEnum<AccessType>("AccessType")
+                                        .MapEnum<QuestionType>("QuestionType")
+                                        .MapEnum<ReportStatus>("ReportStatus")
+                                        .MapEnum<UserGroup>("UserGroup")));
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
