@@ -11,5 +11,7 @@ public class TagConfiguration : IEntityTypeConfiguration<Tag>
         builder
             .Property(t => t.Name)
             .HasMaxLength(32);
+        builder
+            .HasIndex(t => t.Name);
     }
 }

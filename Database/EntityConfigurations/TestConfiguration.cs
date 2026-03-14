@@ -29,5 +29,9 @@ public class TestConfiguration : IEntityTypeConfiguration<Test>
                 t.HasCheckConstraint("TimeLimitCheck", 
                     "TimeLimit IS NULL OR (TimeLimit >= INTERVAL '0 hours' AND TimeLimit <=INTERVAL '5 hours')");
             });
+        builder
+            .HasIndex(t => t.Name);
+        builder
+            .HasIndex(t => t.Description);
     }
 }
