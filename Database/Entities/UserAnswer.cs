@@ -1,6 +1,6 @@
 namespace EduTests.Database.Entities;
 
-public class UserAnswer
+public class UserAnswer : IEntity<int>
 {
     public int Id { get; set; }
     public required TestCompletion Completion { get; set; }

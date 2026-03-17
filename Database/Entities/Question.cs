@@ -2,7 +2,7 @@ using EduTests.Database.Enums;
 
 namespace EduTests.Database.Entities;
 
-public class Question
+public class Question : IEntity<int>
 {
     public int Id { get; set; }
     public required Test Test { get; set; }

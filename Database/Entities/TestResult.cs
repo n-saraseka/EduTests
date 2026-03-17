@@ -1,6 +1,6 @@
 namespace EduTests.Database.Entities;
 
-public class TestResult
+public class TestResult : IEntity<int>
 {
     public int Id { get; set; }
     public required Test Test { get; set; }

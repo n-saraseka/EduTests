@@ -1,6 +1,6 @@
 namespace EduTests.Database.Entities;
 
-public class BannedUser
+public class BannedUser : IEntity<int>
 {
     public int Id { get; set; }
     public required User UserBanned { get; set; }
