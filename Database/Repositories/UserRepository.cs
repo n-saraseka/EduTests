@@ -81,8 +81,9 @@ public class UserRepository(DatabaseContext db) : IRepository<User>
     public async Task UpdateBulkAsync(IEnumerable<User> items, CancellationToken cancellationToken = default)
     {
         var old = await GetBulkAsync(items.Select(u => u.Id), cancellationToken);
+        var toUpdate = items.Where(u => old.Select(o => o.Id).Contains(u.Id));
         if (old.Count > 0)
-            db.Users.UpdateRange(old);
+            db.Users.UpdateRange(toUpdate);
     }
     
     /// <summary>
@@ -93,9 +94,9 @@ public class UserRepository(DatabaseContext db) : IRepository<User>
     /// <exception cref="OperationCanceledException">If the CancellationToken is canceled</exception>
     public async Task DeleteAsync(User item, CancellationToken cancellationToken = default)
     {
-        var old = await GetByIdAsync(item.Id, cancellationToken);
-        if (old != null)
-            db.Users.Remove(old);
+        var toDelete = await GetByIdAsync(item.Id, cancellationToken);
+        if (toDelete != null)
+            db.Users.Remove(toDelete);
     }
     
     /// <summary>
@@ -106,9 +107,9 @@ public class UserRepository(DatabaseContext db) : IRepository<User>
     /// <exception cref="OperationCanceledException">If the CancellationToken is canceled</exception>
     public async Task DeleteBulkAsync(IEnumerable<User> items, CancellationToken cancellationToken = default)
     {
-        var old = await GetBulkAsync(items.Select(u => u.Id), cancellationToken);
-        if (old.Count > 0)
-            db.Users.RemoveRange(old);
+        var toDelete = await GetBulkAsync(items.Select(u => u.Id), cancellationToken);
+        if (toDelete.Count > 0)
+            db.Users.RemoveRange(toDelete);
     }
     
     /// <summary>
