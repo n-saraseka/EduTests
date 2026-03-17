@@ -1,5 +1,4 @@
 using EduTests.Database.Enums;
-using EduTests.Database.Entities.Questions;
 
 namespace EduTests.Database.Entities;
 
