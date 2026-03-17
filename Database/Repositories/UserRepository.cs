@@ -11,8 +11,7 @@ public class UserRepository(DatabaseContext db) : IRepository<User>
     /// <returns>DbSet with all user data</returns>
     public DbSet<User> GetAll()
     {
-        var all = db.Users;
-        return all;
+        return db.Users;
     }
     
     /// <summary>
