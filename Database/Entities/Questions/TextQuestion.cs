@@ -7,10 +7,8 @@ public class TextQuestion : QuestionData
     public string? Answer;
     public List<string> ValidAnswers = new();
 
-    public override void ValidateQuestion(QuestionData correctData, QuestionType expectedType)
+    public override void ValidateQuestion(QuestionData? correctData, QuestionType expectedType)
     {
-        base.ValidateQuestion(correctData, expectedType);
-        
         if (correctData is not TextQuestion correct)
             throw new ArgumentException($"{nameof(correctData)} must be of type {nameof(TextQuestion)}");
         if (Answer is not null )
@@ -21,9 +19,8 @@ public class TextQuestion : QuestionData
             throw new ArgumentException($"{nameof(correct.ValidAnswers)} must contain at least one item");
     }
 
-    public override void ValidateAnswer(QuestionData correctData, QuestionType expectedType)
+    public override void ValidateAnswer()
     {
-        base.ValidateAnswer(correctData, expectedType);
         if (Answer is null)
             throw new ArgumentException($"{nameof(Answer)} must not be null");
     }

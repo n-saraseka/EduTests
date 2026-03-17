@@ -6,10 +6,8 @@ public class ChoiceQuestion : QuestionData
 {
     public List<string> Options { get; set; } = new();
 
-    public override void ValidateQuestion(QuestionData correctData, QuestionType expectedType)
+    public override void ValidateQuestion(QuestionData? correctData, QuestionType expectedType)
     {
-        base.ValidateQuestion(correctData, expectedType);
-        
         if (correctData is not ChoiceQuestion correct)
             throw new ArgumentException($"{nameof(correctData)} must be of type {nameof(ChoiceQuestion)}");
         if (Options.Count is 0 or > 10)
@@ -20,13 +18,9 @@ public class ChoiceQuestion : QuestionData
             throw new ArgumentOutOfRangeException($"{nameof(correct.Options)} must have exactly one option");
     }
 
-    public override void ValidateAnswer(QuestionData correctData, QuestionType expectedType)
+    public override void ValidateAnswer()
     {
-        base.ValidateAnswer(correctData, expectedType);
-        
         if (Options.Count is 0 or > 10)
             throw new ArgumentOutOfRangeException($"{nameof(Options)} must have between 1 and 10 items");
-        if (expectedType == QuestionType.SingleChoice && Options.Count != 1)
-            throw new ArgumentOutOfRangeException($"{nameof(Options)} must have exactly one option");
     }
 }

@@ -6,10 +6,8 @@ public class MatchPairsQuestion : QuestionData
 {
     public List<MatchingPair> Pairs { get; set; } = new();
     
-    public override void ValidateQuestion(QuestionData correctData, QuestionType expectedType)
+    public override void ValidateQuestion(QuestionData? correctData, QuestionType expectedType)
     {
-        base.ValidateQuestion(correctData, expectedType);
-        
         if (correctData is not MatchPairsQuestion correct)
             throw new ArgumentException($"{nameof(correctData)} must be of type {nameof(MatchPairsQuestion)}");
         if (correct.Pairs.Count == 0 || Pairs.Count == 0)
@@ -26,9 +24,8 @@ public class MatchPairsQuestion : QuestionData
             throw new ArgumentException($"Each column in {nameof(Pairs)} should have the same items");
     }
 
-    public override void ValidateAnswer(QuestionData correctData, QuestionType expectedType)
+    public override void ValidateAnswer()
     {
-        base.ValidateAnswer(correctData, expectedType);
         if (Pairs.Count == 0)
             throw new ArgumentException($"{nameof(Pairs)} must not be empty");
     }
