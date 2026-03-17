@@ -12,5 +12,5 @@ public class Question : IEntity<int>
     public required QuestionType Type { get; set; }
     public required string Description { get; set; }
     public required QuestionData Data { get; set; }
-    public QuestionData? CorrectData { get; set; }
+    public required QuestionData CorrectData { get; set; }
 }
