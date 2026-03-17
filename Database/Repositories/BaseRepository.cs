@@ -12,16 +12,16 @@ public class BaseRepository<T, TKey>(DatabaseContext db) : IRepository<T, TKey>
     /// <summary>
     /// Get all items
     /// </summary>
-    /// <returns>An IQueryable that can be used to query all items of class <typeparamref name="T"/></returns>
+    /// <returns>An <see cref="IQueryable"/> that can be used to query all items of class <see cref="T"/></returns>
     public IQueryable<T> GetAll() => Set.AsQueryable();
     
     /// <summary>
     /// Get an item by its ID
     /// </summary>
     /// <param name="id">Item ID</param>
-    /// <param name="cancellationToken">A CancellationToken to observe</param>
-    /// <returns><typeparamref name="T"/> object or null</returns>
-    /// <exception cref="OperationCanceledException">If the CancellationToken is canceled</exception>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>Object of class <see cref="T"/> or null</returns>
+    /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled</exception>
     public ValueTask<T?> GetByIdAsync(TKey id, CancellationToken cancellationToken = default) => 
         Set.FindAsync([id], cancellationToken);
     
@@ -29,9 +29,9 @@ public class BaseRepository<T, TKey>(DatabaseContext db) : IRepository<T, TKey>
     /// Get items by their IDs
     /// </summary>
     /// <param name="ids">Item IDs</param>
-    /// <param name="cancellationToken">A CancellationToken to observe</param>
-    /// <returns>List containing existing items of class <typeparamref name="T"/></returns>
-    /// <exception cref="OperationCanceledException">If the CancellationToken is canceled</exception>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>List containing existing items of class <see cref="T"/></returns>
+    /// <exception cref="OperationCanceledException">If the <see cref="CancellationToken"/> is canceled</exception>
     public Task<List<T>> GetBulkAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default) =>
         Set
             .Where(i => ids.Contains(i.Id)) 
@@ -40,37 +40,37 @@ public class BaseRepository<T, TKey>(DatabaseContext db) : IRepository<T, TKey>
     /// <summary>
     /// Add item
     /// </summary>
-    /// <param name="item">Populated object of class <typeparamref name="T"/></param>
+    /// <param name="item">Populated object of class <see cref="T"/></param>
     public void Create(T item) => Set.Add(item);
     
     /// <summary>
     /// Add items
     /// </summary>
-    /// <param name="items">IEnumerable containing populated objects of class <typeparamref name="T"/></param>
+    /// <param name="items">IEnumerable containing populated objects of class <see cref="T"/></param>
     public void CreateBulk(IEnumerable<T> items) => Set.AddRange(items);
     
     /// <summary>
     /// Update item data
     /// </summary>
-    /// <param name="item">Populated object of class <typeparamref name="T"/></param>
+    /// <param name="item">Populated object of class <see cref="T"/></param>
     public void Update(T item) => Set.Update(item);
     
     /// <summary>
     /// Update items data
     /// </summary>
-    /// <param name="items">IEnumerable containing populated objects of class <typeparamref name="T"/></param>
+    /// <param name="items">IEnumerable containing populated objects of class <see cref="T"/></param>
     public void UpdateBulk(IEnumerable<T> items) => Set.UpdateRange(items);
     
     /// <summary>
     /// Delete item data
     /// </summary>
-    /// <param name="item">Populated object of class <typeparamref name="T"/></param>
+    /// <param name="item">Populated object of class <see cref="T"/></param>
     public void Delete(T item) => Set.Remove(item);
     
     /// <summary>
     /// Delete items data
     /// </summary>
-    /// <param name="items">IEnumerable containing populated objects of class <typeparamref name="T"/></param>
+    /// <param name="items"><see cref="IEnumerable{T}"/> containing populated objects of class <see cref="T"/></param>
     public void DeleteBulk(IEnumerable<T> items) => Set.RemoveRange(items);
     
     /// <summary>
