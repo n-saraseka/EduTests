@@ -1,4 +1,5 @@
 using EduTests.Database.Enums;
+using EduTests.Database.Entities.Questions;
 
 namespace EduTests.Database.Entities;
 
@@ -11,5 +12,5 @@ public class Question : IEntity<int>
     public required QuestionType Type { get; set; }
     public required string Description { get; set; }
     public required QuestionData Data { get; set; }
-    public required QuestionData CorrectData { get; set; }
+    public QuestionData? CorrectData { get; set; }
 }
