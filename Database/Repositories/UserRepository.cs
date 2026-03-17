@@ -82,7 +82,7 @@ public class UserRepository(DatabaseContext db) : IRepository<User>
     {
         var old = await GetBulkAsync(items.Select(u => u.Id), cancellationToken);
         var toUpdate = items.Where(u => old.Select(o => o.Id).Contains(u.Id));
-        if (old.Count > 0)
+        if (toUpdate.Any())
             db.Users.UpdateRange(toUpdate);
     }
     
