@@ -7,7 +7,27 @@ public class QuestionRepository(DatabaseContext db) : BaseRepository<Question, i
 {
     public override void Create(Question item)
     {
-        item.Data.Validate(item.CorrectData, item.Type);
+        item.Data.ValidateQuestion(item.CorrectData, item.Type);
         base.Create(item);
+    }
+
+    public override void CreateBulk(IEnumerable<Question> items)
+    {
+        foreach (var item in items)
+            item.Data.ValidateQuestion(item.CorrectData, item.Type);
+        base.CreateBulk(items);
+    }
+
+    public override void Update(Question item)
+    {
+        item.Data.ValidateQuestion(item.CorrectData, item.Type);
+        base.Update(item);
+    }
+
+    public override void UpdateBulk(IEnumerable<Question> items)
+    {
+        foreach (var item in items)
+            item.Data.ValidateQuestion(item.CorrectData, item.Type);
+        base.UpdateBulk(items);
     }
 }
