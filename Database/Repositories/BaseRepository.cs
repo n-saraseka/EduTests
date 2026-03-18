@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using EduTests.Database.Entities;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace EduTests.Database.Repositories;
 
@@ -81,6 +82,26 @@ public class BaseRepository<T, TKey>(DatabaseContext db) : IRepository<T, TKey>
     /// <returns>Task that represents the asynchronous save operation. Task result contains the number of state entries written to the DB</returns>
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        var entries = db.ChangeTracker.Entries()
+            .Where(e => e is { Entity: IAuditable, State: EntityState.Added or EntityState.Modified });
+
+        foreach (var entry in entries)
+        {
+            var auditable = (IAuditable)entry.Entity;
+            var now = DateTime.UtcNow;
+            
+            if (entry.State == EntityState.Added)
+            {
+                auditable.CreatedAt = now;
+                auditable.UpdatedAt = now;
+            }
+            else
+            {
+                auditable.UpdatedAt = now;
+                entry.Property(nameof(IAuditable.CreatedAt)).IsModified = false;
+            }
+        }
+        
         return db.SaveChangesAsync(cancellationToken);
     }
 }
