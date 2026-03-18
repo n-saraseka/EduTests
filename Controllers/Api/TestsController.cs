@@ -1,5 +1,3 @@
-using EduTests.Database;
-using EduTests.Database.Entities;
 using EduTests.Database.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +8,7 @@ public class TestsController(ITestRepository testRepository,
     IUserRatingRepository ratingRepository, 
     ITestCompletionRepository testCompletionRepository) : Controller
 {
-    public async Task<IActionResult> GetTest(int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetTestAsync(int id, CancellationToken cancellationToken = default)
     {
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
         if (test == null)
@@ -20,7 +18,7 @@ public class TestsController(ITestRepository testRepository,
         return Ok(new {test, rating, completions});
     }
 
-    public async Task<IActionResult> Search(string text, int page, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> SearchAsync(string text, int page, CancellationToken cancellationToken = default)
     {
         var query = testRepository.Search(text);
         var count = await query.CountAsync(cancellationToken);
@@ -31,7 +29,7 @@ public class TestsController(ITestRepository testRepository,
         return Ok(new {count, items, ratings, completions});
     }
 
-    public async Task<IActionResult> GetByTag(string tag, int page, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetByTagAsync(string tag, int page, CancellationToken cancellationToken = default)
     {
         var query = testRepository.GetAllByTag(tag);
         var count = await query.CountAsync(cancellationToken);

@@ -16,4 +16,7 @@ public class UserRepository(DatabaseContext db) : BaseRepository<User, int>(db),
     /// <exception cref="TaskCanceledException">If the <see cref="CancellationToken"/> is canceled</exception>
     public Task<List<User>> GetByGroupAsync(UserGroup group, CancellationToken cancellationToken = default) =>
         Set.Where(u => u.Group == group).ToListAsync(cancellationToken);
+    
+    public Task<User?> GetByLoginAsync(string login,CancellationToken cancellationToken = default) =>
+        Set.Where(u => u.Login == login).FirstOrDefaultAsync(cancellationToken);
 }

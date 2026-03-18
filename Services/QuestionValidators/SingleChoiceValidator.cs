@@ -1,7 +1,7 @@
 using EduTests.Database.Entities;
 using EduTests.Database.Enums;
 
-namespace EduTests.Services.QuestionValidator.Validators;
+namespace EduTests.Services.QuestionValidators;
 
 public class SingleChoiceValidator : IValidator
 {

@@ -1,10 +1,10 @@
 using EduTests.Database.Entities;
 using EduTests.Database.Enums;
-using EduTests.Services.QuestionValidator.Validators;
+using EduTests.Services.QuestionValidators;
 
-namespace EduTests.Services.QuestionValidator;
+namespace EduTests.Services;
 
-public static class QuestionDataValidator
+public class QuestionValidatorService : IQuestionValidatorService
 {
     private static readonly Dictionary<QuestionType, IValidator> Validators = new()
     {
@@ -24,7 +24,7 @@ public static class QuestionDataValidator
     /// <param name="type">The question type</param>
     /// <param name="isQuestion">Whether the <see cref="QuestionData"/> to validate comes from a <see cref="Question"/> or <see cref="UserAnswer"/></param>
     /// <exception cref="ArgumentException">If the <see cref="QuestionType"/> is not valid</exception>
-    public static void Validate(QuestionData questionData, QuestionData? correctData, QuestionType type, bool isQuestion)
+    public void Validate(QuestionData questionData, QuestionData? correctData, QuestionType type, bool isQuestion)
     {
         if (Validators.TryGetValue(type, out var validator))
             validator.Validate(questionData, correctData, isQuestion);
