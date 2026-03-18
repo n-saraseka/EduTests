@@ -41,25 +41,25 @@ public class BaseRepository<T, TKey>(DatabaseContext db) : IRepository<T, TKey>
     /// Add item
     /// </summary>
     /// <param name="item">Populated object of class <see cref="T"/></param>
-    public virtual void Create(T item) => Set.Add(item);
+    public void Create(T item) => Set.Add(item);
     
     /// <summary>
     /// Add items
     /// </summary>
     /// <param name="items">IEnumerable containing populated objects of class <see cref="T"/></param>
-    public virtual void CreateBulk(IEnumerable<T> items) => Set.AddRange(items);
+    public void CreateBulk(IEnumerable<T> items) => Set.AddRange(items);
     
     /// <summary>
     /// Update item data
     /// </summary>
     /// <param name="item">Populated object of class <see cref="T"/></param>
-    public virtual void Update(T item) => Set.Update(item);
+    public void Update(T item) => Set.Update(item);
     
     /// <summary>
     /// Update items data
     /// </summary>
     /// <param name="items">IEnumerable containing populated objects of class <see cref="T"/></param>
-    public virtual void UpdateBulk(IEnumerable<T> items) => Set.UpdateRange(items);
+    public void UpdateBulk(IEnumerable<T> items) => Set.UpdateRange(items);
     
     /// <summary>
     /// Delete item data
