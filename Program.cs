@@ -1,5 +1,7 @@
 using EduTests.Database;
 using EduTests.Database.Enums;
+using EduTests.Database.Repositories;
+using EduTests.Database.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +13,9 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
                                         .MapEnum<QuestionType>("QuestionType")
                                         .MapEnum<ReportStatus>("ReportStatus")
                                         .MapEnum<UserGroup>("UserGroup")));
+builder.Services.AddScoped<ITestRepository, TestRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();

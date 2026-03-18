@@ -1,9 +1,10 @@
 using EduTests.Database.Entities;
 using Microsoft.EntityFrameworkCore;
+using EduTests.Database.Repositories.Interfaces;
 
 namespace EduTests.Database.Repositories;
 
-public class CommentRepository(DatabaseContext db) : BaseRepository<Comment, int>(db)
+public class CommentRepository(DatabaseContext db) : BaseRepository<Comment, int>(db), ICommentRepository
 {
     /// <summary>
     /// Get all <see cref="Comment"/>s from profile

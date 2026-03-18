@@ -1,10 +1,11 @@
 using EduTests.Database.Entities;
 using EduTests.Database.Enums;
+using EduTests.Database.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTests.Database.Repositories;
 
-public class UserRepository(DatabaseContext db) : BaseRepository<User, int>(db)
+public class UserRepository(DatabaseContext db) : BaseRepository<User, int>(db), IUserRepository
 {
     /// <summary>
     /// Get all <see cref="User"/>s within a <see cref="UserGroup"/>

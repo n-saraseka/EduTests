@@ -1,10 +1,11 @@
 using EduTests.Database.Entities;
 using EduTests.Database.Enums;
+using EduTests.Database.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTests.Database.Repositories;
 
-public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db)
+public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db), ITestRepository
 {
     /// <summary>
     /// Search <see cref="Test"/>s that have matching text in their name, description, or tags

@@ -1,4 +1,4 @@
-namespace EduTests.Database.Repositories;
+namespace EduTests.Database.Repositories.Interfaces;
 
 public interface IRepository<T, TKey>
     where T : class
