@@ -12,7 +12,7 @@ public class QuestionData
     public List<MatchingPair> Pairs { get; set; } = new();
     
     // number input
-    public double? Tolerance = 0.1;
+    public double? Tolerance;
     public double? NumberAnswer;
     
     // sequence
