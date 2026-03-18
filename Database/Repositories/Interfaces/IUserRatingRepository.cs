@@ -1,6 +1,9 @@
+using EduTests.Database.Entities;
+
 namespace EduTests.Database.Repositories.Interfaces;
 
-public interface IUserRatingRepository
+public interface IUserRatingRepository : IRepository<UserRating, int>
 {
-    Task<int> ComputeTestRatingAsync(int testId, CancellationToken cancellationToken);
+    Task<int> GetTestRatingAsync(int id, CancellationToken cancellationToken);
+    Task<Dictionary<int, int>> GetTestRatingsAsync(IEnumerable<int> ids, CancellationToken cancellationToken);
 }

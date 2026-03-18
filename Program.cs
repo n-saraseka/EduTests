@@ -17,6 +17,7 @@ builder.Services.AddScoped<ITestRepository, TestRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IUserRatingRepository, UserRatingRepository>();
+builder.Services.AddScoped<ITestCompletionRepository, TestCompletionRepository>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();

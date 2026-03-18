@@ -25,16 +25,4 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
     /// <returns>An <see cref="IQueryable"/> of all <see cref="Test"/>s with the <see cref="Tag"/></returns>
     public IQueryable<Test> GetAllByTag(string name) =>
         Set.Where(t => t.Tags.Any(tag => tag.Name == name));
-    
-    /// <summary>
-    /// Get <see cref="Test"/>s page
-    /// </summary>
-    /// <param name="number">Page number to get <see cref="Test"/>s from</param>
-    /// <param name="count">Count of <see cref="Test"/>s per page</param>
-    /// <param name="tests">An <see cref="IQueryable"/> containing <see cref="Test"/> data</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
-    /// <returns>A list containing all <see cref="Test"/>s on this page</returns>
-    /// <exception cref="TaskCanceledException">If the <see cref="CancellationToken"/> is canceled</exception>
-    public Task<List<Test>> GetPageAsync(int number, int count, IQueryable<Test> tests, CancellationToken cancellationToken) =>
-        tests.Skip((number - 1) * count).Take(count).ToListAsync(cancellationToken);
 }
