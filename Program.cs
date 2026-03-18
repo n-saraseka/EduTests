@@ -16,6 +16,7 @@ builder.Services.AddDbContext<DatabaseContext>(options =>
 builder.Services.AddScoped<ITestRepository, TestRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<IUserRatingRepository, UserRatingRepository>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
