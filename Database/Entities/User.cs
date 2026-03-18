@@ -11,5 +11,5 @@ public class User : IEntity<int>
     public string? AvatarUrl { get; set; }
     public string? Description { get; set; }
     public DateTime RegistrationDate { get; set; }
-    public required UserGroup Group { get; set; }
+    public UserGroup Group { get; set; } = UserGroup.User;
 }

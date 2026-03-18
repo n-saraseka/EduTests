@@ -1,5 +1,3 @@
-using System.Security.Claims;
-using EduTests.Controllers.Api;
 using EduTests.Database;
 using EduTests.Database.Enums;
 using EduTests.Database.Repositories;
@@ -26,45 +24,25 @@ builder.Services.AddScoped<IUserRatingRepository, UserRatingRepository>();
 builder.Services.AddScoped<ITestCompletionRepository, TestCompletionRepository>();
 // services
 builder.Services.AddScoped<IQuestionValidatorService, QuestionValidatorService>();
-builder.Services.AddScoped<IAuthentificationService, AuthentificationService>();
+builder.Services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession();
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication("Cookies")
     .AddCookie(options =>
     {
-        options.LoginPath = "/login";
+        options.LoginPath = "/Account/login";
+        options.LogoutPath = "/Account/logout";
+        options.AccessDeniedPath = "/Account/accessDenied";
     });
 
 var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapPost("/login", async (string? returnUrl, IAuthentificationService service, HttpContext context, CancellationToken cancellationToken) =>
-{
-    var form = context.Request.Form;
-    
-    if (!form.ContainsKey("login") || !form.ContainsKey("password"))
-        return Results.BadRequest("Login and Password are required.");
-    
-    string login = form["login"];
-    string password = form["password"];
-    
-    var user = await service.ValidateUserAsync(login, password, cancellationToken);
-    if (user == null)
-        return Results.Unauthorized();
-    
-    var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-        new Claim(ClaimTypes.Name, user.Login)
-    };
-    var claimsIdentity = new ClaimsIdentity(claims, "Cookies");
-    
-    await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
-    return Results.Redirect(returnUrl??"/");
-});
 
 app.MapGet("/logout", async (HttpContext context) =>
 {
