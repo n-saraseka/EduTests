@@ -26,6 +26,6 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
         builder
             .ToTable(t => 
                 t.HasCheckConstraint("SingleTargetCheckComment", 
-                    "(TestId IS NULL AND UserProfileId IS NOT NULL) OR (TestId IS NOT NULL AND UserProfileId IS NULL)"));
+                    "(test_id IS NULL AND user_profile_id IS NOT NULL) OR (test_id IS NOT NULL AND user_profile_id IS NULL)"));
     }
 }
