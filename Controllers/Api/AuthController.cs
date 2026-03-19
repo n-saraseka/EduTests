@@ -21,8 +21,9 @@ public class AuthController(IUserAuthenticationService service) : ControllerBase
 
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Login)
+            new Claim(ClaimTypes.Role, user.Group.ToString()),
+            new Claim(ClaimTypes.Name, user.Login),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
         };
         
         var claimsIdentity = new ClaimsIdentity(claims, "Cookies");
@@ -43,8 +44,9 @@ public class AuthController(IUserAuthenticationService service) : ControllerBase
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Login)
+                new Claim(ClaimTypes.Role, user.Group.ToString()),
+                new Claim(ClaimTypes.Name, user.Login),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, "Cookies");
