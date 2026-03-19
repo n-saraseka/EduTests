@@ -19,6 +19,7 @@ public class DatabaseSeederService(IUserRepository userRepository, IConfiguratio
                 Login = "admin",
                 Username = "Administrator",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(configuration["adminPassword"]),
+                RegistrationDate = DateTime.UtcNow
             };
             userRepository.Create(user);
             await userRepository.SaveChangesAsync(cancellationToken);

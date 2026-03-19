@@ -19,8 +19,8 @@ public class TestCompletionConfiguration : IEntityTypeConfiguration<TestCompleti
         builder
             .ToTable(tc =>
             {
-                tc.HasCheckConstraint("CompletionPercentageCheck", "CompletionPercentage >= 0 AND CompletionPercentage <= 100");
-                tc.HasCheckConstraint("AnswerCountCheck", "CorrectAnswers >= 0");
+                tc.HasCheckConstraint("completion_percentage_check", "completion_percentage >= 0 AND completion_percentage <= 100");
+                tc.HasCheckConstraint("answer_count_check", "correct_answers >= 0");
             });
     }
 }

@@ -17,6 +17,6 @@ public class TestResultConfiguration : IEntityTypeConfiguration<TestResult>
             .HasMaxLength(32);
         builder
             .ToTable(t => 
-                t.HasCheckConstraint("ThresholdCheck", "PercentageThreshold >= 0 AND PercentageThreshold <= 100"));
+                t.HasCheckConstraint("threshold_check", "percentage_threshold >= 0 AND percentage_threshold <= 100"));
     }
 }

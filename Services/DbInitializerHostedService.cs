@@ -5,12 +5,12 @@ namespace EduTests.Services;
 
 public class DbInitializerHostedService(IServiceProvider serviceProvider) : IHostedService
 {
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-        var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeederService>();
         await dbContext.Database.MigrateAsync(cancellationToken);
+        var seeder = scope.ServiceProvider.GetRequiredService<IDatabaseSeederService>();
         await seeder.SeedAsync(cancellationToken);
     }
     

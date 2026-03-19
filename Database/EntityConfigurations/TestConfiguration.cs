@@ -24,10 +24,10 @@ public class TestConfiguration : IEntityTypeConfiguration<Test>
         builder
             .ToTable(t =>
             {
-                t.HasCheckConstraint("AttemptLimitCheck", 
-                    "AttemptLimit IS NULL OR (AttemptLimit >= 0 AND AttemptLimit <= 10)");
-                t.HasCheckConstraint("TimeLimitCheck", 
-                    "TimeLimit IS NULL OR (TimeLimit >= INTERVAL '0 hours' AND TimeLimit <=INTERVAL '5 hours')");
+                t.HasCheckConstraint("attempt_limit_check", 
+                    "attempt_limit IS NULL OR (attempt_limit >= 0 AND attempt_limit <= 10)");
+                t.HasCheckConstraint("time_limit_check", 
+                    "time_limit IS NULL OR (time_limit >= '0 hours'::interval AND time_limit <= '5 hours'::interval)");
             });
         builder
             .HasIndex(t => t.Name);

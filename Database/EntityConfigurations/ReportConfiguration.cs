@@ -26,8 +26,8 @@ public class ReportConfiguration : IEntityTypeConfiguration<Report>
         builder
             .ToTable(t => 
                 t.HasCheckConstraint("SingleTargetCheckReport", 
-                    "(TestID IS NOT NULL AND UserId IS NULL AND CommentId IS NULL) OR " +
-                    "(TestID IS NULL AND UserId IS NOT NULL AND CommentId IS NULL) OR " +
-                    "(TestID IS NULL AND UserId IS NULL AND CommentId IS NOT NULL)"));
+                    "(test_id IS NOT NULL AND user_id IS NULL AND comment_id IS NULL) OR " +
+                    "(test_id IS NULL AND user_id IS NOT NULL AND comment_id IS NULL) OR " +
+                    "(test_id IS NULL AND user_id IS NULL AND comment_id IS NOT NULL)"));
     }
 }

@@ -3,19 +3,23 @@ using EduTests.Database.Enums;
 using EduTests.Database.Repositories;
 using EduTests.Database.Repositories.Interfaces;
 using EduTests.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using EFCore.NamingConventions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<DatabaseContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), 
-        o => o.MapEnum<AccessType>("AccessType")
-                                        .MapEnum<QuestionType>("QuestionType")
-                                        .MapEnum<ReportStatus>("ReportStatus")
-                                        .MapEnum<UserGroup>("UserGroup")));
+    options
+        .UseSnakeCaseNamingConvention()
+        .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+        o =>
+        {
+            o.MapEnum<AccessType>("AccessType")
+                .MapEnum<QuestionType>("QuestionType")
+                .MapEnum<ReportStatus>("ReportStatus")
+                .MapEnum<UserGroup>("UserGroup");
+        }));
 // repositories
 builder.Services.AddScoped<ITestRepository, TestRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -63,6 +67,18 @@ app.MapStaticAssets();
 app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
+
+app.MapControllerRoute(
+    name: "login",
+    pattern: "login",
+    defaults: new {controller = "Account", action = "Login"}) 
+    .WithStaticAssets();
+
+app.MapControllerRoute(
+        name: "register",
+        pattern: "register",
+        defaults: new {controller = "Account", action = "Register"})
     .WithStaticAssets();
 
 

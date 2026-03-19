@@ -17,7 +17,7 @@ public class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .HasMaxLength(1024);
         builder
             .ToTable(t => 
-                t.HasCheckConstraint("OrderIndexCheck", "OrderIndex >= 1"));
+                t.HasCheckConstraint("order_index_check", "order_index >= 1"));
         builder
             .ComplexProperty(q => q.Data, d => d.ToJson());
         builder
