@@ -24,16 +24,11 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbCont
         modelBuilder.ApplyConfiguration(new TestResultConfiguration());
         modelBuilder.ApplyConfiguration(new TagConfiguration());
         modelBuilder.ApplyConfiguration(new QuestionConfiguration());
-        modelBuilder.Entity<Question>()
-            .ComplexProperty(q => q.Data, d => d.ToJson());
-        modelBuilder.Entity<Question>()
-            .ComplexProperty(q => q.CorrectData, d => d.ToJson());
         modelBuilder.ApplyConfiguration(new TestCompletionConfiguration());
         modelBuilder.ApplyConfiguration(new UserAnswerConfiguration());
-        modelBuilder.Entity<UserAnswer>()
-            .ComplexProperty(ua => ua.Answers, a => a.ToJson());
         modelBuilder.ApplyConfiguration(new CommentConfiguration());
         modelBuilder.ApplyConfiguration(new ReportConfiguration());
         modelBuilder.ApplyConfiguration(new BannedUserConfiguration());
+        modelBuilder.ApplyConfiguration(new UserRatingConfiguration());
     }
 }

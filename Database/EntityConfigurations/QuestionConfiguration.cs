@@ -18,5 +18,9 @@ public class QuestionConfiguration : IEntityTypeConfiguration<Question>
         builder
             .ToTable(t => 
                 t.HasCheckConstraint("OrderIndexCheck", "OrderIndex >= 1"));
+        builder
+            .ComplexProperty(q => q.Data, d => d.ToJson());
+        builder
+            .ComplexProperty(q => q.CorrectData, d => d.ToJson());
     }
 }

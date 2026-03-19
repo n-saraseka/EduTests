@@ -12,6 +12,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .Property(u => u.Login)
             .HasMaxLength(32);
         builder
+            .HasIndex(u => u.Login)
+            .IsUnique();
+        builder
             .Property(u => u.Username)
             .HasMaxLength(32);
         builder

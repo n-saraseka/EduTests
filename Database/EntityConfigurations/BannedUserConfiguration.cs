@@ -16,5 +16,8 @@ public class BannedUserConfiguration : IEntityTypeConfiguration<BannedUser>
             .HasOne(b => b.BannedBy)
             .WithMany()
             .HasForeignKey(b => b.BannedById);
+        builder
+            .Property(b => b.BanReason)
+            .HasMaxLength(512);
     }
 }

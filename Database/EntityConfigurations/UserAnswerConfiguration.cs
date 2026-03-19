@@ -16,5 +16,10 @@ public class UserAnswerConfiguration : IEntityTypeConfiguration<UserAnswer>
             .HasOne(ua => ua.Question)
             .WithMany()
             .HasForeignKey(ua => ua.QuestionId);
+        builder
+            .HasIndex(ua => new {ua.TestCompletionId, ua.QuestionId})
+            .IsUnique();
+        builder
+            .ComplexProperty(ua => ua.Answers, a => a.ToJson());
     }
 }

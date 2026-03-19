@@ -1,4 +1,5 @@
 using EduTests.Database.Entities;
+using EduTests.Database.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -18,5 +19,8 @@ public class UserRatingConfiguration : IEntityTypeConfiguration<UserRating>
             .HasForeignKey(r => r.UserId);
         builder
             .HasIndex(r => new { r.TestId, r.IsPositive });
+        builder
+            .HasIndex(r => new {r.TestId, r.UserId})
+            .IsUnique();
     }
 }
