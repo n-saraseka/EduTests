@@ -15,16 +15,19 @@ public class UserAuthenticationService(IUserRepository repository) : IUserAuthen
         return verified ? user : null;
     }
 
-    public async Task RegisterAsync(string login, string password, string username,
+    public async Task<User?> RegisterAsync(string login, string password, string username,
         CancellationToken cancellationToken = default)
     {
         var user = new User
         {
             Login = login,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
-            Username = username
+            Username = username,
+            RegistrationDate = DateTime.UtcNow
         };
         repository.Create(user);
         await repository.SaveChangesAsync(cancellationToken);
+        var createdUser = await repository.GetByLoginAsync(login, cancellationToken);
+        return createdUser;
     }
 }
