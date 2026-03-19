@@ -25,6 +25,9 @@ builder.Services.AddScoped<ITestCompletionRepository, TestCompletionRepository>(
 // services
 builder.Services.AddScoped<IQuestionValidatorService, QuestionValidatorService>();
 builder.Services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
+builder.Services.AddScoped<IDatabaseSeederService, DatabaseSeederService>();
+builder.Services.AddHostedService<DbInitializerHostedService>();
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDistributedMemoryCache();
@@ -44,12 +47,6 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/logout", async (HttpContext context) =>
-{
-    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-    return Results.Redirect("/");
-});
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -60,8 +57,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
-app.UseAuthorization();
 
 app.MapStaticAssets();
 
