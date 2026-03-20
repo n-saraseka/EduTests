@@ -4,8 +4,10 @@ namespace EduTests.Commands;
 
 public class LoginCommand
 {
-    public required string Login { get; set; }
+    [Required]
+    public string Login { get; set; }
     
+    [Required]
     [MinLength(8)]
-    public required string Password { get; set; }
+    public string Password { get; set; }
 }
