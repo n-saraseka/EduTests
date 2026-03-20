@@ -11,6 +11,12 @@ namespace EduTests.Controllers.Api;
 [ApiController]
 public class AuthController(IUserAuthenticationService service) : ControllerBase
 {
+    /// <summary>
+    /// Log into the system
+    /// </summary>
+    /// <param name="command">The <see cref="LoginCommand"/></param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="OkResult"/> or <see cref="UnauthorizedResult"/> in case of an error</returns>
     [HttpPost]
     [AllowAnonymous]
     public async Task<IActionResult> LoginAsync([FromBody] LoginCommand command, CancellationToken cancellationToken)
@@ -33,6 +39,12 @@ public class AuthController(IUserAuthenticationService service) : ControllerBase
         return Ok();
     }
     
+    /// <summary>
+    /// Register in the system
+    /// </summary>
+    /// <param name="command">The <see cref="RegistrationCommand"/></param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="OkResult"/> or <see cref="BadRequestResult"/> / Status code 500 in case of an error</returns>
     [HttpPost]
     [AllowAnonymous]
     public async Task<IActionResult> RegisterAsync([FromBody] RegistrationCommand command, CancellationToken cancellationToken)
