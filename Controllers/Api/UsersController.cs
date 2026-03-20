@@ -18,7 +18,7 @@ public class UsersController(IUserRepository repository) : ControllerBase
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns><see cref="OkResult"/> with the new <see cref="ApiUser"/> object
     /// (or <see cref="UnauthorizedResult"/> in case of an error)</returns>
-    [HttpPut("change-username")]
+    [HttpPost("change-username")]
     [Authorize(Roles = "User, Moderator, Administrator")]
     public async Task<IActionResult> ChangeUsernameAsync([FromBody] ChangeUsernameCommand command, CancellationToken cancellationToken = default)
     {
@@ -27,7 +27,7 @@ public class UsersController(IUserRepository repository) : ControllerBase
             return Unauthorized();
 
         var user = await repository.GetByLoginAsync(login, cancellationToken);
-        if (user is null || user.Login != login)
+        if (user == null || user.Login != login)
             return Unauthorized();
 
         user.Username = command.Username;
@@ -54,7 +54,7 @@ public class UsersController(IUserRepository repository) : ControllerBase
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns><see cref="OkResult"/> with the new <see cref="ApiUser"/> object
     /// (or <see cref="UnauthorizedResult"/> in case of an error)</returns>
-    [HttpPut("change-description")]
+    [HttpPost("change-description")]
     [Authorize(Roles = "User, Moderator, Administrator")]
     public async Task<IActionResult> ChangeDescriptionAsync([FromBody] ChangeDescriptionCommand command, CancellationToken cancellationToken = default)
     {
@@ -116,7 +116,7 @@ public class UsersController(IUserRepository repository) : ControllerBase
     /// <param name="command">The <see cref="ChangePasswordCommand"/></param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns><see cref="OkResult"/> (or <see cref="UnauthorizedResult"/> / <see cref="BadRequestResult"/> in case of an error)</returns>
-    [HttpPut("change-password")]
+    [HttpPost("change-password")]
     [Authorize(Roles = "User, Moderator, Administrator")]
     public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordCommand command, 
         CancellationToken cancellationToken = default)

@@ -1,13 +1,17 @@
 using EduTests.Database.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace EduTests.Controllers.Api;
 
+[ApiController]
 public class TestsController(ITestRepository testRepository, 
     IUserRatingRepository ratingRepository, 
-    ITestCompletionRepository testCompletionRepository) : Controller
+    ITestCompletionRepository testCompletionRepository) : ControllerBase
 {
+    [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetTestAsync(int id, CancellationToken cancellationToken = default)
     {
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
@@ -18,6 +22,8 @@ public class TestsController(ITestRepository testRepository,
         return Ok(new {test, rating, completions});
     }
 
+    [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> SearchAsync(string text, int page, CancellationToken cancellationToken = default)
     {
         var query = testRepository.Search(text);
@@ -28,7 +34,9 @@ public class TestsController(ITestRepository testRepository,
         var completions = await testCompletionRepository.GetTestCompletionCountsAsync(ids, cancellationToken);
         return Ok(new {count, items, ratings, completions});
     }
-
+    
+    [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetByTagAsync(string tag, int page, CancellationToken cancellationToken = default)
     {
         var query = testRepository.GetAllByTag(tag);
