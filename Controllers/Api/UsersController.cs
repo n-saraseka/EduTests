@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using EduTests.ApiObjects;
 using EduTests.Commands;
-using EduTests.Database.Enums;
 using EduTests.Database.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +11,13 @@ namespace EduTests.Controllers.Api;
 [Route("api/[controller]")]
 public class UsersController(IUserRepository repository) : ControllerBase
 {
+    /// <summary>
+    /// Change the <see cref="ApiUser"/>'s name
+    /// </summary>
+    /// <param name="command">The <see cref="ChangeUsernameCommand"/></param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="OkResult"/> with the new <see cref="ApiUser"/> object
+    /// (or <see cref="UnauthorizedResult"/> in case of an error)</returns>
     [HttpPut("change-username")]
     [Authorize(Roles = "User, Moderator, Administrator")]
     public async Task<IActionResult> ChangeUsernameAsync([FromBody] ChangeUsernameCommand command, CancellationToken cancellationToken = default)
@@ -41,6 +47,13 @@ public class UsersController(IUserRepository repository) : ControllerBase
         return Ok(apiUser);
     }
     
+    /// <summary>
+    /// Change the <see cref="ApiUser"/>'s profile description
+    /// </summary>
+    /// <param name="command">The <see cref="ChangeDescriptionCommand"/></param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="OkResult"/> with the new <see cref="ApiUser"/> object
+    /// (or <see cref="UnauthorizedResult"/> in case of an error)</returns>
     [HttpPut("change-description")]
     [Authorize(Roles = "User, Moderator, Administrator")]
     public async Task<IActionResult> ChangeDescriptionAsync([FromBody] ChangeDescriptionCommand command, CancellationToken cancellationToken = default)
@@ -70,6 +83,12 @@ public class UsersController(IUserRepository repository) : ControllerBase
         return Ok(apiUser);
     }
 
+    /// <summary>
+    /// Change the <see cref="ApiUser"/>'s login
+    /// </summary>
+    /// <param name="command">The <see cref="ChangeLoginCommand"/></param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="OkResult"/> (or <see cref="UnauthorizedResult"/> / <see cref="BadRequestResult"/> in case of an error)</returns>
     public async Task<IActionResult> ChangeLoginAsync([FromBody] ChangeLoginCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -91,6 +110,12 @@ public class UsersController(IUserRepository repository) : ControllerBase
         return Ok();
     }
     
+    /// <summary>
+    /// Change the <see cref="ApiUser"/>'s password
+    /// </summary>
+    /// <param name="command">The <see cref="ChangePasswordCommand"/></param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="OkResult"/> (or <see cref="UnauthorizedResult"/> / <see cref="BadRequestResult"/> in case of an error)</returns>
     [HttpPut("change-password")]
     [Authorize(Roles = "User, Moderator, Administrator")]
     public async Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordCommand command, 
@@ -114,6 +139,11 @@ public class UsersController(IUserRepository repository) : ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Delete the <see cref="ApiUser"/>
+    /// </summary>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="OkResult"/> (or <see cref="UnauthorizedResult"/> in case of an error)</returns>
     [HttpGet("delete-user")]
     [Authorize(Roles = "User, Moderator, Administrator")]
     public async Task<IActionResult> DeleteUserAsync(CancellationToken cancellationToken = default)
