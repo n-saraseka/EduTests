@@ -41,4 +41,9 @@ public class UserRatingRepository(DatabaseContext db) : BaseRepository<UserRatin
         
         return counts;
     }
+
+    public Task<UserRating?> GetUsersRatingAsync(int testId, int userId, CancellationToken cancellationToken = default)
+    {
+        return Set.FirstOrDefaultAsync(r => r.TestId == testId && r.UserId == userId, cancellationToken);
+    }
 }

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using EduTests.ApiObjects;
 using EduTests.Commands.TestCommands;
 using EduTests.Database.Entities;
+using EduTests.Database.Enums;
 using EduTests.Database.Repositories.Interfaces;
 using EduTests.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -226,6 +227,76 @@ public class TestsController(ITestRepository testRepository,
         
         return Ok();
     }
+
+    [HttpPut("{id}/rating")]
+    [Authorize]
+    public async Task<IActionResult> RateTestAsync(int id, RateTestCommand command, 
+        CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        
+        var userIdInt = int.Parse(userId);
+        
+        if (test.AccessType == AccessType.Private && test.UserId != userIdInt)
+            return Forbid();
+        
+        var existingRating = await ratingRepository.GetUsersRatingAsync(test.Id, userIdInt, cancellationToken);
+
+        if (existingRating is null)
+        {
+            var rating = new UserRating
+            {
+                TestId = test.Id,
+                UserId = userIdInt,
+                IsPositive = command.IsPositive
+            };
+            
+            ratingRepository.Create(rating);
+            await ratingRepository.SaveChangesAsync(cancellationToken);
+
+            var apiRating = RatingEntityToDto(rating);
+            return CreatedAtAction("GetTestRating", new { id = test.Id }, apiRating);
+        }
+        else
+        {
+            existingRating.IsPositive = command.IsPositive;
+            ratingRepository.Update(existingRating);
+            await ratingRepository.SaveChangesAsync(cancellationToken);
+        
+            var apiRating = RatingEntityToDto(existingRating);
+            return Ok(apiRating);
+        }
+    }
+
+    [HttpGet("{id}/rating")]
+    public async Task<IActionResult> GetTestRatingAsync(int testId, CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(testId, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        
+        var userIdInt = int.Parse(userId);
+        
+        if (test.AccessType == AccessType.Private && test.UserId != userIdInt)
+            return Forbid();
+        
+        var rating = await ratingRepository.GetUsersRatingAsync(test.Id, userIdInt, cancellationToken);
+        if (rating is null)
+            return NotFound();
+        
+        var apiRating = RatingEntityToDto(rating);
+        return Ok(apiRating);
+    }
     
     private async Task<ApiTest> TestEntityToDto(Test entity, CancellationToken cancellationToken)
     {
@@ -249,5 +320,17 @@ public class TestsController(ITestRepository testRepository,
         };
         
         return testToReturn;
+    }
+
+    private ApiRating RatingEntityToDto(UserRating entity)
+    {
+        var ratingToReturn = new ApiRating
+        {
+            TestId = entity.TestId,
+            UserId = entity.UserId,
+            IsPositive = entity.IsPositive
+        };
+        
+        return ratingToReturn;
     }
 }
