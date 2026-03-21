@@ -322,6 +322,11 @@ public class UsersController(
         return Ok();
     }
     
+    /// <summary>
+    /// Map <see cref="User"/> entity to <see cref="ApiUser"/> DTO
+    /// </summary>
+    /// <param name="entity">The <see cref="User"/> entity</param>
+    /// <returns>The <see cref="ApiUser"/> DTO</returns>
     private ApiUser UserEntityToDto(User entity)
     {
         var apiUser = new ApiUser
@@ -337,6 +342,11 @@ public class UsersController(
         return apiUser;
     }
 
+    /// <summary>
+    /// Map <see cref="BannedUser"/> entity to <see cref="ApiBan"/> DTO
+    /// </summary>
+    /// <param name="entity">The <see cref="BannedUser"/> entity</param>
+    /// <returns>The <see cref="ApiBan"/> DTO</returns>
     private ApiBan BanEntityToDto(BannedUser entity)
     {
         var apiBan = new ApiBan

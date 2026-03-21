@@ -228,6 +228,13 @@ public class TestsController(ITestRepository testRepository,
         return Ok();
     }
 
+    /// <summary>
+    /// Rate a <see cref="ApiTest"/> as current user
+    /// </summary>
+    /// <param name="id"><see cref="ApiTest"/> ID</param>
+    /// <param name="command">The <see cref="RateTestCommand"/></param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>A <see cref="ApiRating"/> object</returns>
     [HttpPut("{id}/rating")]
     [Authorize]
     public async Task<IActionResult> RateTestAsync(int id, RateTestCommand command, 
@@ -274,10 +281,17 @@ public class TestsController(ITestRepository testRepository,
         }
     }
 
+    /// <summary>
+    /// Get current user's <see cref="ApiTest"/> rating
+    /// </summary>
+    /// <param name="id"><see cref="ApiTest"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>A <see cref="ApiRating"/> object</returns>
     [HttpGet("{id}/rating")]
-    public async Task<IActionResult> GetTestRatingAsync(int testId, CancellationToken cancellationToken = default)
+    [Authorize]
+    public async Task<IActionResult> GetTestRatingAsync(int id, CancellationToken cancellationToken = default)
     {
-        var test = await testRepository.GetByIdAsync(testId, cancellationToken);
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
         if (test is null)
             return NotFound();
         
@@ -298,6 +312,12 @@ public class TestsController(ITestRepository testRepository,
         return Ok(apiRating);
     }
     
+    /// <summary>
+    /// Map <see cref="Test"/> entity to <see cref="ApiTest"/> DTO
+    /// </summary>
+    /// <param name="entity">The <see cref="Test"/> entity</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>The <see cref="ApiTest"/> DTO</returns>
     private async Task<ApiTest> TestEntityToDto(Test entity, CancellationToken cancellationToken)
     {
         var ratings = await ratingRepository.GetTestRatingAsync(entity.Id, cancellationToken);
@@ -322,6 +342,11 @@ public class TestsController(ITestRepository testRepository,
         return testToReturn;
     }
 
+    /// <summary>
+    /// Map <see cref="UserRating"/> entity to <see cref="ApiRating"/> DTO
+    /// </summary>
+    /// <param name="entity">The <see cref="UserRating"/> entity</param>
+    /// <returns><see cref="ApiRating"/> DTO</returns>
     private ApiRating RatingEntityToDto(UserRating entity)
     {
         var ratingToReturn = new ApiRating

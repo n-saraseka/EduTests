@@ -42,6 +42,13 @@ public class UserRatingRepository(DatabaseContext db) : BaseRepository<UserRatin
         return counts;
     }
 
+    /// <summary>
+    /// Get <see cref="User"/>'s <see cref="UserRating"/> of this <see cref="Test"/>
+    /// </summary>
+    /// <param name="testId"><see cref="Test"/> ID</param>
+    /// <param name="userId"><see cref="User"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>Corresponding <see cref="UserRating"/> or null</returns>
     public Task<UserRating?> GetUsersRatingAsync(int testId, int userId, CancellationToken cancellationToken = default)
     {
         return Set.FirstOrDefaultAsync(r => r.TestId == testId && r.UserId == userId, cancellationToken);

@@ -77,6 +77,11 @@ public class TagsController(ITagRepository tagRepository): ControllerBase
         return Ok();
     }
 
+    /// <summary>
+    /// Map <see cref="Tag"/> entity to <see cref="ApiTag"/> DTO
+    /// </summary>
+    /// <param name="tag">The <see cref="Tag"/> entity</param>
+    /// <returns>The <see cref="ApiTag"/> DTO</returns>
     private ApiTag TagEntityToDto(Tag tag)
     {
         var apiTag = new ApiTag
