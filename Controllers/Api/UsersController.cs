@@ -278,15 +278,7 @@ public class UsersController(
         
         bannedUserRepository.Create(ban);
 
-        var apiBan = new ApiBan
-        {
-            Id = ban.Id,
-            BannedUserId = id,
-            BannedByUserId = ban.BannedById,
-            BanReason = command.Reason,
-            BanDate = ban.DateBanned,
-            UnbanDate = ban.DateUnbanned
-        };
+        var apiBan = BanEntityToDto(ban);
         
         return CreatedAtAction("GetUserBan",  new { id = ban.Id }, apiBan);
     }
@@ -305,16 +297,8 @@ public class UsersController(
         var ban = await bannedUserRepository.GetByIdAsync(id, cancellationToken);
         if (ban is null)
             return NotFound();
-        
-        var apiBan = new ApiBan
-        {
-            Id = ban.Id,
-            BannedUserId = id,
-            BannedByUserId = ban.BannedById,
-            BanReason = ban.BanReason,
-            BanDate = ban.DateBanned,
-            UnbanDate = ban.DateUnbanned
-        };
+
+        var apiBan = BanEntityToDto(ban);
         
         return Ok(apiBan);
     }
@@ -338,18 +322,33 @@ public class UsersController(
         return Ok();
     }
     
-    private ApiUser UserEntityToDto(User user)
+    private ApiUser UserEntityToDto(User entity)
     {
         var apiUser = new ApiUser
         {
-            Id = user.Id,
-            Username = user.Username,
-            AvatarUrl = user.AvatarUrl,
-            Description = user.Description,
-            RegistrationDate = user.RegistrationDate,
-            Group = user.Group
+            Id = entity.Id,
+            Username = entity.Username,
+            AvatarUrl = entity.AvatarUrl,
+            Description = entity.Description,
+            RegistrationDate = entity.RegistrationDate,
+            Group = entity.Group
         };
         
         return apiUser;
+    }
+
+    private ApiBan BanEntityToDto(BannedUser entity)
+    {
+        var apiBan = new ApiBan
+        {
+            Id = entity.Id,
+            BannedUserId = entity.UserBannedId,
+            BannedByUserId = entity.BannedById,
+            BanReason = entity.BanReason,
+            BanDate = entity.DateBanned,
+            UnbanDate = entity.DateUnbanned
+        };
+        
+        return apiBan;
     }
 }
