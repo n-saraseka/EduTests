@@ -64,4 +64,24 @@ public class TagsController(ITagRepository tagRepository): ControllerBase
         
         return Ok(apiTag);
     }
+
+    /// <summary>
+    /// Delete a <see cref="ApiTag"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTag"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="OkResult"/></returns>
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Moderator, Administrator")]
+    public async Task<IActionResult> DeleteTagAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var tag = await tagRepository.GetByIdAsync(id, cancellationToken);
+        if (tag is null)
+            return NotFound();
+        
+        tagRepository.Delete(tag);
+        await tagRepository.SaveChangesAsync(cancellationToken);
+        
+        return Ok();
+    }
 }
