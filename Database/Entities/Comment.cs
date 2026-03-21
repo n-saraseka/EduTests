@@ -10,6 +10,6 @@ public class Comment : IEntity<int>, IAuditable
     public Test? Test { get; set; }
     public int? TestId { get; set; }
     public required string Content { get; set; }
-    public required DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

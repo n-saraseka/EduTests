@@ -30,7 +30,6 @@ builder.Services.AddScoped<IBannedUserRepository, BannedUserRepository>();
 builder.Services.AddScoped<IReportsRepository, ReportsRepository>();
 // services
 builder.Services.AddScoped<IQuestionValidatorService, QuestionValidatorService>();
-builder.Services.AddScoped<IUserAuthenticationService, UserAuthenticationService>();
 builder.Services.AddScoped<IDatabaseSeederService, DatabaseSeederService>();
 builder.Services.AddHostedService<DbInitializerHostedService>();
 

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EduTests.Controllers;
 
-public class AccountController() : Controller
+public class AccountController : Controller
 {
     /// <summary>
     /// Get the Login page

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace EduTests.Commands;
+namespace EduTests.Commands.UserCommands;
 
 public class ChangeLoginCommand
 {
