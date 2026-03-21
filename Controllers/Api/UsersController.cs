@@ -39,13 +39,7 @@ public class UsersController(
             userRepository.Create(user);
             await userRepository.SaveChangesAsync(cancellationToken);
 
-            var apiUser = new ApiUser
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Group = user.Group,
-                RegistrationDate = user.RegistrationDate
-            };
+            var apiUser = UserEntityToDto(user);
             
             return CreatedAtAction("GetUser",
                 new { id = user.Id }, apiUser);
@@ -70,15 +64,7 @@ public class UsersController(
         if (user == null)
             return NotFound();
 
-        var apiUser = new ApiUser
-        {
-            Id = user.Id,
-            Username = user.Username,
-            AvatarUrl = user.AvatarUrl,
-            Description = user.Description,
-            RegistrationDate = user.RegistrationDate,
-            Group = user.Group
-        };
+        var apiUser = UserEntityToDto(user);
         
         return Ok(apiUser);
     }
@@ -108,15 +94,7 @@ public class UsersController(
         userRepository.Update(userToUpdate);
         await userRepository.SaveChangesAsync(cancellationToken);
 
-        var apiUser = new ApiUser
-        {
-            Id = userToUpdate.Id,
-            Username = userToUpdate.Username,
-            AvatarUrl = userToUpdate.AvatarUrl,
-            Description = userToUpdate.Description,
-            RegistrationDate = userToUpdate.RegistrationDate,
-            Group = userToUpdate.Group
-        };
+        var apiUser = UserEntityToDto(userToUpdate);
         
         return Ok(apiUser);
     }
@@ -146,15 +124,7 @@ public class UsersController(
         userRepository.Update(userToUpdate);
         await userRepository.SaveChangesAsync(cancellationToken);
         
-        var apiUser = new ApiUser
-        {
-            Id = userToUpdate.Id,
-            Username = userToUpdate.Username,
-            AvatarUrl = userToUpdate.AvatarUrl,
-            Description = userToUpdate.Description,
-            RegistrationDate = userToUpdate.RegistrationDate,
-            Group = userToUpdate.Group
-        };
+        var apiUser = UserEntityToDto(userToUpdate);
         
         return Ok(apiUser);
     }
@@ -266,15 +236,7 @@ public class UsersController(
         userRepository.Update(user);
         await userRepository.SaveChangesAsync(cancellationToken);
 
-        var apiUser = new ApiUser
-        {
-            Id = user.Id,
-            Username = user.Username,
-            AvatarUrl = user.AvatarUrl,
-            Description = user.Description,
-            RegistrationDate = user.RegistrationDate,
-            Group = user.Group
-        };
+        var apiUser = UserEntityToDto(user);
         
         return Ok(apiUser);
     }
@@ -374,5 +336,20 @@ public class UsersController(
         
         bannedUserRepository.Delete(ban);
         return Ok();
+    }
+    
+    private ApiUser UserEntityToDto(User user)
+    {
+        var apiUser = new ApiUser
+        {
+            Id = user.Id,
+            Username = user.Username,
+            AvatarUrl = user.AvatarUrl,
+            Description = user.Description,
+            RegistrationDate = user.RegistrationDate,
+            Group = user.Group
+        };
+        
+        return apiUser;
     }
 }

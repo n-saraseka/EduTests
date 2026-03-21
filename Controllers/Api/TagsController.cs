@@ -34,11 +34,7 @@ public class TagsController(ITagRepository tagRepository): ControllerBase
         tagRepository.Create(tag);
         await tagRepository.SaveChangesAsync(cancellationToken);
 
-        var apiTag = new ApiTag
-        {
-            Id = tag.Id,
-            Name = tag.Name
-        };
+        var apiTag = TagEntityToDto(tag);
         
         return CreatedAtAction("GetTag", new { id = tag.Id }, apiTag);
     }
@@ -56,11 +52,7 @@ public class TagsController(ITagRepository tagRepository): ControllerBase
         if (tag is null)
             return NotFound();
         
-        var apiTag = new ApiTag
-        {
-            Id = tag.Id,
-            Name = tag.Name
-        };
+        var apiTag = TagEntityToDto(tag);
         
         return Ok(apiTag);
     }
@@ -83,5 +75,16 @@ public class TagsController(ITagRepository tagRepository): ControllerBase
         await tagRepository.SaveChangesAsync(cancellationToken);
         
         return Ok();
+    }
+
+    private ApiTag TagEntityToDto(Tag tag)
+    {
+        var apiTag = new ApiTag
+        {
+            Id = tag.Id,
+            Name = tag.Name
+        };
+        
+        return apiTag;
     }
 }
