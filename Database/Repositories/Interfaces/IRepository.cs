@@ -4,6 +4,7 @@ public interface IRepository<T, TKey>
     where T : class
     where TKey : IEquatable<TKey>
 {
+    IQueryable<T> GetAll();
     ValueTask<T?> GetByIdAsync(TKey id, CancellationToken cancellationToken = default);
     Task<List<T>> GetBulkAsync(IEnumerable<TKey> ids, CancellationToken cancellationToken = default);
     void Create(T item);
