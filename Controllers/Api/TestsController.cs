@@ -121,7 +121,7 @@ public class TestsController(ITestRepository testRepository,
     /// <returns>Updated <see cref="ApiTest"/> object</returns>
     [HttpPatch("{id}")]
     [Authorize]
-    public async Task<IActionResult> UpdateTestAsync(int id, CreateOrUpdateTestCommand command,
+    public async Task<IActionResult> UpdateTestAsync(int id, [FromBody] CreateOrUpdateTestCommand command,
         CancellationToken cancellationToken = default)
     {
         var test = await testRepository.GetByIdWithTagsAsync(id, cancellationToken);
