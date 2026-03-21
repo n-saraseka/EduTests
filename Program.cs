@@ -28,6 +28,7 @@ builder.Services.AddScoped<IUserRatingRepository, UserRatingRepository>();
 builder.Services.AddScoped<ITestCompletionRepository, TestCompletionRepository>();
 builder.Services.AddScoped<IBannedUserRepository, BannedUserRepository>();
 builder.Services.AddScoped<IReportsRepository, ReportsRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 // services
 builder.Services.AddScoped<IQuestionValidatorService, QuestionValidatorService>();
 builder.Services.AddScoped<IDatabaseSeederService, DatabaseSeederService>();

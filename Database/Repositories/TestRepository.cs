@@ -25,4 +25,14 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
     /// <returns>An <see cref="IQueryable"/> of all <see cref="Test"/>s with the <see cref="Tag"/></returns>
     public IQueryable<Test> GetAllByTag(string name) =>
         Set.Where(t => t.Tags.Any(tag => tag.Name == name));
+
+    /// <summary>
+    /// Get a <see cref="Test"/> by its ID, including tags
+    /// </summary>
+    /// <param name="id"><see cref="Test"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>An <see cref="IQueryable"/> with the <see cref="Test"/> and its loaded <see cref="Tag"/>s</returns>
+    public Task<Test?> GetByIdWithTagsAsync(int id, CancellationToken cancellationToken = default) =>
+        Set.Include(t => t.Tags)
+            .FirstOrDefaultAsync(t => t.Id == id);
 }
