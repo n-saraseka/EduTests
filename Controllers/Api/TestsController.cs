@@ -12,7 +12,8 @@ namespace EduTests.Controllers.Api;
 [Route("api/[controller]")]
 public class TestsController(ITestRepository testRepository, 
     IUserRatingRepository ratingRepository, 
-    ITestCompletionRepository testCompletionRepository) : ControllerBase
+    ITestCompletionRepository testCompletionRepository,
+    ITagRepository tagRepository) : ControllerBase
 {
     /// <summary>
     /// Create a <see cref="ApiTest"/>
@@ -39,15 +40,7 @@ public class TestsController(ITestRepository testRepository,
         testRepository.Create(test);
         await testRepository.SaveChangesAsync(cancellationToken);
 
-        var apiTest = new ApiTest
-        {
-            Id = test.Id,
-            Name = test.Name,
-            Description = test.Description,
-            ThumbnailUrl = test.ThumbnailUrl,
-            CreatedAt = test.CreatedAt,
-            UpdatedAt = test.UpdatedAt
-        };
+        var apiTest = await TestEntityToDto(test, cancellationToken);
         
         return CreatedAtAction("GetTest", new { id = apiTest.Id }, apiTest);
     }
@@ -66,24 +59,7 @@ public class TestsController(ITestRepository testRepository,
         if (test is null)
             return NotFound();
 
-        var ratings = await ratingRepository.GetTestRatingAsync(id, cancellationToken);
-        var completions = await testCompletionRepository.GetTestCompletionCountAsync(id, cancellationToken);
-        var tags = test.Tags.Select(tag => tag.Name).ToList();
-        
-        var testToReturn = new ApiTest
-        {
-            Id = test.Id,
-            Name = test.Name,
-            Description = test.Description,
-            ThumbnailUrl = test.ThumbnailUrl,
-            Rating = ratings,
-            CompletionCount = completions,
-            CreatedAt = test.CreatedAt,
-            UpdatedAt = test.UpdatedAt,
-            AttemptLimit = test.AttemptLimit,
-            TimeLimit = test.TimeLimit,
-            Tags = tags,
-        };
+        var testToReturn = await TestEntityToDto(test, cancellationToken);
         
         return Ok(testToReturn);
     }
@@ -117,27 +93,61 @@ public class TestsController(ITestRepository testRepository,
         testRepository.Update(test);
         await testRepository.SaveChangesAsync(cancellationToken);
         
-        var ratings = await ratingRepository.GetTestRatingAsync(id, cancellationToken);
-        var completions = await testCompletionRepository.GetTestCompletionCountAsync(id, cancellationToken);
-        var tags = test.Tags.Select(tag => tag.Name).ToList();
+        var testToReturn = await TestEntityToDto(test, cancellationToken);
         
-        var testToReturn = new ApiTest
-        {
-            Id = test.Id,
-            Name = test.Name,
-            Description = test.Description,
-            ThumbnailUrl = test.ThumbnailUrl,
-            Rating = ratings,
-            CompletionCount = completions,
-            CreatedAt = test.CreatedAt,
-            UpdatedAt = test.UpdatedAt,
-            AttemptLimit = test.AttemptLimit,
-            TimeLimit = test.TimeLimit,
-            Tags = tags,
-        };
+        return Ok(testToReturn);
+    }
+
+    [HttpPatch("{id}/tags")]
+    [Authorize]
+    public async Task<IActionResult> ChangeTestTagsAsync(int id, [FromBody] ChangeTestTagsCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        
+        var userIdInt = int.Parse(userId);
+        
+        if (test.UserId != userIdInt)
+            return Forbid();
+
+        var tags = await tagRepository.GetByNameBulkAsync(command.Tags, cancellationToken);
+        test.Tags = tags;
+        
+        testRepository.Update(test);
+        await testRepository.SaveChangesAsync(cancellationToken);
+        
+        var testToReturn = await TestEntityToDto(test, cancellationToken);
         
         return Ok(testToReturn);
     }
     
-    
+    private async Task<ApiTest> TestEntityToDto(Test entity, CancellationToken cancellationToken)
+    {
+        var ratings = await ratingRepository.GetTestRatingAsync(entity.Id, cancellationToken);
+        var completions = await testCompletionRepository.GetTestCompletionCountAsync(entity.Id, cancellationToken);
+        var tags = entity.Tags.Select(tag => tag.Name).ToList();
+        
+        var testToReturn = new ApiTest
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            Description = entity.Description,
+            ThumbnailUrl = entity.ThumbnailUrl,
+            Rating = ratings,
+            CompletionCount = completions,
+            CreatedAt = entity.CreatedAt,
+            UpdatedAt = entity.UpdatedAt,
+            AttemptLimit = entity.AttemptLimit,
+            TimeLimit = entity.TimeLimit,
+            Tags = tags,
+        };
+        
+        return testToReturn;
+    }
 }
