@@ -292,7 +292,7 @@ public class TestsController(ITestRepository testRepository,
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>A <see cref="ApiRating"/> object</returns>
     [HttpGet("{id}/rating")]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> GetTestRatingAsync(int id, CancellationToken cancellationToken = default)
     {
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
@@ -499,17 +499,18 @@ public class TestsController(ITestRepository testRepository,
             return NotFound();
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId is null && (test.AttemptLimit != null || test.TimeLimit != null))
-            return Unauthorized("Authorize to complete this test");
-        
-        var userIdInt = int.Parse(userId);
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+        int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
+        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
         
         var userRole = User.FindFirstValue(ClaimTypes.Role);
         
-        if (test.AccessType == AccessType.Private && test.UserId != userIdInt && userRole != "Moderator" && userRole != "Administrator")
+        if (test.AccessType == AccessType.Private && test.UserId != authenticatedUserId && userRole != "Moderator" && userRole != "Administrator")
             return Forbid();
         
-        var existingCompletions = await testCompletionRepository.GetByTestIdAndUserIdAsync(id, userIdInt, cancellationToken);
+        var existingCompletions = await testCompletionRepository
+            .GetByTestIdAndUserIdAsync(id, authenticatedUserId, anonymousUserId, cancellationToken);
         if (existingCompletions.Count == test.AttemptLimit)
             return Forbid();
         
@@ -520,9 +521,13 @@ public class TestsController(ITestRepository testRepository,
         var completion = new TestCompletion
         {
             TestId = id,
-            UserId = userIdInt,
             StartedAt = DateTime.UtcNow
         };
+        
+        if (isAuthenticated)
+            completion.UserId = authenticatedUserId;
+        else
+            completion.AnonymousUserId = anonymousUserId;
         
         var apiCompletion = CompletionEntityToDto(completion, null, null, cancellationToken);
         return CreatedAtAction("GetTestCompletion", new { id = test.Id, completionId = completion.Id }, apiCompletion);
@@ -545,16 +550,16 @@ public class TestsController(ITestRepository testRepository,
             return NotFound();
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId is null)
-            return Unauthorized();
-        
-        var userIdInt = int.Parse(userId);
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+        int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
+        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
         
         var completion = await testCompletionRepository.GetByIdAsync(completionId, cancellationToken);
         if (completion is null)
             return NotFound();
 
-        if (completion.UserId != userIdInt)
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
             return Forbid();
         
         var apiCompletion = CompletionEntityToDto(completion, null, null, cancellationToken);
@@ -578,16 +583,16 @@ public class TestsController(ITestRepository testRepository,
             return NotFound();
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId is null)
-            return Unauthorized();
-        
-        var userIdInt = int.Parse(userId);
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+        int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
+        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
         
         var completion = await testCompletionRepository.GetByIdAsync(completionId, cancellationToken);
         if (completion is null)
             return NotFound();
 
-        if (completion.UserId != userIdInt)
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
             return Forbid();
         
         if (completion.CompletedAt != null)

@@ -37,11 +37,19 @@ public class TestCompletionRepository(DatabaseContext db) : BaseRepository<TestC
         return counts;
     }
 
-    public Task<List<TestCompletion>> GetByTestIdAndUserIdAsync(int testId, int userId,
-        CancellationToken cancellationToken = default) =>
-        Set.Where(tc => tc.TestId == testId && tc.UserId == userId).ToListAsync(cancellationToken);
-    
-    public Task<List<TestCompletion>> GetByTestIdAndAnonUserIdAsync(int testId, Guid userId,
-        CancellationToken cancellationToken = default) =>
-        Set.Where(tc => tc.TestId == testId && tc.AnonymousUserId == userId).ToListAsync(cancellationToken);
+    public Task<List<TestCompletion>> GetByTestIdAndUserIdAsync(int testId, int? userId, Guid? anonymousUserId, 
+        CancellationToken cancellationToken = default) {
+        
+        if (userId == null && anonymousUserId == null)
+            throw new ArgumentException($"Either {nameof(userId)} or {nameof(anonymousUserId)} must be provided");
+
+        if (userId != null && anonymousUserId != null)
+            throw new ArgumentException(
+                $"{nameof(userId)} and {nameof(anonymousUserId)} can't both be provided");
+        
+        if (userId != null)
+            return Set.Where(tc => tc.TestId == testId && tc.UserId == userId).ToListAsync(cancellationToken);
+        else
+            return Set.Where(tc => tc.TestId == testId && tc.AnonymousUserId == anonymousUserId).ToListAsync(cancellationToken);
+    }
 }
