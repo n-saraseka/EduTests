@@ -22,7 +22,7 @@ public class ReportsRepository(DatabaseContext db) : BaseRepository<Report, int>
 
         if (reporterId != null && anonReporterId != null)
             throw new ArgumentException(
-                $"{nameof(anonReporterId)} and {nameof(anonReporterId)} can't both be provided");
+                $"{nameof(reporterId)} and {nameof(anonReporterId)} can't both be provided");
 
         var query = Set
             .AsQueryable()
@@ -51,7 +51,7 @@ public class ReportsRepository(DatabaseContext db) : BaseRepository<Report, int>
 
         if (reporterId != null && anonReporterId != null)
             throw new ArgumentException(
-                $"{nameof(anonReporterId)} and {nameof(anonReporterId)} can't both be provided");
+                $"{nameof(reporterId)} and {nameof(anonReporterId)} can't both be provided");
 
         var query = Set
             .AsQueryable()
@@ -79,7 +79,7 @@ public class ReportsRepository(DatabaseContext db) : BaseRepository<Report, int>
 
         if (reporterId != null && anonReporterId != null)
             throw new ArgumentException(
-                $"{nameof(anonReporterId)} and {nameof(anonReporterId)} can't both be provided");
+                $"{nameof(reporterId)} and {nameof(anonReporterId)} can't both be provided");
 
         var query = Set
             .AsQueryable()
