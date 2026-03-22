@@ -4,8 +4,6 @@ namespace EduTests.ApiObjects;
 
 public class ApiTag
 {
-    [Required]
-    public int Id { get; set; }
-    [Required]
-    public string Name { get; set; }
+    public required int Id { get; set; }
+    public required string Name { get; set; }
 }

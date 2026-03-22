@@ -8,14 +8,9 @@ public class ApiQuestion
 {
     public int Id { get; set; }
     public int TestId { get; set; }
-    [Required]
-    public int OrderIndex { get; set; }
-    [Required]
-    public QuestionType Type { get; set; }
-    [Required]
-    public string Description { get; set; }
-    [Required]
-    public QuestionData Data { get; set; }
-    [Required]
-    public QuestionData CorrectData { get; set; }
+    public required int OrderIndex { get; set; }
+    public required QuestionType Type { get; set; }
+    public required string Description { get; set; }
+    public required QuestionData Data { get; set; }
+    public required QuestionData CorrectData { get; set; }
 }

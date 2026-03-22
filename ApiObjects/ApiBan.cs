@@ -4,15 +4,10 @@ namespace EduTests.ApiObjects;
 
 public class ApiBan
 {
-    [Required]
-    public int Id { get; set; }
-    [Required]
-    public int BannedUserId  { get; set; }
-    [Required]
-    public int BannedByUserId { get; set; }
-    [Required]
-    public string BanReason { get; set; }
-    [Required]
-    public DateTime BanDate { get; set; }
+    public required int Id { get; set; }
+    public required int BannedUserId  { get; set; }
+    public required int BannedByUserId { get; set; }
+    public required string BanReason { get; set; }
+    public required DateTime BanDate { get; set; }
     public DateTime? UnbanDate { get; set; }
 }
