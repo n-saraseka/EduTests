@@ -491,6 +491,12 @@ public class TestsController(ITestRepository testRepository,
         return Ok(apiQuestions);
     }
 
+    /// <summary>
+    /// Create a <see cref="ApiTest"/>'s <see cref="ApiCompletion"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>Created <see cref="ApiCompletion"/></returns>
     [HttpPost("{id}/completions")]
     [AllowAnonymous]
     public async Task<IActionResult> CreateTestCompletionAsync(int id, CancellationToken cancellationToken = default)
