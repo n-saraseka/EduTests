@@ -5,6 +5,7 @@ using EduTests.Database;
 using EduTests.Database.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -13,9 +14,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EduTests.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20260322133211_AddAnonymousUsers")]
+    partial class AddAnonymousUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -287,14 +290,6 @@ namespace EduTests.Migrations
                         .HasColumnType("\"ReportStatus\"")
                         .HasColumnName("report_status");
 
-                    b.Property<Guid?>("ReportingAnonymousUserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("reporting_anonymous_user_id");
-
-                    b.Property<int?>("ReportingUserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("reporting_user_id");
-
                     b.Property<int?>("TestId")
                         .HasColumnType("integer")
                         .HasColumnName("test_id");
@@ -314,12 +309,6 @@ namespace EduTests.Migrations
 
                     b.HasIndex("CommentId")
                         .HasDatabaseName("ix_reports_comment_id");
-
-                    b.HasIndex("ReportingAnonymousUserId")
-                        .HasDatabaseName("ix_reports_reporting_anonymous_user_id");
-
-                    b.HasIndex("ReportingUserId")
-                        .HasDatabaseName("ix_reports_reporting_user_id");
 
                     b.HasIndex("TestId")
                         .HasDatabaseName("ix_reports_test_id");
@@ -760,16 +749,6 @@ namespace EduTests.Migrations
                         .HasForeignKey("CommentId")
                         .HasConstraintName("fk_reports_comments_comment_id");
 
-                    b.HasOne("EduTests.Database.Entities.AnonymousUser", "ReportingAnonymousUser")
-                        .WithMany()
-                        .HasForeignKey("ReportingAnonymousUserId")
-                        .HasConstraintName("fk_reports_anonymous_users_reporting_anonymous_user_id");
-
-                    b.HasOne("EduTests.Database.Entities.User", "ReportingUser")
-                        .WithMany()
-                        .HasForeignKey("ReportingUserId")
-                        .HasConstraintName("fk_reports_users_reporting_user_id");
-
                     b.HasOne("EduTests.Database.Entities.Test", "Test")
                         .WithMany()
                         .HasForeignKey("TestId")
@@ -781,10 +760,6 @@ namespace EduTests.Migrations
                         .HasConstraintName("fk_reports_users_user_id");
 
                     b.Navigation("Comment");
-
-                    b.Navigation("ReportingAnonymousUser");
-
-                    b.Navigation("ReportingUser");
 
                     b.Navigation("Test");
 

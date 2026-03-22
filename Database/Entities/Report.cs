@@ -5,6 +5,10 @@ namespace EduTests.Database.Entities;
 public class Report : IEntity<int>
 {
     public int Id { get; set; }
+    public User? ReportingUser { get; set; }
+    public int? ReportingUserId { get; set; }
+    public AnonymousUser? ReportingAnonymousUser { get; set; }
+    public Guid? ReportingAnonymousUserId { get; set; }
     public User? User { get; set; }
     public int? UserId { get; set; }
     public Test? Test { get; set; }

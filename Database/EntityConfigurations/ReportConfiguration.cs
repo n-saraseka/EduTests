@@ -9,6 +9,14 @@ public class ReportConfiguration : IEntityTypeConfiguration<Report>
     public void Configure(EntityTypeBuilder<Report> builder)
     {
         builder
+            .HasOne(r => r.ReportingUser)
+            .WithMany()
+            .HasForeignKey(r => r.ReportingUserId);
+        builder
+            .HasOne(r => r.ReportingAnonymousUser)
+            .WithMany()
+            .HasForeignKey(r => r.ReportingAnonymousUserId);
+        builder
             .HasOne(r => r.Test)
             .WithMany()
             .HasForeignKey(r => r.TestId);
