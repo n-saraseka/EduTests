@@ -120,9 +120,7 @@ public class ReportController(IReportsRepository reportsRepository,
             .Take(amountPerPage)
             .ToListAsync(cancellationToken);
 
-        var apiReports = new List<ApiReport>();
-        foreach (var report in reports)
-            apiReports.Add(ReportEntityToDto(report));
+        var apiReports = reports.Select(ReportEntityToDto).ToList();
         
         return Ok(apiReports);
     }
