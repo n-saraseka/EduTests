@@ -611,6 +611,158 @@ public class TestsController(ITestRepository testRepository,
         var apiCompletion =  CompletionEntityToDto(completion, userAnswers, questions, cancellationToken);
         return Ok(apiCompletion);
     }
+
+    /// <summary>
+    /// Get specific <see cref="ApiAnswer"/> for this <see cref="ApiTest"/>'s <see cref="ApiCompletion"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="completionId">The <see cref="ApiCompletion"/> ID</param>
+    /// <param name="answerId">The <see cref="ApiAnswer"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>A <see cref="ApiAnswer"/> object</returns>
+    [HttpGet("{id}/completions/{completionId}/answers/{answerId}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetTestAnswerAsync(int id, int completionId, int answerId,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+        int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
+        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var completion = await testCompletionRepository.GetByIdAsync(completionId, cancellationToken);
+        if (completion is null)
+            return NotFound();
+        
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
+            return Forbid();
+        
+        var answer = await userAnswerRepository.GetByIdAsync(answerId, cancellationToken);
+        if (answer is null)
+            return NotFound();
+
+        var apiAnswer = AnswerEntityToDto(answer);
+        
+        return Ok(apiAnswer);
+    }
+    
+    /// <summary>
+    /// Add a <see cref="ApiAnswer"/> to this <see cref="ApiTest"/>'s <see cref="ApiCompletion"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="completionId">The <see cref="ApiCompletion"/> ID</param>
+    /// <param name="command"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpPost("{id}/completions/{completionId}/answers/")]
+    [AllowAnonymous]
+    public async Task<IActionResult> AddTestAnswerAsync(int id, int completionId, 
+        [FromBody] AnswerTestCommand command, CancellationToken cancellationToken = default)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+        int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
+        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var completion = await testCompletionRepository.GetByIdAsync(completionId, cancellationToken);
+        if (completion is null)
+            return NotFound();
+        
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
+            return Forbid();
+        
+        if (completion.CompletedAt != null)
+            return BadRequest("The completion is already answered");
+        
+        var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
+        if (questions.Any(q => q.Id == command.QuestionId))
+            return BadRequest("The question is already answered");
+
+        if (questions.All(q => q.Id != command.QuestionId))
+            return NotFound();
+        
+        var answers = await userAnswerRepository.GetByCompletionId(completionId, cancellationToken);
+        if (answers.Count == questions.Count)
+            return BadRequest("All  questions have been answered");
+
+        var answer = new UserAnswer
+        {
+            TestCompletionId = completionId,
+            QuestionId = command.QuestionId,
+            Answers = command.Answer
+        };
+        
+        userAnswerRepository.Create(answer);
+        await userAnswerRepository.SaveChangesAsync(cancellationToken);
+        
+        var apiAnswer = AnswerEntityToDto(answer);
+        
+        return CreatedAtAction("GetTestAnswer", new
+        {
+            id = test.Id, completionId = completion.Id, answerId = answer.Id
+        }, apiAnswer);
+    }
+
+    /// <summary>
+    /// Edit a <see cref="ApiAnswer"/> to this <see cref="ApiTest"/>'s <see cref="ApiCompletion"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="completionId">The <see cref="ApiCompletion"/> ID</param>
+    /// <param name="answerId">The <see cref="ApiAnswer"/> ID</param>
+    /// <param name="command">The <see cref="EditTestAnswerCommand"/></param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>Updated <see cref="ApiAnswer"/> object</returns>
+    [HttpPatch("{id}/completions/{completionId}/answers/{answerId}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> EditAnswerAsync(int id, int completionId, int answerId,
+        [FromBody] EditTestAnswerCommand command, CancellationToken cancellationToken = default)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+        int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
+        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var completion = await testCompletionRepository.GetByIdAsync(completionId, cancellationToken);
+        if (completion is null)
+            return NotFound();
+        
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
+            return Forbid();
+        
+        if (completion.CompletedAt != null)
+            return BadRequest("The completion is already answered");
+        
+        var answer = await userAnswerRepository.GetByIdAsync(answerId, cancellationToken);
+        if (answer is null)
+            return NotFound();
+        
+        var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
+
+        if (questions.All(q => q.Id != answer.QuestionId))
+            return NotFound();
+
+        answer.Answers = command.NewAnswer;
+        userAnswerRepository.Update(answer);
+        await userAnswerRepository.SaveChangesAsync(cancellationToken);
+        
+        var apiAnswer = AnswerEntityToDto(answer);
+        return Ok(apiAnswer);
+    }
     
     /// <summary>
     /// Map <see cref="Test"/> entity to <see cref="ApiTest"/> DTO
@@ -756,5 +908,23 @@ public class TestsController(ITestRepository testRepository,
         }
 
         return completionToReturn;
+    }
+
+    /// <summary>
+    /// Map <see cref="UserAnswer"/> entity to <see cref="UserAnswer"/> DTO
+    /// </summary>
+    /// <param name="entity">The <see cref="UserAnswer"/> entity</param>
+    /// <returns>The <see cref="ApiAnswer"/> DTO</returns>
+    private ApiAnswer AnswerEntityToDto(UserAnswer entity)
+    {
+        var answerToReturn = new ApiAnswer
+        {
+            Id = entity.Id,
+            TestCompletionId = entity.TestCompletionId,
+            QuestionId = entity.QuestionId,
+            Answer = entity.Answers
+        };
+        
+        return answerToReturn;
     }
 }
