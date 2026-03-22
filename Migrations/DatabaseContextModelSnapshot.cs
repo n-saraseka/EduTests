@@ -28,6 +28,27 @@ namespace EduTests.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "UserGroup", new[] { "administrator", "moderator", "user" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("EduTests.Database.Entities.AnonymousUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_anonymous_users");
+
+                    b.ToTable("anonymous_users", (string)null);
+                });
+
             modelBuilder.Entity("EduTests.Database.Entities.BannedUser", b =>
                 {
                     b.Property<int>("Id")
@@ -404,6 +425,10 @@ namespace EduTests.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<Guid?>("AnonymousUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("anonymous_user_id");
+
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("completed_at");
@@ -416,12 +441,15 @@ namespace EduTests.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("test_id");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
                         .HasName("pk_test_completions");
+
+                    b.HasIndex("AnonymousUserId")
+                        .HasDatabaseName("ix_test_completions_anonymous_user_id");
 
                     b.HasIndex("TestId")
                         .HasDatabaseName("ix_test_completions_test_id");
@@ -749,6 +777,11 @@ namespace EduTests.Migrations
 
             modelBuilder.Entity("EduTests.Database.Entities.TestCompletion", b =>
                 {
+                    b.HasOne("EduTests.Database.Entities.AnonymousUser", "AnonymousUser")
+                        .WithMany()
+                        .HasForeignKey("AnonymousUserId")
+                        .HasConstraintName("fk_test_completions_anonymous_users_anonymous_user_id");
+
                     b.HasOne("EduTests.Database.Entities.Test", "Test")
                         .WithMany()
                         .HasForeignKey("TestId")
@@ -759,9 +792,9 @@ namespace EduTests.Migrations
                     b.HasOne("EduTests.Database.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("fk_test_completions_users_user_id");
+
+                    b.Navigation("AnonymousUser");
 
                     b.Navigation("Test");
 

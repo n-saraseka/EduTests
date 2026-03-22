@@ -1,5 +1,3 @@
-using EduTests.Database.Enums;
-
 namespace EduTests.Database.Entities;
 
 public class UserAnswer : IEntity<int>

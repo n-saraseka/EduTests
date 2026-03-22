@@ -491,7 +491,7 @@ public class TestsController(ITestRepository testRepository,
     }
 
     [HttpPost("{id}/completions")]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> CreateTestCompletionAsync(int id, CancellationToken cancellationToken = default)
     {
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
@@ -499,8 +499,8 @@ public class TestsController(ITestRepository testRepository,
             return NotFound();
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId is null)
-            return Unauthorized();
+        if (userId is null && (test.AttemptLimit != null || test.TimeLimit != null))
+            return Unauthorized("Authorize to complete this test");
         
         var userIdInt = int.Parse(userId);
         
@@ -536,7 +536,7 @@ public class TestsController(ITestRepository testRepository,
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>The <see cref="ApiCompletion"/></returns>
     [HttpGet("{id}/completions/{completionId}")]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> GetTestCompletionAsync(int id, int completionId,
         CancellationToken cancellationToken = default)
     {
@@ -569,7 +569,7 @@ public class TestsController(ITestRepository testRepository,
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>Updated <see cref="ApiCompletion"/></returns>
     [HttpPatch("{id}/completions/{completionId}")]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> FinishTestCompletionAsync(int id, int completionId,
         CancellationToken cancellationToken = default)
     {
@@ -715,11 +715,17 @@ public class TestsController(ITestRepository testRepository,
     private ApiCompletion CompletionEntityToDto(TestCompletion entity, List<UserAnswer>? userAnswers, List<Question>? questions,
         CancellationToken cancellationToken = default)
     {
+        var userId = entity.UserId;
+        var anonymousId = entity.AnonymousUserId;
+        
+        if (userId is null && anonymousId is null)
+            throw new ArgumentException($"Neither {nameof(entity.UserId)} or {nameof(entity.AnonymousUserId)} are not null");
+        
         var completionToReturn = new ApiCompletion
         {
             Id = entity.Id,
             TestId = entity.TestId,
-            UserId = entity.UserId,
+            UserId = userId,
             StartedAt = entity.StartedAt,
             CompletedAt = entity.CompletedAt,
         };

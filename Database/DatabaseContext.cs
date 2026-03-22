@@ -7,6 +7,7 @@ namespace EduTests.Database;
 public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
+    public DbSet<AnonymousUser> AnonymousUsers { get; set; }
     public DbSet<Test> Tests { get; set; }
     public DbSet<TestResult> TestResults { get; set; }
     public DbSet<Tag> Tags { get; set; }

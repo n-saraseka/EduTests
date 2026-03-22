@@ -13,6 +13,10 @@ public class TestCompletionConfiguration : IEntityTypeConfiguration<TestCompleti
             .WithMany()
             .HasForeignKey(tc => tc.UserId);
         builder
+            .HasOne(tc => tc.AnonymousUser)
+            .WithMany()
+            .HasForeignKey(tc => tc.AnonymousUserId);
+        builder
             .HasOne(tc => tc.Test)
             .WithMany()
             .HasForeignKey(tc => tc.TestId);
