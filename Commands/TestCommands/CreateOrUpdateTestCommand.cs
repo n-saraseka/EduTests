@@ -12,5 +12,8 @@ public class CreateOrUpdateTestCommand
     public int? AttemptLimit { get; set; }
     public TimeSpan? TimeLimit { get; set; }
     public string? Password { get; set; }
+    [Required]
     public List<ApiQuestion> Questions { get; set; }
+    [Required]
+    public Dictionary<double, string> Results { get; set; }
 }

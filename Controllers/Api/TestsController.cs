@@ -19,6 +19,7 @@ public class TestsController(ITestRepository testRepository,
     ITestCompletionRepository testCompletionRepository,
     ITagRepository tagRepository,
     IQuestionRepository questionRepository,
+    ITestResultRepository testResultRepository,
     ICommentRepository commentRepository,
     IUserAnswerRepository userAnswerRepository,
     IAnonymousUserRepository anonymousUserRepository,
@@ -92,6 +93,15 @@ public class TestsController(ITestRepository testRepository,
         var allTags = tags.Concat(tagsToAdd).ToList();
         foreach (var tag in allTags)
             test.Tags.Add(tag);
+        
+        var results = command.Results.Select(r => new TestResult
+        {
+            TestId = test.Id,
+            PercentageThreshold = (float)r.Key,
+            Result = r.Value
+        });
+        testResultRepository.CreateBulk(results);
+        
         await testRepository.SaveChangesAsync(cancellationToken);
         
         var apiTest = await TestEntityToDto(test, cancellationToken);
@@ -195,6 +205,17 @@ public class TestsController(ITestRepository testRepository,
         test.Tags.Clear();
         foreach (var tag in allTags)
             test.Tags.Add(tag);
+        
+        var existingResults = await testResultRepository.GetByTestIdAsync(id, cancellationToken);
+        testResultRepository.DeleteBulk(existingResults);
+        
+        var results = command.Results.Select(r => new TestResult
+        {
+            TestId = test.Id,
+            PercentageThreshold = (float)r.Key,
+            Result = r.Value
+        });
+        testResultRepository.CreateBulk(results);
         
         await testRepository.SaveChangesAsync(cancellationToken);
 
