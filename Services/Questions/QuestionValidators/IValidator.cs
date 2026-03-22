@@ -1,7 +1,6 @@
 using EduTests.Database.Entities;
-using EduTests.Database.Enums;
 
-namespace EduTests.Services.QuestionValidators;
+namespace EduTests.Services.Questions.QuestionValidators;
 
 public interface IValidator
 {

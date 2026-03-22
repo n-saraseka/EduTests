@@ -1,8 +1,8 @@
 using EduTests.Database.Entities;
 using EduTests.Database.Enums;
-using EduTests.Services.QuestionValidators;
+using EduTests.Services.Questions.QuestionValidators;
 
-namespace EduTests.Services;
+namespace EduTests.Services.Questions;
 
 public class QuestionValidatorService : IQuestionValidatorService
 {
@@ -21,7 +21,7 @@ public class QuestionValidatorService : IQuestionValidatorService
     /// </summary>
     /// <param name="questionData">The question / answer data</param>
     /// <param name="correctData">The valid answers data</param>
-    /// <param name="type">The question type</param>
+    /// <param name="type">The <see cref="QuestionType"/></param>
     /// <param name="isQuestion">Whether the <see cref="QuestionData"/> to validate comes from a <see cref="Question"/> or <see cref="UserAnswer"/></param>
     /// <exception cref="ArgumentException">If the <see cref="QuestionType"/> is not valid</exception>
     public void Validate(QuestionData questionData, QuestionData? correctData, QuestionType type, bool isQuestion)

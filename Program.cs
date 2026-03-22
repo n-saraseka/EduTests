@@ -3,7 +3,7 @@ using EduTests.Database.Enums;
 using EduTests.Database.Repositories;
 using EduTests.Database.Repositories.Interfaces;
 using EduTests.Services;
-using EFCore.NamingConventions;
+using EduTests.Services.Questions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +31,7 @@ builder.Services.AddScoped<IReportsRepository, ReportsRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 // services
 builder.Services.AddScoped<IQuestionValidatorService, QuestionValidatorService>();
+builder.Services.AddScoped<IAnswerVerifierService, AnswerVerifierService>();
 builder.Services.AddScoped<IDatabaseSeederService, DatabaseSeederService>();
 builder.Services.AddHostedService<DbInitializerHostedService>();
 
