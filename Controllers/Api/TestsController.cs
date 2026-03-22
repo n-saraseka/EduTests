@@ -4,7 +4,7 @@ using EduTests.Commands.TestCommands;
 using EduTests.Database.Entities;
 using EduTests.Database.Enums;
 using EduTests.Database.Repositories.Interfaces;
-using EduTests.Services;
+using EduTests.Services.Questions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +19,9 @@ public class TestsController(ITestRepository testRepository,
     ITagRepository tagRepository,
     IQuestionRepository questionRepository,
     ICommentRepository commentRepository,
-    IQuestionValidatorService questionValidatorService) : ControllerBase
+    IUserAnswerRepository userAnswerRepository,
+    IQuestionValidatorService questionValidatorService,
+    IAnswerVerifierService answerVerifierService) : ControllerBase
 {
     /// <summary>
     /// Create a <see cref="ApiTest"/>
@@ -487,6 +489,39 @@ public class TestsController(ITestRepository testRepository,
         
         return Ok(apiQuestions);
     }
+
+    /// <summary>
+    /// Get a <see cref="ApiTest"/>'s <see cref="ApiCompletion"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="completionId">The <see cref="ApiCompletion"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>The <see cref="ApiCompletion"/></returns>
+    [HttpGet("{id}/completions/{completionId}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetTestCompletionAsync(int id, int completionId,
+        CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        
+        var userIdInt = int.Parse(userId);
+        
+        var completion = await testCompletionRepository.GetByIdAsync(completionId, cancellationToken);
+        if (completion is null)
+            return NotFound();
+
+        if (completion.UserId != userIdInt)
+            return Forbid();
+        
+        var apiCompletion = await CompletionEntityToDto(completion, cancellationToken);
+        return Ok(apiCompletion);
+    }
     
     /// <summary>
     /// Map <see cref="Test"/> entity to <see cref="ApiTest"/> DTO
@@ -582,5 +617,50 @@ public class TestsController(ITestRepository testRepository,
         };
         
         return questionToReturn;
+    }
+
+    /// <summary>
+    /// Convert <see cref="TestCompletion"/> entity to <see cref="ApiCompletion"/> DTO
+    /// </summary>
+    /// <param name="entity">The <see cref="TestCompletion"/> entity</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>The <see cref="ApiCompletion"/> DTO</returns>
+    /// <exception cref="ArgumentNullException">If there's no corresponding <see cref="Question"/> for a <see cref="UserAnswer"/></exception>
+    private async Task<ApiCompletion> CompletionEntityToDto(TestCompletion entity, 
+        CancellationToken cancellationToken = default)
+    {
+        var completionToReturn = new ApiCompletion
+        {
+            Id = entity.Id,
+            TestId = entity.TestId,
+            UserId = entity.UserId,
+            StartedAt = entity.StartedAt,
+            CompletedAt = entity.CompletedAt,
+        };
+        
+        if (entity.CompletedAt is not null)
+        {
+            var answers = await userAnswerRepository.GetByCompletionId(entity.Id, cancellationToken);
+            var questions = await questionRepository.GetByTestIdAsync(entity.TestId, cancellationToken);
+            
+            var questionCount = questions.Count;
+            var correctAnswers = 0;
+            var correctPercentage = 0.0;
+
+            foreach (var answer in answers)
+            {
+                var correspondingQuestion = questions.FirstOrDefault(q => q.Id == answer.QuestionId);
+                if (correspondingQuestion is null)
+                    throw new ArgumentNullException(nameof(correspondingQuestion));
+                if (answerVerifierService.Verify(answer, correspondingQuestion, correspondingQuestion.Type))
+                    correctAnswers++;
+            }
+            
+            completionToReturn.CorrectAnswers = correctAnswers;
+            correctPercentage = correctAnswers * 100.0 / questionCount;
+            completionToReturn.CompletionPercentage = Math.Round(correctPercentage, 2);
+        }
+
+        return completionToReturn;
     }
 }
