@@ -37,6 +37,15 @@ public class TestCompletionRepository(DatabaseContext db) : BaseRepository<TestC
         return counts;
     }
 
+    /// <summary>
+    /// Get all <see cref="TestCompletion"/>s for this <see cref="Test"/> and <see cref="User"/> (or <see cref="AnonymousUser"/>)
+    /// </summary>
+    /// <param name="testId"><see cref="Test"/> ID</param>
+    /// <param name="userId"><see cref="User"/> ID</param>
+    /// <param name="anonymousUserId"><see cref="AnonymousUser"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>List of all corresponding <see cref="TestCompletion"/>s</returns>
+    /// <exception cref="ArgumentException">If <paramref name="userId"/> and <paramref name="anonymousUserId"/> input is invalid</exception>
     public Task<List<TestCompletion>> GetByTestIdAndUserIdAsync(int testId, int? userId, Guid? anonymousUserId, 
         CancellationToken cancellationToken = default) {
         
