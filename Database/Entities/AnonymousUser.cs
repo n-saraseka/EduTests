@@ -1,6 +1,6 @@
 namespace EduTests.Database.Entities;
 
-public class AnonymousUser : IAuditable
+public class AnonymousUser : IEntity<Guid>, IAuditable
 {
     public Guid Id { get; set; }
     public DateTime CreatedAt { get; set; }
