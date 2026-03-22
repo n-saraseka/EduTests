@@ -23,11 +23,10 @@ public class AnswerVerifierService : IAnswerVerifierService
     /// <param name="question">The corresponding <see cref="Question"/></param>
     /// <param name="type">The <see cref="QuestionType"/></param>
     /// <exception cref="ArgumentException">If the <see cref="QuestionType"/> is not valid</exception>
-    public void Verify(UserAnswer answer, Question question, QuestionType type)
+    public bool Verify(UserAnswer answer, Question question, QuestionType type)
     {
         if (Validators.TryGetValue(type, out var validator))
-            validator.Verify(answer.Answers, question.CorrectData);
-        else
-            throw new ArgumentException($"The type {type} is not valid.");
+            return validator.Verify(answer.Answers, question.CorrectData);
+        throw new ArgumentException($"The type {type} is not valid.");
     }
 }
