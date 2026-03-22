@@ -352,7 +352,7 @@ public class TestsController(ITestRepository testRepository,
         await commentRepository.SaveChangesAsync(cancellationToken);
         
         var apiComment = CommentEntityToDto(comment);
-        return CreatedAtAction("GetTestComment", new { id = comment.Id }, apiComment);
+        return CreatedAtAction("GetTestComment", new { id = test.Id, commentId = comment.Id }, apiComment);
     }
 
     /// <summary>
@@ -490,6 +490,44 @@ public class TestsController(ITestRepository testRepository,
         return Ok(apiQuestions);
     }
 
+    [HttpPost("{id}/completions")]
+    [Authorize]
+    public async Task<IActionResult> CreateTestCompletionAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        
+        var userIdInt = int.Parse(userId);
+        
+        var userRole = User.FindFirstValue(ClaimTypes.Role);
+        
+        if (test.AccessType == AccessType.Private && test.UserId != userIdInt && userRole != "Moderator" && userRole != "Administrator")
+            return Forbid();
+        
+        var existingCompletions = await testCompletionRepository.GetByTestIdAndUserIdAsync(id, userIdInt, cancellationToken);
+        if (existingCompletions.Count == test.AttemptLimit)
+            return Forbid();
+        
+        var pendingCompletion = existingCompletions.FirstOrDefault(tc => tc.CompletedAt == null);
+        if (pendingCompletion is not null)
+            return BadRequest("There is already a uncompleted completion");
+
+        var completion = new TestCompletion
+        {
+            TestId = id,
+            UserId = userIdInt,
+            StartedAt = DateTime.UtcNow
+        };
+        
+        var apiCompletion = CompletionEntityToDto(completion, null, null, cancellationToken);
+        return CreatedAtAction("GetTestCompletion", new { id = test.Id, completionId = completion.Id }, apiCompletion);
+    }
+
     /// <summary>
     /// Get a <see cref="ApiTest"/>'s <see cref="ApiCompletion"/>
     /// </summary>
@@ -498,7 +536,7 @@ public class TestsController(ITestRepository testRepository,
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>The <see cref="ApiCompletion"/></returns>
     [HttpGet("{id}/completions/{completionId}")]
-    [AllowAnonymous]
+    [Authorize]
     public async Task<IActionResult> GetTestCompletionAsync(int id, int completionId,
         CancellationToken cancellationToken = default)
     {
@@ -519,7 +557,53 @@ public class TestsController(ITestRepository testRepository,
         if (completion.UserId != userIdInt)
             return Forbid();
         
-        var apiCompletion = await CompletionEntityToDto(completion, cancellationToken);
+        var apiCompletion = CompletionEntityToDto(completion, null, null, cancellationToken);
+        return Ok(apiCompletion);
+    }
+
+    /// <summary>
+    /// Finish a <see cref="ApiCompletion"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="completionId">The <see cref="ApiCompletion"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>Updated <see cref="ApiCompletion"/></returns>
+    [HttpPatch("{id}/completions/{completionId}")]
+    [Authorize]
+    public async Task<IActionResult> FinishTestCompletionAsync(int id, int completionId,
+        CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        
+        var userIdInt = int.Parse(userId);
+        
+        var completion = await testCompletionRepository.GetByIdAsync(completionId, cancellationToken);
+        if (completion is null)
+            return NotFound();
+
+        if (completion.UserId != userIdInt)
+            return Forbid();
+        
+        if (completion.CompletedAt != null)
+            return BadRequest("The completion is already finished");
+        
+        var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
+        var userAnswers = await userAnswerRepository.GetByCompletionId(completionId, cancellationToken);
+        
+        if (questions.Count != userAnswers.Count)
+            return BadRequest("Not all questions have been answered");
+        
+        completion.CompletedAt = DateTime.UtcNow;
+        testCompletionRepository.Update(completion);
+        await testCompletionRepository.SaveChangesAsync(cancellationToken);
+        
+        var apiCompletion =  CompletionEntityToDto(completion, userAnswers, questions, cancellationToken);
         return Ok(apiCompletion);
     }
     
@@ -623,10 +707,12 @@ public class TestsController(ITestRepository testRepository,
     /// Convert <see cref="TestCompletion"/> entity to <see cref="ApiCompletion"/> DTO
     /// </summary>
     /// <param name="entity">The <see cref="TestCompletion"/> entity</param>
+    /// <param name="userAnswers">List of <see cref="UserAnswer"/>s (if the completion has finished)</param>
+    /// <param name="questions">List of <see cref="Question"/>s (if the completion has finished)</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>The <see cref="ApiCompletion"/> DTO</returns>
     /// <exception cref="ArgumentNullException">If there's no corresponding <see cref="Question"/> for a <see cref="UserAnswer"/></exception>
-    private async Task<ApiCompletion> CompletionEntityToDto(TestCompletion entity, 
+    private ApiCompletion CompletionEntityToDto(TestCompletion entity, List<UserAnswer>? userAnswers, List<Question>? questions,
         CancellationToken cancellationToken = default)
     {
         var completionToReturn = new ApiCompletion
@@ -640,14 +726,11 @@ public class TestsController(ITestRepository testRepository,
         
         if (entity.CompletedAt is not null)
         {
-            var answers = await userAnswerRepository.GetByCompletionId(entity.Id, cancellationToken);
-            var questions = await questionRepository.GetByTestIdAsync(entity.TestId, cancellationToken);
-            
             var questionCount = questions.Count;
             var correctAnswers = 0;
             var correctPercentage = 0.0;
 
-            foreach (var answer in answers)
+            foreach (var answer in userAnswers)
             {
                 var correspondingQuestion = questions.FirstOrDefault(q => q.Id == answer.QuestionId);
                 if (correspondingQuestion is null)

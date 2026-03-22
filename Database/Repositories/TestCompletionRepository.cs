@@ -38,4 +38,10 @@ public class TestCompletionRepository(DatabaseContext db) : BaseRepository<TestC
         
         return counts;
     }
+
+    public Task<List<TestCompletion>> GetByTestIdAndUserIdAsync(int testId, int userId,
+        CancellationToken cancellationToken = default)
+    {
+        return Set.Where(tc => tc.TestId == testId && tc.UserId == userId).ToListAsync(cancellationToken);
+    }
 }
