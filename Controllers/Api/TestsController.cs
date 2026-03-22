@@ -458,6 +458,30 @@ public class TestsController(ITestRepository testRepository,
 
         return Ok();
     }
+
+    /// <summary>
+    /// Get <see cref="ApiQuestion"/>s from a <see cref="ApiTest"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>A List of <see cref="ApiQuestion"/>s</returns>
+    [HttpGet("{id}/questions")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetTestQuestionsAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
+        
+        if (questions.Count == 0)
+            return NoContent();
+
+        var apiQuestions = questions.Select(QuestionEntityToDto).ToList();
+        
+        return Ok(apiQuestions);
+    }
     
     /// <summary>
     /// Map <see cref="Test"/> entity to <see cref="ApiTest"/> DTO
@@ -532,5 +556,26 @@ public class TestsController(ITestRepository testRepository,
         };
 
         return commentToReturn;
+    }
+
+    /// <summary>
+    /// Map a <see cref="Question"/> entity to <see cref="ApiQuestion"/> DTO
+    /// </summary>
+    /// <param name="entity">The <see cref="Question"/> entity</param>
+    /// <returns>The <see cref="ApiQuestion"/> DTO</returns>
+    private ApiQuestion QuestionEntityToDto(Question entity)
+    {
+        var questionToReturn = new ApiQuestion
+        {
+            Id = entity.Id,
+            TestId = entity.TestId,
+            OrderIndex = entity.OrderIndex,
+            Type = entity.Type,
+            Description = entity.Description,
+            Data = entity.Data,
+            CorrectData = entity.CorrectData,
+        };
+        
+        return questionToReturn;
     }
 }
