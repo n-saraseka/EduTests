@@ -12,12 +12,10 @@ public class TestCompletionRepository(DatabaseContext db) : BaseRepository<TestC
     /// <param name="id"><see cref="Test"/> ID</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>The <see cref="Test"/>'s completion count</returns>
-    public async Task<int> GetTestCompletionCountAsync(int id, CancellationToken cancellationToken = default)
-    {
-        return await Set
+    public Task<int> GetTestCompletionCountAsync(int id, CancellationToken cancellationToken = default) => 
+        Set
             .Where(tc => tc.TestId == id)
             .CountAsync(cancellationToken);
-    }
 
     /// <summary>
     /// Get completion counts for multiple <see cref="Test"/>s
@@ -40,8 +38,10 @@ public class TestCompletionRepository(DatabaseContext db) : BaseRepository<TestC
     }
 
     public Task<List<TestCompletion>> GetByTestIdAndUserIdAsync(int testId, int userId,
-        CancellationToken cancellationToken = default)
-    {
-        return Set.Where(tc => tc.TestId == testId && tc.UserId == userId).ToListAsync(cancellationToken);
-    }
+        CancellationToken cancellationToken = default) =>
+        Set.Where(tc => tc.TestId == testId && tc.UserId == userId).ToListAsync(cancellationToken);
+    
+    public Task<List<TestCompletion>> GetByTestIdAndAnonUserIdAsync(int testId, Guid userId,
+        CancellationToken cancellationToken = default) =>
+        Set.Where(tc => tc.TestId == testId && tc.AnonymousUserId == userId).ToListAsync(cancellationToken);
 }
