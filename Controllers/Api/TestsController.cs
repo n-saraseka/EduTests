@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using EduTests.ApiObjects;
+using EduTests.Commands.CommentCommands;
 using EduTests.Commands.TestCommands;
 using EduTests.Database.Entities;
 using EduTests.Database.Enums;
@@ -321,12 +322,12 @@ public class TestsController(ITestRepository testRepository,
     /// Create a <see cref="ApiComment"/> on an <see cref="ApiTest"/>
     /// </summary>
     /// <param name="id">The <see cref="ApiTest"/> ID</param>
-    /// <param name="command">The <see cref="CreateTestCommentCommand"/></param>
+    /// <param name="command">The <see cref="CreateCommentCommand"/></param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns><see cref="CreatedAtActionResult"/> with the <see cref="ApiComment"/></returns>
     [HttpPost("{id}/comments")]
     [Authorize]
-    public async Task<IActionResult> CreateTestCommentAsync(int id, [FromBody] CreateTestCommentCommand command, 
+    public async Task<IActionResult> CreateTestCommentAsync(int id, [FromBody] CreateCommentCommand command, 
         CancellationToken cancellationToken = default)
     {
         var test = await testRepository.GetByIdAsync(id, cancellationToken);

@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace EduTests.Commands.TestCommands;
+namespace EduTests.Commands.CommentCommands;
 
-public class CreateTestCommentCommand
+public class CreateCommentCommand
 {
     [Required]
     public string Content {get; set;}

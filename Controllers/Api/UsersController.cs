@@ -1,11 +1,13 @@
 using System.Security.Claims;
 using EduTests.ApiObjects;
+using EduTests.Commands.CommentCommands;
 using EduTests.Commands.UserCommands;
 using EduTests.Database.Entities;
 using EduTests.Database.Enums;
 using EduTests.Database.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EduTests.Controllers.Api;
 
@@ -13,7 +15,8 @@ namespace EduTests.Controllers.Api;
 [Route("api/[controller]")]
 public class UsersController(
     IUserRepository userRepository,
-    IBannedUserRepository bannedUserRepository) : ControllerBase
+    IBannedUserRepository bannedUserRepository,
+    ICommentRepository commentRepository) : ControllerBase
 {
     /// <summary>
     /// Register in the system
@@ -216,6 +219,122 @@ public class UsersController(
     }
 
     /// <summary>
+    /// Get a specific <see cref="ApiComment"/> from this <see cref="ApiUser"/>'s profile
+    /// </summary>
+    /// <param name="id"><see cref="ApiUser"/> ID</param>
+    /// <param name="commentId"><see cref="ApiComment"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="ApiComment"/> object</returns>
+    [HttpGet("{id}/profilecomments/{commentId}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetProfileCommentAsync(int id, int commentId, 
+        CancellationToken cancellationToken = default)
+    {
+        var comment = await commentRepository.GetByIdAsync(commentId, cancellationToken);
+        if (comment is null)
+            return NotFound();
+
+        var apiComment = CommentEntityToDto(comment);
+        return Ok(apiComment);
+    }
+
+    /// <summary>
+    /// Get <see cref="ApiComment"/>s under <see cref="ApiUser"/>'s profile
+    /// </summary>
+    /// <param name="id"><see cref="ApiUser"/> ID</param>
+    /// <param name="page">Page number</param>
+    /// <param name="amountPerPage">Amount of <see cref="ApiReport"/>s per page</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>List of <see cref="ApiComment"/>s</returns>
+    [HttpGet("{id}/profilecomments")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetProfileCommentsAsync(int id, [FromQuery] int page,
+        [FromQuery] int amountPerPage, CancellationToken cancellationToken = default)
+    {
+        if (page < 1 || amountPerPage < 1)
+            return BadRequest("Invalid pagination parameters");
+
+        var comments = await commentRepository
+            .GetProfileComments(id)
+            .Skip((page - 1) * amountPerPage)
+            .Take(amountPerPage)
+            .ToListAsync(cancellationToken);
+
+        var apiComments = comments.Select(CommentEntityToDto).ToList();
+
+        return Ok(apiComments);
+    }
+    
+    /// <summary>
+    /// Create a <see cref="ApiComment"/> under <see cref="ApiUser"/>'s profile
+    /// </summary>
+    /// <param name="id"><see cref="ApiUser"/> ID</param>
+    /// <param name="command">The <see cref="CreateCommentCommand"/></param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>Created <see cref="ApiComment"/></returns>
+    [HttpPost("{id}/profilecomments")]
+    [Authorize]
+    public async Task<IActionResult> CreateProfileCommentAsync(int id, [FromBody] CreateCommentCommand command, 
+        CancellationToken cancellationToken = default)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        
+        var userIdInt = int.Parse(userId);
+        
+        var user = await userRepository.GetByIdAsync(id, cancellationToken);
+        if (user is null)
+            return NotFound();
+
+        var comment = new Comment
+        {
+            CommenterId = userIdInt,
+            UserProfileId = id,
+            Content = command.Content
+        };
+        
+        commentRepository.Create(comment);
+        await commentRepository.SaveChangesAsync(cancellationToken);
+
+        var apiComment = CommentEntityToDto(comment);
+        
+        return CreatedAtAction("GetProfileComment",  new { id = user.Id, commentId = comment.Id }, apiComment);
+    }
+
+    /// <summary>
+    /// Delete a <see cref="ApiComment"/> under <see cref="ApiUser"/>'s profile
+    /// </summary>
+    /// <param name="id"><see cref="ApiUser"/> ID</param>
+    /// <param name="commentId">The <see cref="ApiComment"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="OkResult"/></returns>
+    [HttpDelete("{id}/profilecomments/{commentId}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteProfileCommentAsync(int id, int commentId,
+        CancellationToken cancellationToken = default)
+    {
+        var comment = await commentRepository.GetByIdAsync(commentId, cancellationToken);
+        if (comment is null)
+            return NotFound();
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        var userIdInt = int.Parse(userId);
+        
+        var role = User.FindFirstValue(ClaimTypes.Role);
+        
+        if (comment.CommenterId != userIdInt && role != "Moderator" && role != "Administrator")
+            return Forbid();
+            
+        commentRepository.Delete(comment);
+        await commentRepository.SaveChangesAsync(cancellationToken);
+        
+        return Ok();
+    }
+
+    /// <summary>
     /// Promote a <see cref="ApiUser"/> to <see cref="UserGroup.Moderator"/>
     /// </summary>
     /// <param name="id"><see cref="ApiUser"/> ID</param>
@@ -360,5 +479,33 @@ public class UsersController(
         };
         
         return apiBan;
+    }
+    
+    /// <summary>
+    /// Map <see cref="Comment"/> entity to <see cref="ApiComment"/> DTO
+    /// </summary>
+    /// <param name="entity">The <see cref="Comment"/> entity</param>
+    /// <returns>The <see cref="ApiComment"/> DTO</returns>
+    /// <exception cref="ArgumentNullException">In case <see cref="Comment.UserProfileId"/> and <see cref="Comment.TestId"/> both are null</exception>
+    private ApiComment CommentEntityToDto(Comment entity)
+    {
+        var entityType = (entity.UserProfileId != null) ? CommentEntityType.UserProfile : CommentEntityType.Test;
+        var entityId = entity.UserProfileId ?? entity.TestId;
+        
+        if (entityId is null)
+            throw new ArgumentNullException(nameof(entityId));
+
+        var commentToReturn = new ApiComment
+        {
+            Id = entity.Id,
+            UserId = entity.CommenterId,
+            EntityType = entityType,
+            EntityId = (int)entityId,
+            Content = entity.Content,
+            CreatedAt = entity.CreatedAt,
+            UpdatedAt = entity.UpdatedAt,
+        };
+
+        return commentToReturn;
     }
 }
