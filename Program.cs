@@ -1,3 +1,4 @@
+using EduTests;
 using EduTests.Database;
 using EduTests.Database.Enums;
 using EduTests.Database.Repositories;
@@ -52,6 +53,7 @@ builder.Services.AddAuthentication("Cookies")
 var app = builder.Build();
 
 app.UseAuthentication();
+app.UseMiddleware<AnonymousAuthenticationMiddleware>();
 app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
