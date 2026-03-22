@@ -404,21 +404,13 @@ namespace EduTests.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CompletedAt")
+                    b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("completed_at");
 
-                    b.Property<float>("CompletionPercentage")
-                        .HasColumnType("real")
-                        .HasColumnName("completion_percentage");
-
-                    b.Property<TimeSpan>("CompletionTime")
-                        .HasColumnType("interval")
-                        .HasColumnName("completion_time");
-
-                    b.Property<int>("CorrectAnswers")
-                        .HasColumnType("integer")
-                        .HasColumnName("correct_answers");
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
 
                     b.Property<int>("TestId")
                         .HasColumnType("integer")
