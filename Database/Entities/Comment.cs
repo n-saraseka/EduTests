@@ -3,7 +3,7 @@ namespace EduTests.Database.Entities;
 public class Comment : IEntity<int>, IAuditable 
 {
     public int Id { get; set; }
-    public required User Commenter { get; set; }
+    public User Commenter { get; set; }
     public required int CommenterId { get; set; }
     public User? UserProfile { get; set; }
     public int? UserProfileId { get; set; }

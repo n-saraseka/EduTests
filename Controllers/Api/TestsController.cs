@@ -7,6 +7,7 @@ using EduTests.Database.Repositories.Interfaces;
 using EduTests.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EduTests.Controllers.Api;
 
@@ -17,6 +18,7 @@ public class TestsController(ITestRepository testRepository,
     ITestCompletionRepository testCompletionRepository,
     ITagRepository tagRepository,
     IQuestionRepository questionRepository,
+    ICommentRepository commentRepository,
     IQuestionValidatorService questionValidatorService) : ControllerBase
 {
     /// <summary>
@@ -311,6 +313,151 @@ public class TestsController(ITestRepository testRepository,
         var apiRating = RatingEntityToDto(rating);
         return Ok(apiRating);
     }
+
+    /// <summary>
+    /// Create a <see cref="ApiComment"/> on an <see cref="ApiTest"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="command">The <see cref="CreateTestCommentCommand"/></param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="CreatedAtActionResult"/> with the <see cref="ApiComment"/></returns>
+    [HttpPost("{id}/comments")]
+    [Authorize]
+    public async Task<IActionResult> CreateTestCommentAsync(int id, [FromBody] CreateTestCommentCommand command, 
+        CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        
+        var userIdInt = int.Parse(userId);
+        
+        if (test.AccessType == AccessType.Private && test.UserId != userIdInt)
+            return Forbid();
+
+        var comment = new Comment
+        {
+            CommenterId = userIdInt,
+            TestId = id,
+            Content = command.Content
+        };
+        
+        commentRepository.Create(comment);
+        await commentRepository.SaveChangesAsync(cancellationToken);
+        
+        var apiComment = CommentEntityToDto(comment);
+        return CreatedAtAction("GetTestComment", new { id = comment.Id }, apiComment);
+    }
+
+    /// <summary>
+    /// Get a <see cref="ApiComment"/> on a <see cref="ApiTest"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="commentId">The <see cref="ApiComment"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>A <see cref="ApiComment"/> object</returns>
+    [HttpGet("{id}/comments/{commentId}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetTestCommentAsync(int id, int commentId,
+        CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        if (test.AccessType == AccessType.Private)
+            return Forbid();
+        
+        var comment = await commentRepository.GetByIdAsync(commentId, cancellationToken);
+        
+        if (comment is null)
+            return NotFound();
+        
+        var apiComment = CommentEntityToDto(comment);
+        
+        return Ok(apiComment);
+    }
+
+    /// <summary>
+    /// Get <see cref="ApiComment"/>s on an <see cref="ApiTest"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="page">Page number</param>
+    /// <param name="amountPerPage">Amount of <see cref="ApiReport"/>s per page</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>List of <see cref="ApiComment"/>s</returns>
+    [HttpGet("{id}/comments")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetTestCommentsAsync(int id, [FromQuery] int page, [FromQuery] int amountPerPage, 
+        CancellationToken cancellationToken = default)
+    {
+        if (page < 1 || amountPerPage < 1)
+            return BadRequest("Invalid pagination parameters");
+        
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var userRole = User.FindFirstValue(ClaimTypes.Role);
+        
+        if (test.AccessType == AccessType.Private && userRole != "Administrator")
+            return Forbid();
+
+        var query = commentRepository.GetTestComments(id);
+        
+        var comments = await query.OrderByDescending(r => r.CreatedAt)
+            .Skip((page - 1) * amountPerPage)
+            .Take(amountPerPage)
+            .ToListAsync(cancellationToken);
+        
+        var apiComments = comments.Select(CommentEntityToDto).ToList();
+        
+        return Ok(apiComments);
+    }
+
+    /// <summary>
+    /// Delete a <see cref="ApiComment"/> on an <see cref="ApiTest"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="commentId">The <see cref="ApiComment"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="OkResult"/></returns>
+    [HttpDelete("{id}/comments/{commentId}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteTestCommentAsync(int id, int commentId,
+        CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var userRole = User.FindFirstValue(ClaimTypes.Role);
+        
+        if (test.AccessType == AccessType.Private && userRole != "Administrator")
+            return Forbid();
+ 
+        var comment = await commentRepository.GetByIdAsync(commentId, cancellationToken);
+        if (comment is null)
+            return NotFound();
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        
+        var userIdInt = int.Parse(userId);
+        
+        if (comment.CommenterId != userIdInt && userRole != "Moderator" && userRole != "Administrator")
+            return Forbid();
+        
+        commentRepository.Delete(comment);
+        await commentRepository.SaveChangesAsync(cancellationToken);
+
+        return Ok();
+    }
     
     /// <summary>
     /// Map <see cref="Test"/> entity to <see cref="ApiTest"/> DTO
@@ -357,5 +504,33 @@ public class TestsController(ITestRepository testRepository,
         };
         
         return ratingToReturn;
+    }
+
+    /// <summary>
+    /// Map <see cref="Comment"/> entity to <see cref="ApiComment"/> DTO
+    /// </summary>
+    /// <param name="entity">The <see cref="Comment"/> entity</param>
+    /// <returns>The <see cref="ApiComment"/> DTO</returns>
+    /// <exception cref="ArgumentNullException">In case <see cref="Comment.UserProfileId"/> and <see cref="Comment.TestId"/> both are null</exception>
+    private ApiComment CommentEntityToDto(Comment entity)
+    {
+        var entityType = (entity.UserProfileId != null) ? CommentEntityType.UserProfile : CommentEntityType.Test;
+        var entityId = entity.UserProfileId ?? entity.TestId;
+        
+        if (entityId is null)
+            throw new ArgumentNullException(nameof(entityId));
+
+        var commentToReturn = new ApiComment
+        {
+            Id = entity.Id,
+            UserId = entity.CommenterId,
+            EntityType = entityType,
+            EntityId = (int)entityId,
+            Content = entity.Content,
+            CreatedAt = entity.CreatedAt,
+            UpdatedAt = entity.UpdatedAt,
+        };
+
+        return commentToReturn;
     }
 }
