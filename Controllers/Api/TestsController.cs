@@ -473,6 +473,11 @@ public class TestsController(ITestRepository testRepository,
         if (test is null)
             return NotFound();
         
+        var userRole = User.FindFirstValue(ClaimTypes.Role);
+        
+        if (test.AccessType == AccessType.Private && userRole != "Administrator")
+            return Forbid();
+        
         var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
         
         if (questions.Count == 0)
