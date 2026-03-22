@@ -20,6 +20,7 @@ public class TestsController(ITestRepository testRepository,
     IQuestionRepository questionRepository,
     ICommentRepository commentRepository,
     IUserAnswerRepository userAnswerRepository,
+    IAnonymousUserRepository anonymousUserRepository,
     IQuestionValidatorService questionValidatorService,
     IAnswerVerifierService answerVerifierService) : ControllerBase
 {
@@ -503,6 +504,20 @@ public class TestsController(ITestRepository testRepository,
 
         int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
         Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        
+        if (!isAuthenticated)
+        {
+            var existingAnon = await anonymousUserRepository.GetByIdAsync((Guid)anonymousUserId, cancellationToken);
+            if (existingAnon is null)
+            {
+                var anon = new AnonymousUser
+                {
+                    Id = (Guid)anonymousUserId
+                };
+                anonymousUserRepository.Create(anon);
+                await anonymousUserRepository.SaveChangesAsync(cancellationToken);
+            }
+        }
         
         var userRole = User.FindFirstValue(ClaimTypes.Role);
         
