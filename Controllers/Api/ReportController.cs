@@ -15,6 +15,7 @@ namespace EduTests.Controllers.Api;
 [Route("api/[controller]")]
 public class ReportController(IReportsRepository reportsRepository,
     IUserRepository userRepository,
+    IAnonymousUserRepository anonymousUserRepository,
     ICommentRepository commentRepository,
     ITestRepository testRepository) : ControllerBase
 {
@@ -29,70 +30,94 @@ public class ReportController(IReportsRepository reportsRepository,
     public async Task<IActionResult> CreateReportAsync([FromBody] CreateReportCommand command,
         CancellationToken cancellationToken = default)
     {
-        switch (command.EntityType)
-        {
-            case EntityType.Test:
-                var test = await testRepository.GetByIdAsync(command.EntityId, cancellationToken);
-                if (test is null)
-                    return NotFound();
-                
-                var report = new Report
-                {
-                    TestId = test.Id,
-                    Text = command.Text,
-                    DateTime = DateTime.UtcNow,
-                    ReportStatus = ReportStatus.Pending
-                };
-                reportsRepository.Create(report);
-                await reportsRepository.SaveChangesAsync(cancellationToken);
-                
-                var apiReport = ReportEntityToDto(report);
-                return Created(string.Empty, apiReport);
-            case EntityType.User:
-                var user = await userRepository.GetByIdAsync(command.EntityId, cancellationToken);
-                if (user is null)
-                    return NotFound();
-                
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (userId is null)
-                    return Unauthorized();
-        
-                var userIdInt = int.Parse(userId);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 
-                if (userIdInt == command.EntityId)
-                    return BadRequest();
-                
-                report = new Report
+        int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
+        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+
+        if (!isAuthenticated)
+        {
+            var existingAnon = await anonymousUserRepository.GetByIdAsync((Guid)anonymousUserId, cancellationToken);
+            if (existingAnon is null)
+            {
+                var anon = new AnonymousUser
                 {
-                    UserId = user.Id,
-                    Text = command.Text,
-                    DateTime = DateTime.UtcNow,
-                    ReportStatus = ReportStatus.Pending
+                    Id = (Guid)anonymousUserId
                 };
-                reportsRepository.Create(report);
-                await reportsRepository.SaveChangesAsync(cancellationToken);
-                
-                apiReport = ReportEntityToDto(report);
-                return Created(string.Empty, apiReport);
-            case EntityType.Comment:
-                var comment = await commentRepository.GetByIdAsync(command.EntityId, cancellationToken);
-                if (comment is null)
-                    return NotFound();
-                report = new Report
-                {
-                    CommentId = comment.Id,
-                    Text = command.Text,
-                    DateTime = DateTime.UtcNow,
-                    ReportStatus = ReportStatus.Pending
-                };
-                reportsRepository.Create(report);
-                await reportsRepository.SaveChangesAsync(cancellationToken);
-                
-                apiReport = ReportEntityToDto(report);
-                return Created(string.Empty, apiReport);
-            default:
-                return BadRequest("Unknown entity type");
+                anonymousUserRepository.Create(anon);
+                await anonymousUserRepository.SaveChangesAsync(cancellationToken);
+            }
         }
+
+        Report? existingReport = null;
+        Report? report = null;
+        
+        switch (command.EntityType)
+            {
+                case EntityType.Test:
+                    var test = await testRepository.GetByIdAsync(command.EntityId, cancellationToken);
+                    if (test is null)
+                        return NotFound();
+                    
+                    existingReport = await reportsRepository.
+                        GetByTestAndReporterIdAsync(test.Id, authenticatedUserId, anonymousUserId, cancellationToken);
+                    
+                    report = new Report
+                    {
+                        TestId = test.Id,
+                        Text = command.Text,
+                        DateTime = DateTime.UtcNow,
+                        ReportStatus = ReportStatus.Pending
+                    };
+
+                    break;
+                case EntityType.User:
+                    var user = await userRepository.GetByIdAsync(command.EntityId, cancellationToken);
+                    if (user is null)
+                        return NotFound();
+
+                    existingReport = await reportsRepository.
+                        GetByUserAndReporterIdAsync(user.Id, authenticatedUserId, anonymousUserId, cancellationToken);
+
+                    if (user.Id == authenticatedUserId)
+                        return BadRequest("Self reporting is not allowed");
+                    
+                    report = new Report
+                    {
+                        UserId = user.Id,
+                        Text = command.Text,
+                        DateTime = DateTime.UtcNow,
+                        ReportStatus = ReportStatus.Pending
+                    };
+                    break;
+                case EntityType.Comment:
+                    var comment = await commentRepository.GetByIdAsync(command.EntityId, cancellationToken);
+                    if (comment is null)
+                        return NotFound();
+                    
+                    existingReport = await reportsRepository.
+                        GetByCommentAndReporterIdAsync(comment.Id, authenticatedUserId, anonymousUserId, cancellationToken);
+                    
+                    report = new Report
+                    {
+                        CommentId = comment.Id,
+                        Text = command.Text,
+                        DateTime = DateTime.UtcNow,
+                        ReportStatus = ReportStatus.Pending
+                    };
+                    break;
+                default:
+                    return BadRequest("Unknown entity type");
+            }
+        
+        if (existingReport is not null && DateTime.UtcNow.Subtract(existingReport.DateTime).TotalDays < 1)
+            return BadRequest("The entity has been recently reported by user");
+        
+        await FinishReportDataAndCreateAsync(report, authenticatedUserId, anonymousUserId, cancellationToken);
+                    
+        var apiReport = ReportEntityToDto(report);
+        return Created(string.Empty, apiReport);
     }
 
     /// <summary>
@@ -176,5 +201,30 @@ public class ReportController(IReportsRepository reportsRepository,
         };
         
         return apiReport;
+    }
+
+    /// <summary>
+    /// Finish up a <see cref="Report"/> object and add that entity through the repository
+    /// </summary>
+    /// <param name="report">The <see cref="Report"/> to add onto</param>
+    /// <param name="userId">The <see cref="User"/> ID</param>
+    /// <param name="anonUserId">The <see cref="AnonymousUser"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="Task{int}"/></returns>
+    /// <exception cref="ArgumentException"></exception>
+    private Task<int> FinishReportDataAndCreateAsync(Report report, int? userId, Guid? anonUserId, 
+        CancellationToken cancellationToken = default)
+    {
+        if (userId is null && anonUserId is null)
+            throw new ArgumentException($"Either {nameof(userId)} or {nameof(anonUserId)} must be specified");
+        if (userId != null && anonUserId != null)
+            throw new ArgumentException(
+                $"Both {nameof(userId)} and {nameof(anonUserId)} can't be specified at the same time");
+        
+        report.ReportingUserId = userId;
+        report.ReportingAnonymousUserId = anonUserId;
+        
+        reportsRepository.Create(report);
+        return reportsRepository.SaveChangesAsync(cancellationToken);
     }
 }
