@@ -15,7 +15,6 @@ public class AccountController : Controller
     /// <returns>The <see cref="ViewResult"/> with the <see cref="LoginViewModel"/></returns>
     [HttpGet]
     [AllowAnonymous]
-    [ValidateAntiForgeryToken]
     public IActionResult Login(LoginViewModel model)
     {
         return View(model);
@@ -28,7 +27,6 @@ public class AccountController : Controller
     /// <returns>The <see cref="ViewResult"/> with the <see cref="RegisterViewModel"/></returns>
     [HttpGet]
     [AllowAnonymous]
-    [ValidateAntiForgeryToken]
     public IActionResult Register(RegisterViewModel model)
     {
         return View(model);
@@ -40,7 +38,6 @@ public class AccountController : Controller
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>A <see cref="RedirectToActionResult"/> (redirects to the home page)</returns>
     [HttpGet]
-    [ValidateAntiForgeryToken]
     public async Task<IActionResult> LogoutAsync(CancellationToken cancellationToken)
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

@@ -20,6 +20,7 @@ public class AuthController(IUserRepository repository) : ControllerBase
     /// <returns><see cref="OkResult"/> or <see cref="UnauthorizedResult"/> in case of an error</returns>
     [HttpPost("login")]
     [AllowAnonymous]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> LoginAsync([FromBody] LoginCommand command, CancellationToken cancellationToken)
     {
         var user = await repository.GetByLoginAsync(command.Login, cancellationToken);

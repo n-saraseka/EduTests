@@ -26,6 +26,7 @@ public class UsersController(
     /// <returns><see cref="OkResult"/> or <see cref="BadRequestResult"/></returns>
     [HttpPost]
     [AllowAnonymous]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> RegisterAsync([FromBody] RegistrationCommand command, CancellationToken cancellationToken)
     {
         try
@@ -40,7 +41,14 @@ public class UsersController(
             };
             
             userRepository.Create(user);
-            await userRepository.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await userRepository.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception)
+            {
+                return BadRequest("User with that login already exists");
+            }
 
             var apiUser = UserEntityToDto(user);
             
