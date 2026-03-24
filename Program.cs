@@ -53,6 +53,8 @@ builder.Services.AddAuthentication("Cookies")
 
 var app = builder.Build();
 
+app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseMiddleware<AnonymousAuthenticationMiddleware>();
 app.UseAuthorization();
