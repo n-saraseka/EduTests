@@ -6,6 +6,13 @@
     <title>@ViewData["Title"] - EduTests</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/EduTests.styles.css" asp-append-version="true"/>
+    <script type="module">
+        import RefreshRuntime from "http://localhost:5173/@@react-refresh"
+        RefreshRuntime.injectIntoGlobalHook(window)
+        window.$RefreshReg$ = () => {}
+        window.$RefreshSig$ = () => (type) => type
+        window.__vite_plugin_react_preamble_installed__ = true
+    </script>
 </head>
 <body>
 <header class="border-bottom">
