@@ -41,7 +41,7 @@ public class AuthController(IUserRepository repository) : ControllerBase
         return Ok();
     }
 
-    [HttpPost("logout")]
+    [HttpGet("logout")]
     [Authorize]
     public async Task<IActionResult> LogoutAsync(CancellationToken cancellationToken)
     {

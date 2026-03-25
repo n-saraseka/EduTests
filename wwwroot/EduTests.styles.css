@@ -1,0 +1,147 @@
+/* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
+for details on configuring this project to bundle and minify static web assets. */
+
+/* Base layout */
+
+body {
+    color: #0b0b11;
+    background-color: #f4f4f8;
+    font-family: Arial, Helvetica, sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0 0;
+}
+
+body > * {
+    flex-shrink: 0;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 8px;
+}
+
+.header-navigation {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.header-navigation li a {
+    color: #0b0b11;
+    text-decoration: none;
+}
+
+.site-title a {
+    font-size: 1.5rem;
+}
+
+a.navbar-brand {
+    white-space: normal;
+    text-align: center;
+    word-break: break-all;
+}
+
+a {
+    color: #4f98ff;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.2rem;
+    font-weight: bold;
+}
+
+.btn:hover {
+    cursor: pointer;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #4f98ff;
+    border-color: #2E85FF;
+}
+
+.btn-primary:hover {
+    background-color: #2e85ff;
+    border-color: #006aff;
+}
+
+.border-left {
+    border-left: 1px solid #e5e5e5;
+}
+
+.border-right {
+    border-right: 1px solid #e5e5e5;
+}
+
+.border-top {
+    border-top: 1px solid #e5e5e5;
+}
+.border-bottom {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.box-shadow {
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+button.accept-policy {
+    font-size: 1rem;
+    line-height: inherit;
+}
+
+.footer {
+    padding: 0 8px;
+    white-space: nowrap;
+    line-height: 60px;
+    background-color: #f5f5f5;
+}
+
+.container {
+    width: 90%;
+    flex-grow: 1;
+    background: #fcfcfc;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.container h2 {
+    text-align: center;
+}
+
+/* Form stuff */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+form * {
+    flex-grow: 0;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+input:focus {
+    outline-color: #4f98ff;
+    border-color: #4f98ff;
+}
+
+.required-field::after {
+    content: ' *';
+    color: red;
+}
