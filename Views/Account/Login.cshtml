@@ -6,7 +6,6 @@
 <head>
     <title>Login</title>
 </head>
-<script src="js/login.js"></script>
 <body>
 <h2>Вход</h2>
 
@@ -27,14 +26,19 @@
     
         <button type="submit" class="btn btn-primary">Войти</button>
     </form>
-
-    <p>
+    
+    <p id="error-text"></p>
+    
+    <p id="">
         Нет аккаунта? <a asp-action="Register">Зарегистрируйтесь здесь</a>.
     </p>
 }
 else
 {
-    <p>You're already logged in. <a asp-action="Logout">Log out</a></p>
+    <p>Вы уже вошли в аккаунт. <a asp-action="Logout">Выход</a></p>
 }
+
+<script type="module" src="http://localhost:5173/@@vite/client"></script>
+<script type="module" src="http://localhost:5173/src/navLogin.jsx"></script>
 </body>
 </html>

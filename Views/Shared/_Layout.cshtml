@@ -20,15 +20,15 @@
         <li class="site-title"><a asp-controller="Home" asp-action="Index">EduTests</a></li>
         <li>Популярные тесты</li>
     </ul>
-    <ul class="header-navigation">
+    <ul class="header-navigation auth-navigation">
         @if (User.Identity.IsAuthenticated)
         {
             <li class="nav-link"><a asp-controller="Account" asp-action="Logout">Выход</a></li>
         }
         else
         {
-            <li><a asp-controller="Account" asp-action="Login" class="nav-link">Вход</a></li>
-            <li><a asp-controller="Account" asp-action="Register" class="nav-link">Регистрация</a></li>
+            <li><a asp-route="login" class="nav-link">Вход</a></li>
+            <li><a asp-route="register" class="nav-link">Регистрация</a></li>
         }
     </ul>
 </header>
