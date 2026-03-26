@@ -1,12 +1,9 @@
 @model EduTests.Models.LoginViewModel
 
-<!DOCTYPE html>
+@{
+    ViewBag.Title = "Вход";
+}
 
-<html>
-<head>
-    <title>Login</title>
-</head>
-<body>
 <h2>Вход</h2>
 
 @if (!User.Identity.IsAuthenticated)
@@ -38,5 +35,3 @@ else
 
 <script type="module" src="http://localhost:5173/@@vite/client"></script>
 <script type="module" src="http://localhost:5173/src/loginScripts.jsx"></script>
-</body>
-</html>

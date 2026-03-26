@@ -1,12 +1,9 @@
 @model EduTests.Models.RegisterViewModel
 
-<!DOCTYPE html>
+@{
+    ViewBag.Title = "Регистрация";
+}
 
-<html>
-<head>
-    <title>Register</title>
-</head>
-<body>
 <h2>Регистрация</h2>
 
 @if (!User.Identity.IsAuthenticated)
@@ -48,5 +45,3 @@ else
 
 <script type="module" src="http://localhost:5173/@@vite/client"></script>
 <script type="module" src="http://localhost:5173/src/regScripts.jsx"></script>
-</body>
-</html>
