@@ -99,5 +99,10 @@ app.MapControllerRoute(
         defaults: new {controller = "Account", action = "Logout"})
     .WithStaticAssets();
 
+app.MapControllerRoute(
+    name: "profile",
+    pattern: "{controller}/{id}",
+    defaults: new {controller = "User", action = "Profile"});
+
 
 app.Run();

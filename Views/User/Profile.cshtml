@@ -1,0 +1,27 @@
+@model EduTests.Models.ProfileViewModel
+
+@{
+    var userName = Model.User.Username;
+    var userId = Model.User.Id;
+    var registrationDate = Model.User.RegistrationDate.ToLocalTime();
+    var description = Model.User.Description;
+    ViewBag.Title = "Профиль пользователя " + userName;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css">
+}
+
+<div id="user-card">
+    <div id="user-card-header">
+        <img src="/files/users/@userId" alt="Фотография профиля" id="profile-avatar">
+        <div id="username-reg">
+            <h2>@userName</h2>
+            <p>Зарегистрирован на сайте с <span title="@registrationDate">@registrationDate.ToShortDateString()</span></p>
+        </div>
+    </div>
+    <p id="user-card-description">@description</p>
+</div>
+<h2>Тесты</h2>
+<div id="test-cards">Пользователь пока не создал ни одного теста.</div>
+<h2>Комментарии</h2>
