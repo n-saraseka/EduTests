@@ -27,18 +27,16 @@
         <button type="submit" class="btn btn-primary">Войти</button>
     </form>
     
-    <p id="error-text"></p>
+    <div id="error-text"></div>
     
-    <p id="">
-        Нет аккаунта? <a asp-action="Register">Зарегистрируйтесь здесь</a>.
-    </p>
+    <div id="login-account-help">Нет аккаунта? <a asp-route="register">Зарегистрируйтесь здесь</a>.</div>
 }
 else
 {
-    <p>Вы уже вошли в аккаунт. <a asp-action="Logout">Выход</a></p>
+    <div id="login-account-help">Вы вошли в аккаунт. <a asp-route="logout">Выход</a></div>
 }
 
 <script type="module" src="http://localhost:5173/@@vite/client"></script>
-<script type="module" src="http://localhost:5173/src/navLogin.jsx"></script>
+<script type="module" src="http://localhost:5173/src/loginScripts.jsx"></script>
 </body>
 </html>

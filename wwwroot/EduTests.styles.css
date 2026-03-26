@@ -39,6 +39,12 @@ header {
     text-decoration: none;
 }
 
+#nav-avatar {
+    width: 1.25rem;
+    height: 1.25rem;
+    object-fit: cover;
+}
+
 .site-title a {
     font-size: 1.5rem;
 }

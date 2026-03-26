@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+@{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var userName = User.FindFirstValue(ClaimTypes.GivenName);
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
@@ -23,7 +29,9 @@
     <ul class="header-navigation auth-navigation">
         @if (User.Identity.IsAuthenticated)
         {
-            <li class="nav-link"><a asp-controller="Account" asp-action="Logout">Выход</a></li>
+            <li><img id="nav-avatar" src="/files/users/@userId" alt="Profile picture"/></li>
+            <li><a href="/users/@userId" class="nav-link">@userName</a></li>
+            <li><a asp-route="logout" class="nav-link">Выход</a></li>
         }
         else
         {

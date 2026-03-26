@@ -6,7 +6,6 @@
 <head>
     <title>Register</title>
 </head>
-<script src="js/register.js"></script>
 <body>
 <h2>Регистрация</h2>
 
@@ -37,13 +36,17 @@
     
         <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
     </form>
-    <p>
-        Уже имеете аккаунт? <a asp-action="Login">Войдите здесь</a>.
-    </p>
+    
+    <div id="error-text"></div>
+    
+    <div id="reg-account-help">Уже имеете аккаунт? <a asp-action="Login">Войдите здесь</a>.</div>
 }
 else
 {
-    <p>Вы уже вошли в аккаунт. <a asp-action="Logout">Выход</a></p>
+    <div>Вы уже вошли в аккаунт. <a asp-route="logout">Выход</a></div>
 }
+
+<script type="module" src="http://localhost:5173/@@vite/client"></script>
+<script type="module" src="http://localhost:5173/src/regScripts.jsx"></script>
 </body>
 </html>

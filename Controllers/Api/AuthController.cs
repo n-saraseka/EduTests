@@ -1,5 +1,7 @@
 using System.Security.Claims;
+using EduTests.ApiObjects;
 using EduTests.Commands.AuthCommands;
+using EduTests.Database.Entities;
 using EduTests.Database.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -25,12 +27,13 @@ public class AuthController(IUserRepository repository) : ControllerBase
     {
         var user = await repository.GetByLoginAsync(command.Login, cancellationToken);
         if (user == null || !BCrypt.Net.BCrypt.Verify(command.Password, user.PasswordHash))
-            return Unauthorized();
+            return BadRequest("Username or password is incorrect");
 
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Role, user.Group.ToString()),
             new Claim(ClaimTypes.Name, user.Login),
+            new Claim(ClaimTypes.GivenName, user.Username),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
         };
         
@@ -38,14 +41,28 @@ public class AuthController(IUserRepository repository) : ControllerBase
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(claimsIdentity));
-        return Ok();
+        
+        var apiUser = UserEntityToDto(user);
+        return Ok(apiUser);
     }
-
-    [HttpGet("logout")]
-    [Authorize]
-    public async Task<IActionResult> LogoutAsync(CancellationToken cancellationToken)
+    
+    /// <summary>
+    /// Map <see cref="User"/> entity to <see cref="ApiUser"/> DTO
+    /// </summary>
+    /// <param name="entity">The <see cref="User"/> entity</param>
+    /// <returns>The <see cref="ApiUser"/> DTO</returns>
+    private ApiUser UserEntityToDto(User entity)
     {
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return Ok();
+        var apiUser = new ApiUser
+        {
+            Id = entity.Id,
+            Username = entity.Username,
+            AvatarUrl = entity.AvatarUrl,
+            Description = entity.Description,
+            RegistrationDate = entity.RegistrationDate,
+            Group = entity.Group
+        };
+        
+        return apiUser;
     }
 }

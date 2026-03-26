@@ -2,6 +2,7 @@ using System.Security.Claims;
 using EduTests.Database.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace EduTests.Controllers.Api;
@@ -9,10 +10,11 @@ namespace EduTests.Controllers.Api;
 [ApiController]
 [Route("[controller]")]
 public class FilesController(IWebHostEnvironment env,
+    FileExtensionContentTypeProvider provider,
     ITestRepository testRepository,
     IUserRepository userRepository) : Controller
 {
-    private readonly List<byte[]> _validSignatures = new List<byte[]>
+    private readonly List<byte[]> _validSignatures = new()
     {
         new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }, // PNG
         new byte[] { 0xFF, 0xD8, 0xFF, 0xDB }, // JPEG (JFIF)
@@ -53,6 +55,24 @@ public class FilesController(IWebHostEnvironment env,
         return Ok(new { url });
     }
     
+    [HttpGet("tests/{id}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetTestThumbnailAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test == null)
+            return NotFound();
+
+        var path = GetFilePath(test.ThumbnailUrl, "tests");
+        
+        var fileBytes = await System.IO.File.ReadAllBytesAsync(path, cancellationToken);
+
+        var fileName = Path.GetFileName(path);
+        var mimeType = GetMimeType(fileName);
+        
+        return File(fileBytes, mimeType, fileName);
+    }
+    
     [HttpPut("users/{id}")]
     [Authorize]
     [RequestSizeLimit(8_388_608)]
@@ -84,6 +104,24 @@ public class FilesController(IWebHostEnvironment env,
         await userRepository.SaveChangesAsync(cancellationToken);
 
         return Ok(new { url });
+    }
+
+    [HttpGet("users/{id}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetUserAvatarAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var user = await userRepository.GetByIdAsync(id, cancellationToken);
+        if (user == null)
+            return NotFound();
+
+        var path = GetFilePath(user.AvatarUrl, "users");
+        
+        var fileBytes = await System.IO.File.ReadAllBytesAsync(path, cancellationToken);
+
+        var fileName = Path.GetFileName(path);
+        var mimeType = GetMimeType(fileName);
+        
+        return File(fileBytes, mimeType, fileName);
     }
 
     private bool IsValidFileType(IFormFile file) {
@@ -122,4 +160,13 @@ public class FilesController(IWebHostEnvironment env,
         
         return $"/uploads/{subfolderName}/{fileName}";
     }
+    
+    private string GetFilePath(string? fileUrl, string subFolder) => 
+        fileUrl == null ? Path.Combine(env.WebRootPath, "files", subFolder, "default.jpg") :
+            Path.Combine(env.WebRootPath, fileUrl.TrimStart('/'));
+    
+    private string GetMimeType(string fileName) =>
+        provider.TryGetContentType(fileName, out var contentType) 
+            ? contentType 
+            : "application/octet-stream";
 }

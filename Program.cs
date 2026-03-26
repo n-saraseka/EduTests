@@ -5,6 +5,7 @@ using EduTests.Database.Repositories;
 using EduTests.Database.Repositories.Interfaces;
 using EduTests.Services;
 using EduTests.Services.Questions;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,7 @@ builder.Services.AddScoped<IAnonymousUserRepository, AnonymousUserRepository>();
 builder.Services.AddScoped<IQuestionValidatorService, QuestionValidatorService>();
 builder.Services.AddScoped<IAnswerVerifierService, AnswerVerifierService>();
 builder.Services.AddScoped<IDatabaseSeederService, DatabaseSeederService>();
+builder.Services.AddScoped<FileExtensionContentTypeProvider>();
 builder.Services.AddHostedService<DbInitializerHostedService>();
 
 builder.Services.AddControllersWithViews();
@@ -55,6 +57,8 @@ builder.Services.AddAuthentication("Cookies")
 var app = builder.Build();
 
 app.UseStaticFiles();
+app.UseRouting();
+app.MapControllers();
 
 app.UseAuthentication();
 app.UseMiddleware<AnonymousAuthenticationMiddleware>();
@@ -69,7 +73,6 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseRouting();
 
 app.MapStaticAssets();
 
@@ -88,6 +91,12 @@ app.MapControllerRoute(
         name: "register",
         pattern: "register",
         defaults: new {controller = "Account", action = "Register"})
+    .WithStaticAssets();
+
+app.MapControllerRoute(
+        name: "logout",
+        pattern: "logout",
+        defaults: new {controller = "Account", action = "Logout"})
     .WithStaticAssets();
 
 
