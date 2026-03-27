@@ -75,6 +75,18 @@ a {
     border-color: #2E85FF;
 }
 
+.btn-danger {
+    color: #fff;
+    background-color: #b06700;
+    border-color: #754400;
+}
+
+.btn-danger:hover {
+    color: #fff;
+    background-color: #754400;
+    border-color: #472a00;
+}
+
 .btn-primary:hover {
     background-color: #2e85ff;
     border-color: #006aff;

@@ -105,5 +105,9 @@ app.MapControllerRoute(
     pattern: "{controller}/{id}",
     defaults: new {controller = "User", action = "Profile"});
 
+app.MapControllerRoute(
+    name: "my_account",
+    pattern: "{controller}/{id}/my_account",
+    defaults: new {controller = "User", action = "Settings"});
 
 app.Run();

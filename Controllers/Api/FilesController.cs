@@ -22,7 +22,7 @@ public class FilesController(IWebHostEnvironment env,
         new byte[] { 0xFF, 0xD8, 0xFF, 0xE1 }  // JPEG (EXIF)
     };
     
-    [HttpPut("tests/{id}")]
+    [HttpPatch("tests/{id}")]
     [Authorize]
     [RequestSizeLimit(8_388_608)]
     public async Task<IActionResult> UploadTestThumbnailAsync(int id, IFormFile? file, 
@@ -73,7 +73,7 @@ public class FilesController(IWebHostEnvironment env,
         return File(fileBytes, mimeType, fileName);
     }
     
-    [HttpPut("users/{id}")]
+    [HttpPatch("users/{id}")]
     [Authorize]
     [RequestSizeLimit(8_388_608)]
     public async Task<IActionResult> UploadUserAvatarAsync(int id, IFormFile? file, 

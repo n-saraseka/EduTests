@@ -6,6 +6,8 @@ using EduTests.Database.Entities;
 using EduTests.Database.Enums;
 using EduTests.Database.Repositories.Interfaces;
 using EduTests.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -87,12 +89,14 @@ public class UsersController(
     /// </summary>
     /// <param name="id">The <see cref="ApiUser"/> ID</param>
     /// <param name="command">The <see cref="ChangeUsernameCommand"/></param>
+    /// <param name="context">The <see cref="HttpContext"/></param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns><see cref="OkResult"/> with the new <see cref="ApiUser"/> object
     /// (or <see cref="UnauthorizedResult"/> in case of an error)</returns>
     [HttpPatch("{id}/username")]
     [Authorize(Roles = "User, Moderator, Administrator")]
-    public async Task<IActionResult> ChangeUsernameAsync(int id, [FromBody] ChangeUsernameCommand command, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ChangeUsernameAsync(int id, [FromBody] ChangeUsernameCommand command, 
+        CancellationToken cancellationToken = default)
     {
         var login = User.FindFirstValue(ClaimTypes.Name);
         var role = User.FindFirstValue(ClaimTypes.Role);
@@ -106,6 +110,19 @@ public class UsersController(
         userToUpdate.Username = command.Username;
         userRepository.Update(userToUpdate);
         await userRepository.SaveChangesAsync(cancellationToken);
+
+        if (User.Identity is ClaimsIdentity claimsIdentity)
+        {
+            var givenNameClaim = claimsIdentity.FindFirst(ClaimTypes.GivenName);
+            if (claimsIdentity.TryRemoveClaim(givenNameClaim))
+            {
+                claimsIdentity.AddClaim(new Claim(ClaimTypes.GivenName, command.Username));
+                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    claimsPrincipal);
+            }
+        }
 
         var apiUser = entityToDtoService.UserEntityToDto(userToUpdate);
         
@@ -225,6 +242,7 @@ public class UsersController(
         
         userRepository.Delete(user);
         await userRepository.SaveChangesAsync(cancellationToken);
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return Ok();
     }
 
