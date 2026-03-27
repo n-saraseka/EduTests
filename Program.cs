@@ -36,6 +36,7 @@ builder.Services.AddScoped<IAnonymousUserRepository, AnonymousUserRepository>();
 builder.Services.AddScoped<IQuestionValidatorService, QuestionValidatorService>();
 builder.Services.AddScoped<IAnswerVerifierService, AnswerVerifierService>();
 builder.Services.AddScoped<IDatabaseSeederService, DatabaseSeederService>();
+builder.Services.AddScoped<IEntityToDtoService, EntityToDtoService>();
 builder.Services.AddScoped<FileExtensionContentTypeProvider>();
 builder.Services.AddHostedService<DbInitializerHostedService>();
 

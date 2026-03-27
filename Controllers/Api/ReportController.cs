@@ -4,6 +4,7 @@ using EduTests.Commands.ReportCommands;
 using EduTests.Database.Entities;
 using EduTests.Database.Enums;
 using EduTests.Database.Repositories.Interfaces;
+using EduTests.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,8 @@ public class ReportController(IReportsRepository reportsRepository,
     IUserRepository userRepository,
     IAnonymousUserRepository anonymousUserRepository,
     ICommentRepository commentRepository,
-    ITestRepository testRepository) : ControllerBase
+    ITestRepository testRepository,
+    IEntityToDtoService entityToDtoService) : ControllerBase
 {
     /// <summary>
     /// Create a <see cref="ApiReport"/>
@@ -116,7 +118,7 @@ public class ReportController(IReportsRepository reportsRepository,
         
         await FinishReportDataAndCreateAsync(report, authenticatedUserId, anonymousUserId, cancellationToken);
                     
-        var apiReport = ReportEntityToDto(report);
+        var apiReport = entityToDtoService.ReportEntityToDto(report);
         return Created(string.Empty, apiReport);
     }
 
@@ -145,7 +147,7 @@ public class ReportController(IReportsRepository reportsRepository,
             .Take(amountPerPage)
             .ToListAsync(cancellationToken);
 
-        var apiReports = reports.Select(ReportEntityToDto).ToList();
+        var apiReports = reports.Select(entityToDtoService.ReportEntityToDto).ToList();
         
         return Ok(apiReports);
     }
@@ -171,36 +173,8 @@ public class ReportController(IReportsRepository reportsRepository,
         
         await reportsRepository.SaveChangesAsync(cancellationToken);
         
-        var apiReport = ReportEntityToDto(report);
+        var apiReport = entityToDtoService.ReportEntityToDto(report);
         return Ok(apiReport);
-    }
-
-    /// <summary>
-    /// Map <see cref="Report"/> entity to <see cref="ApiReport"/> DTO
-    /// </summary>
-    /// <param name="entity">The <see cref="Report"/> entity</param>
-    /// <returns>The <see cref="ApiReport"/> DTO</returns>
-    /// <exception cref="ArgumentNullException">If <see cref="Report.UserId"/>, <see cref="Report.TestId"/> and
-    /// <see cref="Report.CommentId"/> are all null</exception>
-    private ApiReport ReportEntityToDto(Report entity)
-    {
-        var entityType = (entity.UserId != null) ? EntityType.User : (entity.TestId != null) ? EntityType.Test : EntityType.Comment;
-        var entityId = entity.UserId ?? entity.TestId ?? entity.CommentId;
-        
-        if (entityId is null)
-            throw new ArgumentNullException(nameof(entityId));
-
-        var apiReport = new ApiReport
-        {
-            Id = entity.Id,
-            EntityType = entityType,
-            EntityId = (int)entityId,
-            ReportText = entity.Text,
-            DateReported = entity.DateTime,
-            ReportStatus = entity.ReportStatus
-        };
-        
-        return apiReport;
     }
 
     /// <summary>

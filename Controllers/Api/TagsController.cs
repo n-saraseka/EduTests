@@ -2,6 +2,7 @@ using EduTests.ApiObjects;
 using EduTests.Commands.TagCommands;
 using EduTests.Database.Entities;
 using EduTests.Database.Repositories.Interfaces;
+using EduTests.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +10,8 @@ namespace EduTests.Controllers.Api;
 
 [ApiController]
 [Route("api/[controller]")]
-public class TagsController(ITagRepository tagRepository): ControllerBase
+public class TagsController(ITagRepository tagRepository,
+    IEntityToDtoService entityToDtoService): ControllerBase
 {
     /// <summary>
     /// Create a <see cref="ApiTag"/>
@@ -34,7 +36,7 @@ public class TagsController(ITagRepository tagRepository): ControllerBase
         tagRepository.Create(tag);
         await tagRepository.SaveChangesAsync(cancellationToken);
 
-        var apiTag = TagEntityToDto(tag);
+        var apiTag = entityToDtoService.TagEntityToDto(tag);
         
         return CreatedAtAction("GetTag", new { id = tag.Id }, apiTag);
     }
@@ -52,7 +54,7 @@ public class TagsController(ITagRepository tagRepository): ControllerBase
         if (tag is null)
             return NotFound();
         
-        var apiTag = TagEntityToDto(tag);
+        var apiTag = entityToDtoService.TagEntityToDto(tag);
         
         return Ok(apiTag);
     }
@@ -75,21 +77,5 @@ public class TagsController(ITagRepository tagRepository): ControllerBase
         await tagRepository.SaveChangesAsync(cancellationToken);
         
         return Ok();
-    }
-
-    /// <summary>
-    /// Map <see cref="Tag"/> entity to <see cref="ApiTag"/> DTO
-    /// </summary>
-    /// <param name="tag">The <see cref="Tag"/> entity</param>
-    /// <returns>The <see cref="ApiTag"/> DTO</returns>
-    private ApiTag TagEntityToDto(Tag tag)
-    {
-        var apiTag = new ApiTag
-        {
-            Id = tag.Id,
-            Name = tag.Name
-        };
-        
-        return apiTag;
     }
 }

@@ -5,6 +5,7 @@ using EduTests.Commands.UserCommands;
 using EduTests.Database.Entities;
 using EduTests.Database.Enums;
 using EduTests.Database.Repositories.Interfaces;
+using EduTests.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +17,8 @@ namespace EduTests.Controllers.Api;
 public class UsersController(
     IUserRepository userRepository,
     IBannedUserRepository bannedUserRepository,
-    ICommentRepository commentRepository) : ControllerBase
+    ICommentRepository commentRepository,
+    IEntityToDtoService entityToDtoService) : ControllerBase
 {
     /// <summary>
     /// Register in the system
@@ -50,7 +52,7 @@ public class UsersController(
                 return BadRequest("User with that login already exists");
             }
 
-            var apiUser = UserEntityToDto(user);
+            var apiUser = entityToDtoService.UserEntityToDto(user);
             
             return CreatedAtAction("GetUser",
                 new { id = user.Id }, apiUser);
@@ -75,7 +77,7 @@ public class UsersController(
         if (user == null)
             return NotFound();
 
-        var apiUser = UserEntityToDto(user);
+        var apiUser = entityToDtoService.UserEntityToDto(user);
         
         return Ok(apiUser);
     }
@@ -105,7 +107,7 @@ public class UsersController(
         userRepository.Update(userToUpdate);
         await userRepository.SaveChangesAsync(cancellationToken);
 
-        var apiUser = UserEntityToDto(userToUpdate);
+        var apiUser = entityToDtoService.UserEntityToDto(userToUpdate);
         
         return Ok(apiUser);
     }
@@ -135,7 +137,7 @@ public class UsersController(
         userRepository.Update(userToUpdate);
         await userRepository.SaveChangesAsync(cancellationToken);
         
-        var apiUser = UserEntityToDto(userToUpdate);
+        var apiUser = entityToDtoService.UserEntityToDto(userToUpdate);
         
         return Ok(apiUser);
     }
@@ -242,7 +244,7 @@ public class UsersController(
         if (comment is null)
             return NotFound();
 
-        var apiComment = CommentEntityToDto(comment);
+        var apiComment = entityToDtoService.CommentEntityToDto(comment);
         return Ok(apiComment);
     }
 
@@ -268,7 +270,7 @@ public class UsersController(
             .Take(amountPerPage)
             .ToListAsync(cancellationToken);
 
-        var apiComments = comments.Select(CommentEntityToDto).ToList();
+        var apiComments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
 
         return Ok(apiComments);
     }
@@ -305,7 +307,7 @@ public class UsersController(
         commentRepository.Create(comment);
         await commentRepository.SaveChangesAsync(cancellationToken);
 
-        var apiComment = CommentEntityToDto(comment);
+        var apiComment = entityToDtoService.CommentEntityToDto(comment);
         
         return CreatedAtAction("GetProfileComment",  new { id = user.Id, commentId = comment.Id }, apiComment);
     }
@@ -363,7 +365,7 @@ public class UsersController(
         userRepository.Update(user);
         await userRepository.SaveChangesAsync(cancellationToken);
 
-        var apiUser = UserEntityToDto(user);
+        var apiUser = entityToDtoService.UserEntityToDto(user);
         
         return Ok(apiUser);
     }
@@ -405,7 +407,7 @@ public class UsersController(
         
         bannedUserRepository.Create(ban);
 
-        var apiBan = BanEntityToDto(ban);
+        var apiBan = entityToDtoService.BanEntityToDto(ban);
         
         return CreatedAtAction("GetUserBan",  new { id = ban.Id }, apiBan);
     }
@@ -425,7 +427,7 @@ public class UsersController(
         if (ban is null)
             return NotFound();
 
-        var apiBan = BanEntityToDto(ban);
+        var apiBan = entityToDtoService.BanEntityToDto(ban);
         
         return Ok(apiBan);
     }
@@ -447,73 +449,5 @@ public class UsersController(
         
         bannedUserRepository.Delete(ban);
         return Ok();
-    }
-    
-    /// <summary>
-    /// Map <see cref="User"/> entity to <see cref="ApiUser"/> DTO
-    /// </summary>
-    /// <param name="entity">The <see cref="User"/> entity</param>
-    /// <returns>The <see cref="ApiUser"/> DTO</returns>
-    private ApiUser UserEntityToDto(User entity)
-    {
-        var apiUser = new ApiUser
-        {
-            Id = entity.Id,
-            Username = entity.Username,
-            AvatarUrl = entity.AvatarUrl,
-            Description = entity.Description,
-            RegistrationDate = entity.RegistrationDate,
-            Group = entity.Group
-        };
-        
-        return apiUser;
-    }
-
-    /// <summary>
-    /// Map <see cref="BannedUser"/> entity to <see cref="ApiBan"/> DTO
-    /// </summary>
-    /// <param name="entity">The <see cref="BannedUser"/> entity</param>
-    /// <returns>The <see cref="ApiBan"/> DTO</returns>
-    private ApiBan BanEntityToDto(BannedUser entity)
-    {
-        var apiBan = new ApiBan
-        {
-            Id = entity.Id,
-            BannedUserId = entity.UserBannedId,
-            BannedByUserId = entity.BannedById,
-            BanReason = entity.BanReason,
-            BanDate = entity.DateBanned,
-            UnbanDate = entity.DateUnbanned
-        };
-        
-        return apiBan;
-    }
-    
-    /// <summary>
-    /// Map <see cref="Comment"/> entity to <see cref="ApiComment"/> DTO
-    /// </summary>
-    /// <param name="entity">The <see cref="Comment"/> entity</param>
-    /// <returns>The <see cref="ApiComment"/> DTO</returns>
-    /// <exception cref="ArgumentNullException">In case <see cref="Comment.UserProfileId"/> and <see cref="Comment.TestId"/> both are null</exception>
-    private ApiComment CommentEntityToDto(Comment entity)
-    {
-        var entityType = (entity.UserProfileId != null) ? CommentEntityType.UserProfile : CommentEntityType.Test;
-        var entityId = entity.UserProfileId ?? entity.TestId;
-        
-        if (entityId is null)
-            throw new ArgumentNullException(nameof(entityId));
-
-        var commentToReturn = new ApiComment
-        {
-            Id = entity.Id,
-            UserId = entity.CommenterId,
-            EntityType = entityType,
-            EntityId = (int)entityId,
-            Content = entity.Content,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt,
-        };
-
-        return commentToReturn;
     }
 }

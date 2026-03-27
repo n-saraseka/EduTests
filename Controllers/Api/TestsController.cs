@@ -5,6 +5,7 @@ using EduTests.Commands.TestCommands;
 using EduTests.Database.Entities;
 using EduTests.Database.Enums;
 using EduTests.Database.Repositories.Interfaces;
+using EduTests.Services;
 using EduTests.Services.Questions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,8 @@ public class TestsController(ITestRepository testRepository,
     IUserAnswerRepository userAnswerRepository,
     IAnonymousUserRepository anonymousUserRepository,
     IQuestionValidatorService questionValidatorService,
-    IAnswerVerifierService answerVerifierService) : ControllerBase
+    IAnswerVerifierService answerVerifierService,
+    IEntityToDtoService entityToDtoService) : ControllerBase
 {
     /// <summary>
     /// Create a <see cref="ApiTest"/>
@@ -104,7 +106,7 @@ public class TestsController(ITestRepository testRepository,
         
         await testRepository.SaveChangesAsync(cancellationToken);
         
-        var apiTest = await TestEntityToDto(test, cancellationToken);
+        var apiTest = await entityToDtoService.TestEntityToDtoAsync(test, cancellationToken);
         
         return CreatedAtAction("GetTest", new { id = apiTest.Id }, apiTest);
     }
@@ -123,7 +125,7 @@ public class TestsController(ITestRepository testRepository,
         if (test is null)
             return NotFound();
 
-        var testToReturn = await TestEntityToDto(test, cancellationToken);
+        var testToReturn = await entityToDtoService.TestEntityToDtoAsync(test, cancellationToken);
         
         return Ok(testToReturn);
     }
@@ -219,7 +221,7 @@ public class TestsController(ITestRepository testRepository,
         
         await testRepository.SaveChangesAsync(cancellationToken);
 
-        var apiTest = await TestEntityToDto(test, cancellationToken);
+        var apiTest = await entityToDtoService.TestEntityToDtoAsync(test, cancellationToken);
 
         return Ok(apiTest);
     }
@@ -294,7 +296,7 @@ public class TestsController(ITestRepository testRepository,
             ratingRepository.Create(rating);
             await ratingRepository.SaveChangesAsync(cancellationToken);
 
-            var apiRating = RatingEntityToDto(rating);
+            var apiRating = entityToDtoService.RatingEntityToDto(rating);
             return CreatedAtAction("GetTestRating", new { id = test.Id }, apiRating);
         }
         else
@@ -303,7 +305,7 @@ public class TestsController(ITestRepository testRepository,
             ratingRepository.Update(existingRating);
             await ratingRepository.SaveChangesAsync(cancellationToken);
         
-            var apiRating = RatingEntityToDto(existingRating);
+            var apiRating = entityToDtoService.RatingEntityToDto(existingRating);
             return Ok(apiRating);
         }
     }
@@ -335,7 +337,7 @@ public class TestsController(ITestRepository testRepository,
         if (rating is null)
             return NotFound();
         
-        var apiRating = RatingEntityToDto(rating);
+        var apiRating = entityToDtoService.RatingEntityToDto(rating);
         return Ok(apiRating);
     }
 
@@ -373,8 +375,8 @@ public class TestsController(ITestRepository testRepository,
         
         commentRepository.Create(comment);
         await commentRepository.SaveChangesAsync(cancellationToken);
-        
-        var apiComment = CommentEntityToDto(comment);
+
+        var apiComment = entityToDtoService.CommentEntityToDto(comment);
         return CreatedAtAction("GetTestComment", new { id = test.Id, commentId = comment.Id }, apiComment);
     }
 
@@ -401,8 +403,8 @@ public class TestsController(ITestRepository testRepository,
         
         if (comment is null)
             return NotFound();
-        
-        var apiComment = CommentEntityToDto(comment);
+
+        var apiComment = entityToDtoService.CommentEntityToDto(comment);
         
         return Ok(apiComment);
     }
@@ -439,7 +441,7 @@ public class TestsController(ITestRepository testRepository,
             .Take(amountPerPage)
             .ToListAsync(cancellationToken);
         
-        var apiComments = comments.Select(CommentEntityToDto).ToList();
+        var apiComments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
         
         return Ok(apiComments);
     }
@@ -508,7 +510,7 @@ public class TestsController(ITestRepository testRepository,
         if (questions.Count == 0)
             return NoContent();
 
-        var apiQuestions = questions.Select(QuestionEntityToDto).ToList();
+        var apiQuestions = questions.Select(entityToDtoService.QuestionEntityToDto).ToList();
         
         return Ok(apiQuestions);
     }
@@ -572,7 +574,7 @@ public class TestsController(ITestRepository testRepository,
         else
             completion.AnonymousUserId = anonymousUserId;
         
-        var apiCompletion = CompletionEntityToDto(completion, null, null, cancellationToken);
+        var apiCompletion = entityToDtoService.CompletionEntityToDto(completion, null, null);
         return CreatedAtAction("GetTestCompletion", new { id = test.Id, completionId = completion.Id }, apiCompletion);
     }
 
@@ -605,7 +607,7 @@ public class TestsController(ITestRepository testRepository,
         if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
             return Forbid();
         
-        var apiCompletion = CompletionEntityToDto(completion, null, null, cancellationToken);
+        var apiCompletion = entityToDtoService.CompletionEntityToDto(completion, null, null);
         return Ok(apiCompletion);
     }
 
@@ -651,7 +653,7 @@ public class TestsController(ITestRepository testRepository,
         testCompletionRepository.Update(completion);
         await testCompletionRepository.SaveChangesAsync(cancellationToken);
         
-        var apiCompletion =  CompletionEntityToDto(completion, userAnswers, questions, cancellationToken);
+        var apiCompletion =  entityToDtoService.CompletionEntityToDto(completion, null, null);
         return Ok(apiCompletion);
     }
 
@@ -689,7 +691,8 @@ public class TestsController(ITestRepository testRepository,
         if (answer is null)
             return NotFound();
 
-        var apiAnswer = AnswerEntityToDto(answer);
+        var apiAnswer = entityToDtoService.AnswerEntityToDto(answer)
+            ;
         
         return Ok(apiAnswer);
     }
@@ -747,8 +750,8 @@ public class TestsController(ITestRepository testRepository,
         
         userAnswerRepository.Create(answer);
         await userAnswerRepository.SaveChangesAsync(cancellationToken);
-        
-        var apiAnswer = AnswerEntityToDto(answer);
+
+        var apiAnswer = entityToDtoService.AnswerEntityToDto(answer);
         
         return CreatedAtAction("GetTestAnswer", new
         {
@@ -803,171 +806,7 @@ public class TestsController(ITestRepository testRepository,
         userAnswerRepository.Update(answer);
         await userAnswerRepository.SaveChangesAsync(cancellationToken);
         
-        var apiAnswer = AnswerEntityToDto(answer);
+        var apiAnswer = entityToDtoService.AnswerEntityToDto(answer);
         return Ok(apiAnswer);
-    }
-    
-    /// <summary>
-    /// Map <see cref="Test"/> entity to <see cref="ApiTest"/> DTO
-    /// </summary>
-    /// <param name="entity">The <see cref="Test"/> entity</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
-    /// <returns>The <see cref="ApiTest"/> DTO</returns>
-    private async Task<ApiTest> TestEntityToDto(Test entity, CancellationToken cancellationToken)
-    {
-        var ratings = await ratingRepository.GetTestRatingAsync(entity.Id, cancellationToken);
-        var completions = await testCompletionRepository.GetTestCompletionCountAsync(entity.Id, cancellationToken);
-        var tags = entity.Tags.Select(t => t.Name).ToList();
-        
-        var testToReturn = new ApiTest
-        {
-            Id = entity.Id,
-            Name = entity.Name,
-            Description = entity.Description,
-            ThumbnailUrl = entity.ThumbnailUrl,
-            Rating = ratings,
-            CompletionCount = completions,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt,
-            AttemptLimit = entity.AttemptLimit,
-            TimeLimit = entity.TimeLimit,
-            Tags = tags,
-        };
-        
-        return testToReturn;
-    }
-
-    /// <summary>
-    /// Map <see cref="UserRating"/> entity to <see cref="ApiRating"/> DTO
-    /// </summary>
-    /// <param name="entity">The <see cref="UserRating"/> entity</param>
-    /// <returns><see cref="ApiRating"/> DTO</returns>
-    private ApiRating RatingEntityToDto(UserRating entity)
-    {
-        var ratingToReturn = new ApiRating
-        {
-            TestId = entity.TestId,
-            UserId = entity.UserId,
-            IsPositive = entity.IsPositive
-        };
-        
-        return ratingToReturn;
-    }
-
-    /// <summary>
-    /// Map <see cref="Comment"/> entity to <see cref="ApiComment"/> DTO
-    /// </summary>
-    /// <param name="entity">The <see cref="Comment"/> entity</param>
-    /// <returns>The <see cref="ApiComment"/> DTO</returns>
-    /// <exception cref="ArgumentNullException">In case <see cref="Comment.UserProfileId"/> and <see cref="Comment.TestId"/> both are null</exception>
-    private ApiComment CommentEntityToDto(Comment entity)
-    {
-        var entityType = (entity.UserProfileId != null) ? CommentEntityType.UserProfile : CommentEntityType.Test;
-        var entityId = entity.UserProfileId ?? entity.TestId;
-        
-        if (entityId is null)
-            throw new ArgumentNullException(nameof(entityId));
-
-        var commentToReturn = new ApiComment
-        {
-            Id = entity.Id,
-            UserId = entity.CommenterId,
-            EntityType = entityType,
-            EntityId = (int)entityId,
-            Content = entity.Content,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt,
-        };
-
-        return commentToReturn;
-    }
-
-    /// <summary>
-    /// Map a <see cref="Question"/> entity to <see cref="ApiQuestion"/> DTO
-    /// </summary>
-    /// <param name="entity">The <see cref="Question"/> entity</param>
-    /// <returns>The <see cref="ApiQuestion"/> DTO</returns>
-    private ApiQuestion QuestionEntityToDto(Question entity)
-    {
-        var questionToReturn = new ApiQuestion
-        {
-            Id = entity.Id,
-            TestId = entity.TestId,
-            OrderIndex = entity.OrderIndex,
-            Type = entity.Type,
-            Description = entity.Description,
-            Data = entity.Data,
-            CorrectData = entity.CorrectData,
-        };
-        
-        return questionToReturn;
-    }
-
-    /// <summary>
-    /// Convert <see cref="TestCompletion"/> entity to <see cref="ApiCompletion"/> DTO
-    /// </summary>
-    /// <param name="entity">The <see cref="TestCompletion"/> entity</param>
-    /// <param name="userAnswers">List of <see cref="UserAnswer"/>s (if the completion has finished)</param>
-    /// <param name="questions">List of <see cref="Question"/>s (if the completion has finished)</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
-    /// <returns>The <see cref="ApiCompletion"/> DTO</returns>
-    /// <exception cref="ArgumentNullException">If there's no corresponding <see cref="Question"/> for a <see cref="UserAnswer"/></exception>
-    private ApiCompletion CompletionEntityToDto(TestCompletion entity, List<UserAnswer>? userAnswers, List<Question>? questions,
-        CancellationToken cancellationToken = default)
-    {
-        var userId = entity.UserId;
-        var anonymousId = entity.AnonymousUserId;
-        
-        if (userId is null && anonymousId is null)
-            throw new ArgumentException($"Neither {nameof(entity.UserId)} or {nameof(entity.AnonymousUserId)} are not null");
-        
-        var completionToReturn = new ApiCompletion
-        {
-            Id = entity.Id,
-            TestId = entity.TestId,
-            UserId = userId,
-            StartedAt = entity.StartedAt,
-            CompletedAt = entity.CompletedAt,
-        };
-        
-        if (entity.CompletedAt is not null)
-        {
-            var questionCount = questions.Count;
-            var correctAnswers = 0;
-            var correctPercentage = 0.0;
-
-            foreach (var answer in userAnswers)
-            {
-                var correspondingQuestion = questions.FirstOrDefault(q => q.Id == answer.QuestionId);
-                if (correspondingQuestion is null)
-                    throw new ArgumentNullException(nameof(correspondingQuestion));
-                if (answerVerifierService.Verify(answer, correspondingQuestion, correspondingQuestion.Type))
-                    correctAnswers++;
-            }
-            
-            completionToReturn.CorrectAnswers = correctAnswers;
-            correctPercentage = correctAnswers * 100.0 / questionCount;
-            completionToReturn.CompletionPercentage = Math.Round(correctPercentage, 2);
-        }
-
-        return completionToReturn;
-    }
-
-    /// <summary>
-    /// Map <see cref="UserAnswer"/> entity to <see cref="UserAnswer"/> DTO
-    /// </summary>
-    /// <param name="entity">The <see cref="UserAnswer"/> entity</param>
-    /// <returns>The <see cref="ApiAnswer"/> DTO</returns>
-    private ApiAnswer AnswerEntityToDto(UserAnswer entity)
-    {
-        var answerToReturn = new ApiAnswer
-        {
-            Id = entity.Id,
-            TestCompletionId = entity.TestCompletionId,
-            QuestionId = entity.QuestionId,
-            Answer = entity.Answers
-        };
-        
-        return answerToReturn;
     }
 }

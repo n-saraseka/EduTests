@@ -3,6 +3,7 @@ using EduTests.ApiObjects;
 using EduTests.Commands.AuthCommands;
 using EduTests.Database.Entities;
 using EduTests.Database.Repositories.Interfaces;
+using EduTests.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +13,8 @@ namespace EduTests.Controllers.Api;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IUserRepository repository) : ControllerBase
+public class AuthController(IUserRepository repository,
+    IEntityToDtoService entityToDtoService) : ControllerBase
 {
     /// <summary>
     /// Log into the system
@@ -42,27 +44,7 @@ public class AuthController(IUserRepository repository) : ControllerBase
             CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(claimsIdentity));
         
-        var apiUser = UserEntityToDto(user);
+        var apiUser = entityToDtoService.UserEntityToDto(user);
         return Ok(apiUser);
-    }
-    
-    /// <summary>
-    /// Map <see cref="User"/> entity to <see cref="ApiUser"/> DTO
-    /// </summary>
-    /// <param name="entity">The <see cref="User"/> entity</param>
-    /// <returns>The <see cref="ApiUser"/> DTO</returns>
-    private ApiUser UserEntityToDto(User entity)
-    {
-        var apiUser = new ApiUser
-        {
-            Id = entity.Id,
-            Username = entity.Username,
-            AvatarUrl = entity.AvatarUrl,
-            Description = entity.Description,
-            RegistrationDate = entity.RegistrationDate,
-            Group = entity.Group
-        };
-        
-        return apiUser;
     }
 }
