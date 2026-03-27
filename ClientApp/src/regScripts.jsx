@@ -18,7 +18,7 @@ form.addEventListener('submit', async (e) => {
     let formData = new FormData(form);
     let command = JSON.stringify(formCommand(formData));
 
-    let result = await Register(command, token);
+    let result = await register(command, token);
     if (result.ok) {
         window.dispatchEvent(new CustomEvent('auth:account', { detail: { isRegistered: true } }));
         window.dispatchEvent(new CustomEvent('auth:error', { detail: { message: '' } }));
@@ -43,7 +43,7 @@ class RegisterCommand {
     }
 }
 
-async function Register(data, token) {
+async function register(data, token) {
     let response = await fetch("api/users", {
         method: 'POST',
         headers: {
