@@ -4,6 +4,10 @@
     ViewBag.Title = "Вход";
 }
 
+@section Scripts {
+    <script type="module" src="http://localhost:5173/src/loginScripts.jsx"></script>
+}
+
 <h2>Вход</h2>
 
 @if (!User.Identity.IsAuthenticated)
@@ -32,6 +36,3 @@ else
 {
     <div id="login-account-help">Вы вошли в аккаунт. <a asp-route="logout">Выход</a></div>
 }
-
-<script type="module" src="http://localhost:5173/@@vite/client"></script>
-<script type="module" src="http://localhost:5173/src/loginScripts.jsx"></script>

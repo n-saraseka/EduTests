@@ -4,6 +4,11 @@
     ViewBag.Title = "Регистрация";
 }
 
+@section Scripts
+{ 
+    <script type="module" src="http://localhost:5173/src/regScripts.jsx"></script>
+}
+
 <h2>Регистрация</h2>
 
 @if (!User.Identity.IsAuthenticated)
@@ -42,6 +47,3 @@ else
 {
     <div>Вы уже вошли в аккаунт. <a asp-route="logout">Выход</a></div>
 }
-
-<script type="module" src="http://localhost:5173/@@vite/client"></script>
-<script type="module" src="http://localhost:5173/src/regScripts.jsx"></script>
