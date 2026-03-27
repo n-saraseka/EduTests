@@ -25,7 +25,6 @@ public class TestsController(ITestRepository testRepository,
     IUserAnswerRepository userAnswerRepository,
     IAnonymousUserRepository anonymousUserRepository,
     IQuestionValidatorService questionValidatorService,
-    IAnswerVerifierService answerVerifierService,
     IEntityToDtoService entityToDtoService) : ControllerBase
 {
     /// <summary>
@@ -691,8 +690,7 @@ public class TestsController(ITestRepository testRepository,
         if (answer is null)
             return NotFound();
 
-        var apiAnswer = entityToDtoService.AnswerEntityToDto(answer)
-            ;
+        var apiAnswer = entityToDtoService.AnswerEntityToDto(answer);
         
         return Ok(apiAnswer);
     }
