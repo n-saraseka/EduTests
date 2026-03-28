@@ -14,10 +14,10 @@
 }
 
 @section Scripts {
-    <script type="module" src="http://localhost:5173/src/settingsScripts.jsx"></script>
     <script>
         window.__INITIAL_DATA__ = @Html.Raw(Json.Serialize(Model.User));
     </script>
+    <script type="module" src="http://localhost:5173/src/settingsScripts.jsx"></script>
 }
 
 <div id="user-card"></div>
