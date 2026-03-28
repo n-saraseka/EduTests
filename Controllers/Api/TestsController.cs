@@ -374,6 +374,8 @@ public class TestsController(ITestRepository testRepository,
         
         commentRepository.Create(comment);
         await commentRepository.SaveChangesAsync(cancellationToken);
+        
+        comment = await commentRepository.GetWithLoadedCommenter(comment.Id, cancellationToken);
 
         var apiComment = entityToDtoService.CommentEntityToDto(comment);
         return CreatedAtAction("GetTestComment", new { id = test.Id, commentId = comment.Id }, apiComment);
@@ -398,7 +400,7 @@ public class TestsController(ITestRepository testRepository,
         if (test.AccessType == AccessType.Private)
             return Forbid();
         
-        var comment = await commentRepository.GetByIdAsync(commentId, cancellationToken);
+        var comment = await commentRepository.GetWithLoadedCommenter(id, cancellationToken);
         
         if (comment is null)
             return NotFound();

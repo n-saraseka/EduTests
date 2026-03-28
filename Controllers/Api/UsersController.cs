@@ -258,7 +258,7 @@ public class UsersController(
     public async Task<IActionResult> GetProfileCommentAsync(int id, int commentId, 
         CancellationToken cancellationToken = default)
     {
-        var comment = await commentRepository.GetByIdAsync(commentId, cancellationToken);
+        var comment = await commentRepository.GetWithLoadedCommenter(commentId, cancellationToken);
         if (comment is null)
             return NotFound();
 
@@ -324,6 +324,8 @@ public class UsersController(
         
         commentRepository.Create(comment);
         await commentRepository.SaveChangesAsync(cancellationToken);
+        
+        comment = await commentRepository.GetWithLoadedCommenter(comment.Id, cancellationToken);
 
         var apiComment = entityToDtoService.CommentEntityToDto(comment);
         

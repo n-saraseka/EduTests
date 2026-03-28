@@ -61,20 +61,25 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
     /// Map <see cref="Comment"/> entity to <see cref="ApiComment"/> DTO
     /// </summary>
     /// <param name="entity">The <see cref="Comment"/> entity</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>The <see cref="ApiComment"/> DTO</returns>
-    /// <exception cref="ArgumentNullException">In case <see cref="Comment.UserProfileId"/> and <see cref="Comment.TestId"/> both are null</exception>
+    /// <exception cref="NullReferenceException">In case <see cref="Comment.UserProfileId"/> and <see cref="Comment.TestId"/> both are null,
+    /// or if the <see cref="User"/> associated with the <see cref="Comment.CommenterId"/> is null</exception>
     public ApiComment CommentEntityToDto(Comment entity)
     {
         var entityType = (entity.UserProfileId != null) ? CommentEntityType.UserProfile : CommentEntityType.Test;
         var entityId = entity.UserProfileId ?? entity.TestId;
         
         if (entityId is null)
-            throw new ArgumentNullException(nameof(entityId));
+            throw new NullReferenceException(nameof(entityId));
+        
+        var apiUser = UserEntityToDto(entity.Commenter);
 
         var commentToReturn = new ApiComment
         {
             Id = entity.Id,
             UserId = entity.CommenterId,
+            User = apiUser,
             EntityType = entityType,
             EntityId = (int)entityId,
             Content = entity.Content,
