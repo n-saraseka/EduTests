@@ -12,6 +12,14 @@
     <link rel="stylesheet" href="~/css/profile.css">
 }
 
+@section Scripts
+{
+    <script>
+        window.__INITIAL_DATA__ = @Html.Raw(Json.Serialize(Model));
+    </script>
+    <script type="module" src="http://localhost:5173/src/profileScripts.jsx"></script>
+}
+
 <div id="user-card">
     <div id="user-card-header">
         <img src="/files/users/@userId" alt="Фотография профиля" id="profile-avatar">
@@ -25,3 +33,4 @@
 <h2>Тесты</h2>
 <div id="test-cards">Пользователь пока не создал ни одного теста.</div>
 <h2>Комментарии</h2>
+<div id="comments"></div>

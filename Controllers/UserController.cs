@@ -4,11 +4,14 @@ using EduTests.Models;
 using EduTests.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EduTests.Controllers;
 
 public class UserController(IUserRepository userRepository,
-    IEntityToDtoService entityToDtoService) : Controller
+    ICommentRepository commentRepository,
+    IEntityToDtoService entityToDtoService,
+    IConfiguration config) : Controller
 {
     public async Task<IActionResult> Profile(int id, ProfileViewModel model, CancellationToken cancellationToken = default)
     {
@@ -18,6 +21,22 @@ public class UserController(IUserRepository userRepository,
         
         var apiUser = entityToDtoService.UserEntityToDto(user);
         model.User = apiUser;
+        
+        var commentQuery = commentRepository.GetProfileComments(id);
+        var pageSize = int.Parse(config["pageSize"]);
+        model.CommentsPerPage = pageSize;
+        
+        var commentCount = await commentQuery.CountAsync(cancellationToken);
+        var pages = (int)Math.Ceiling((double)commentCount / pageSize);
+        model.CommentPages = pages;
+        
+        var comments = await commentQuery
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+        var apiComments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
+        model.Comments = apiComments;
+        
+        model.IsAuthorized = HttpContext.User.Identity?.IsAuthenticated ?? false;
 
         return View(model);
     }
