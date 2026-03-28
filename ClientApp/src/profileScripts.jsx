@@ -9,4 +9,4 @@ commentRoot.render(<Comments commentsPerPage={parseInt(initialData.commentsPerPa
                              isTest={false} 
                              baseComments={initialData.comments} 
                              basePages={parseInt(initialData.commentPages)}
-                             isAuthorized={initialData.isAuthorized}/>);
+                             currentUserId={parseInt(initialData.currentUserId)}/>);

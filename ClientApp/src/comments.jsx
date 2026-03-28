@@ -1,19 +1,69 @@
 import {useState} from "react";
+import ConfirmationModalWithText from "./modals/confirmationModalWithText.jsx";
+import ConfirmationModal from "./modals/confirmationModal.jsx";
 
-function Comment({baseComment}) {
-    return (<div className="comment">
-        <div className="comment-header">
-            <img src={`/files/users/${baseComment.userId}`} 
-                 alt={`Аватар пользователя ${baseComment.user.username}`} className="comment-avatar"/>
-            <span className="username">{baseComment.user.username}</span>
-        </div>
-        <p className="comment-content">{baseComment.content}</p>
-    </div>)
+function Comment({baseComment, currentUserId, onDelete}) {
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    
+    const openReportModal = () => {
+        setIsReportModalOpen(true);
+    }
+    
+    const onReportModalConfirm = async () => {
+        const reportText = document.getElementById('modal-text').value;
+        const command = new ReportCommand(2, baseComment.id, reportText);
+        
+        const postResult = await reportComment(command);
+        setIsReportModalOpen(false);
+    }
+    
+    const onReportModalCancel = () => {
+        setIsReportModalOpen(false);
+    }
+    
+    const openDeleteModal = () => {
+        setIsDeleteModalOpen(true);
+    }
+    
+    const onDeleteModalConfirm = async () => {
+        const postResult = await onDelete();
+        setIsDeleteModalOpen(false);
+    }
+    
+    const onDeleteModalCancel = () => {
+        setIsDeleteModalOpen(false);
+    }
+    
+    return (<div className="comment-wrapper">
+                <div className="comment">
+                    <div className="comment-header">
+                        <img src={`/files/users/${baseComment.userId}`}
+                             alt={`Аватар пользователя ${baseComment.user.username}`} className="comment-avatar"/>
+                        <a className="username" href={`/user/${baseComment.userId}`}>{baseComment.user.username}</a>
+                    </div>
+                    <p className="comment-content">{baseComment.content}</p>
+                </div>
+                <div className="comment-interact">
+                    {currentUserId === baseComment.userId && <img src="/files/icons/close.png"
+                                                                  alt="Удалить комментарий"
+                                                                  onClick={openDeleteModal}
+                                                                  className="comment-delete"/>}
+                    <img src="/files/icons/report.png" alt="Пожаловаться" onClick={openReportModal} className="comment-report"/>
+                </div>
+                {isReportModalOpen && (<ConfirmationModalWithText title={"Пожаловаться на комментарий?"} 
+                                                                  onCancel={onReportModalCancel} 
+                                                                  onConfirm={onReportModalConfirm}/>)}
+                {isDeleteModalOpen && (<ConfirmationModal title="Удалить комментарий?" 
+                                                          subtitle="Отменить это действие будет невозможно. Все данные будут утеряны" 
+                                                          onConfirm={onDeleteModalConfirm} 
+                                                          onCancel={onDeleteModalCancel}/>)}
+            </div>)
 }
 
 function PostComment({ isPosting, onPost}) {
     return ( <>
-            <textarea name="new-comment" id="new-comment" cols="30" rows="10" placeholder="Введите свой комментарий..." disabled={isPosting}></textarea>
+            <textarea name="new-comment" id="new-comment" placeholder="Введите свой комментарий..." disabled={isPosting}></textarea>
             <button className="btn-primary" disabled={isPosting} onClick={onPost}>Опубликовать комментарий</button>
     </>)
 }
@@ -39,7 +89,7 @@ function Pagination({ page, pageCount, onChangePage }) {
     )
 }
 
-function Comments({ dtoId, isTest, baseComments, basePages, commentsPerPage, isAuthorized}) {
+function Comments({ dtoId, isTest, baseComments, basePages, commentsPerPage, currentUserId}) {
     const [comments, setComments] = useState(baseComments);
     const [page, setPage] = useState(1);
     const [pageCount, setPageCount] = useState(basePages);
@@ -50,7 +100,7 @@ function Comments({ dtoId, isTest, baseComments, basePages, commentsPerPage, isA
         if (isPosting || isLoading) return;
         
         const targetPage = Math.max(1, Math.min(newPage, pageCount));
-        if (targetPage == page) return;
+        if (targetPage === page) return;
         
         setPage(targetPage);
         
@@ -86,13 +136,30 @@ function Comments({ dtoId, isTest, baseComments, basePages, commentsPerPage, isA
         setIsLoading(false);
     }
     
+    const handleCommentDelete = async (commentId) => {
+        setIsPosting(true);
+        const postResult = await deleteComment(dtoId, commentId, isTest);
+        setIsPosting(false);
+
+        setIsLoading(true);
+        const result = await getComments(dtoId, page, commentsPerPage, isTest);
+        const newComments = await result.json();
+        const pages = parseInt(newComments.pages);
+        if (pages !== pageCount) {
+            setPageCount(pages)
+        }
+        setComments(newComments.comments);
+        setIsLoading(false);
+    }
+    
     return (
         <>
-            { isAuthorized && <PostComment onPost={handleCommentSubmit}/>}
+            { !isNaN(currentUserId) && <PostComment onPost={handleCommentSubmit}/>}
             {isLoading ? <div className="loading">
                     <img src="/files/icons/loading.png" alt="Загрузка контента" className="loading-icon"/>
                 </div> 
-                : comments.map(comment => <Comment key={comment.id} baseComment={comment}/>)}
+                : comments.map(comment => <Comment key={comment.id} baseComment={comment} currentUserId={currentUserId} 
+                                                   onDelete={() => handleCommentDelete(comment.id)}/>)}
             {pageCount > 1 && <Pagination page={page} pageCount={pageCount} onChangePage={handlePageChange}/>}
         </>
     )
@@ -114,6 +181,32 @@ function postComment(data, id, isTest) {
     const endpointBase = isTest ? 'tests' : 'users';
     const endpointEnd = isTest ? 'comments' : 'profilecomments';
     return fetch(`/api/${endpointBase}/${id}/${endpointEnd}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+        },
+        body: JSON.stringify(data)
+    });
+}
+
+function deleteComment(id, commentId, isTest) {
+    const endpointBase = isTest ? 'tests' : 'users';
+    const endpointEnd = isTest ? 'comments' : 'profilecomments';
+    return fetch(`/api/${endpointBase}/${id}/${endpointEnd}/${commentId}`, {
+        method: 'DELETE'
+    });
+}
+
+class ReportCommand {
+    constructor(entityType, entityId, text) {
+        this.entityType = entityType;
+        this.entityId = entityId;
+        this.text = text;
+    }
+}
+
+function reportComment(data) {
+    return fetch('/api/report',{
         method: 'POST',
         headers: {
             'Content-Type': 'application/json;charset=utf-8',

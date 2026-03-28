@@ -8,5 +8,5 @@ public class ProfileViewModel
     public required List<ApiComment> Comments { get; set; }
     public required int CommentPages { get; set; }
     public required int CommentsPerPage { get; set; }
-    public required bool IsAuthorized { get; set; }
+    public int? CurrentUserId { get; set; }
 }

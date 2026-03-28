@@ -36,7 +36,9 @@ public class UserController(IUserRepository userRepository,
         var apiComments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
         model.Comments = apiComments;
         
-        model.IsAuthorized = HttpContext.User.Identity?.IsAuthenticated ?? false;
+        var result = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId);
+        if (result)
+            model.CurrentUserId = userId;
 
         return View(model);
     }
