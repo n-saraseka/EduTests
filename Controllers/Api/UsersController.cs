@@ -282,15 +282,19 @@ public class UsersController(
         if (page < 1 || amountPerPage < 1)
             return BadRequest("Invalid pagination parameters");
 
-        var comments = await commentRepository
-            .GetProfileComments(id)
+        var query = commentRepository.GetProfileComments(id);
+        
+        var commentCount = await query.CountAsync(cancellationToken);
+        var pages = Math.Ceiling((double)commentCount / amountPerPage);
+
+        var comments = await query
             .Skip((page - 1) * amountPerPage)
             .Take(amountPerPage)
             .ToListAsync(cancellationToken);
 
         var apiComments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
 
-        return Ok(apiComments);
+        return Ok(new {comments = apiComments, pages});
     }
     
     /// <summary>

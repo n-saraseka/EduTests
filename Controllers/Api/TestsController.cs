@@ -436,6 +436,9 @@ public class TestsController(ITestRepository testRepository,
             return Forbid();
 
         var query = commentRepository.GetTestComments(id);
+
+        var commentCount = await query.CountAsync(cancellationToken);
+        var pages = Math.Ceiling((double)commentCount / amountPerPage);
         
         var comments = await query.OrderByDescending(r => r.CreatedAt)
             .Skip((page - 1) * amountPerPage)
@@ -444,7 +447,7 @@ public class TestsController(ITestRepository testRepository,
         
         var apiComments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
         
-        return Ok(apiComments);
+        return Ok(new {comments = apiComments, pages});
     }
 
     /// <summary>
