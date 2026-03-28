@@ -1,3 +1,4 @@
+@using System.Security.Claims
 @model EduTests.Models.UserSettingsViewModel
 
 @{
@@ -20,3 +21,12 @@
 }
 
 <div id="user-card"></div>
+<h2>Ваши тесты</h2>
+<p>Вы ещё не создали ни одного теста...</p>
+@if (User.FindFirstValue(ClaimTypes.Role) is "Administrator" or "Moderator")
+{
+    <h2>Жалобы</h2>
+    <div id="reports"></div>
+    <h2>Заблокированные пользователи</h2>
+    <div id="banned-users"></div>
+}
