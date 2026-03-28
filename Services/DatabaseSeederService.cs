@@ -1,4 +1,5 @@
 using EduTests.Database.Entities;
+using EduTests.Database.Enums;
 using EduTests.Database.Repositories.Interfaces;
 
 namespace EduTests.Services;
@@ -19,6 +20,7 @@ public class DatabaseSeederService(IUserRepository userRepository, IConfiguratio
                 Login = "admin",
                 Username = "Administrator",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(configuration["adminPassword"]),
+                Group = UserGroup.Administrator,
                 RegistrationDate = DateTime.UtcNow
             };
             userRepository.Create(user);
