@@ -34,5 +34,5 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
     /// <returns>An <see cref="IQueryable"/> with the <see cref="Test"/> and its loaded <see cref="Tag"/>s</returns>
     public Task<Test?> GetByIdWithTagsAsync(int id, CancellationToken cancellationToken = default) =>
         Set.Include(t => t.Tags)
-            .FirstOrDefaultAsync(t => t.Id == id);
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 }
