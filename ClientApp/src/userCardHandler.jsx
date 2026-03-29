@@ -1,4 +1,5 @@
 import {useState} from "react";
+import ConfirmationModal from "./modals/confirmationModal.jsx";
 
 const initialData = window.__INITIAL_DATA__;
 
@@ -52,6 +53,8 @@ function UserCardHandler() {
     const [cacheTrick, setCacheTrick] = useState(null);
     
     const [isLoading, setIsLoading] = useState(false);
+    
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const handleUsernameEditing = async (event) => {
         event.preventDefault();
@@ -159,17 +162,22 @@ function UserCardHandler() {
         }
     }
     
+    const openDeleteModal = () => {
+        setIsDeleteModalOpen(true);
+    }
+    
     const handleDeletion = async (event) => {
-        event.preventDefault();
         if (isLoading) return;
-        
-        let confirmation = confirm("Вы уверены, что хотите удалить свой аккаунт? Все данные будут утеряны! Отменить это действие невозможно.");
-        if (confirmation) {
-            let result = await deleteAccount();
-            if (result.ok) {
-                window.location.replace("/home");
-            }
+
+        let result = await deleteAccount();
+        if (result.ok) {
+            setIsDeleteModalOpen(false);
+            window.location.replace("/home");
         }
+    }
+    
+    const onDeleteModalCancel = () => {
+        setIsDeleteModalOpen(false);
     }
     
     return (
@@ -204,7 +212,10 @@ function UserCardHandler() {
                 <button className="btn-primary" onClick={handlePasswordChange} disabled={isLoading}>Изменить пароль</button>
                 <FieldChangeStatus isSuccess={isPasswordSuccess}/>
             </div>
-            <button className="btn-danger" onClick={handleDeletion}>Удалить аккаунт</button>
+            <button className="btn-danger" onClick={openDeleteModal}>Удалить аккаунт</button>
+            {isDeleteModalOpen && <ConfirmationModal onConfirm={handleDeletion} onCancel={onDeleteModalCancel} 
+                                                     title="Вы действительно хотите удалить аккаунт?" 
+                                                     subtitle="Отменить это действие будет невозможно. Все данные, комментарии и тесты будут утеряны."/>}
         </>
     )
 }
