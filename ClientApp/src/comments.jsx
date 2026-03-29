@@ -1,26 +1,11 @@
 import {useState} from "react";
-import ConfirmationModalWithText from "./modals/confirmationModalWithText.jsx";
+import ReportButton from "./reportButton.jsx";
 import ConfirmationModal from "./modals/confirmationModal.jsx";
 
 function Comment({baseComment, currentUserId, onDelete}) {
-    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     
-    const openReportModal = () => {
-        setIsReportModalOpen(true);
-    }
     
-    const onReportModalConfirm = async () => {
-        const reportText = document.getElementById('modal-text').value;
-        const command = new ReportCommand(2, baseComment.id, reportText);
-        
-        const postResult = await reportComment(command);
-        setIsReportModalOpen(false);
-    }
-    
-    const onReportModalCancel = () => {
-        setIsReportModalOpen(false);
-    }
     
     const openDeleteModal = () => {
         setIsDeleteModalOpen(true);
@@ -49,15 +34,12 @@ function Comment({baseComment, currentUserId, onDelete}) {
                                                                   alt="Удалить комментарий"
                                                                   onClick={openDeleteModal}
                                                                   className="comment-delete"/>}
-                    <img src="/files/icons/report.png" alt="Пожаловаться" onClick={openReportModal} className="comment-report"/>
+                    {isDeleteModalOpen && (<ConfirmationModal title="Удалить комментарий?"
+                                                              subtitle="Отменить это действие будет невозможно. Все данные будут утеряны"
+                                                              onConfirm={onDeleteModalConfirm}
+                                                              onCancel={onDeleteModalCancel}/>)}
+                    <ReportButton reportFunction={reportComment} entityType={2} entityId={baseComment.id}/>
                 </div>
-                {isReportModalOpen && (<ConfirmationModalWithText title={"Пожаловаться на комментарий?"} 
-                                                                  onCancel={onReportModalCancel} 
-                                                                  onConfirm={onReportModalConfirm}/>)}
-                {isDeleteModalOpen && (<ConfirmationModal title="Удалить комментарий?" 
-                                                          subtitle="Отменить это действие будет невозможно. Все данные будут утеряны" 
-                                                          onConfirm={onDeleteModalConfirm} 
-                                                          onCancel={onDeleteModalCancel}/>)}
             </div>)
 }
 
@@ -195,14 +177,6 @@ function deleteComment(id, commentId, isTest) {
     return fetch(`/api/${endpointBase}/${id}/${endpointEnd}/${commentId}`, {
         method: 'DELETE'
     });
-}
-
-class ReportCommand {
-    constructor(entityType, entityId, text) {
-        this.entityType = entityType;
-        this.entityId = entityId;
-        this.text = text;
-    }
 }
 
 function reportComment(data) {
