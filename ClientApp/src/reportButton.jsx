@@ -12,7 +12,7 @@ function ReportButton({ reportFunction, entityType, entityId }) {
         const reportText = document.getElementById('modal-text').value;
         const command = new ReportCommand(entityType, entityId, reportText);
 
-        const postResult = await reportFunction(command);
+        const postResult = await report(command);
         setIsReportModalOpen(false);
     }
 
@@ -34,6 +34,16 @@ class ReportCommand {
         this.entityId = entityId;
         this.text = text;
     }
+}
+
+function report(data) {
+    return fetch('/api/report',{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8',
+        },
+        body: JSON.stringify(data)
+    });
 }
 
 export default ReportButton;

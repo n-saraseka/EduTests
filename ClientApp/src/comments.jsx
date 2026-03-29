@@ -5,8 +5,6 @@ import ConfirmationModal from "./modals/confirmationModal.jsx";
 function Comment({baseComment, currentUserId, onDelete}) {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     
-    
-    
     const openDeleteModal = () => {
         setIsDeleteModalOpen(true);
     }
@@ -176,16 +174,6 @@ function deleteComment(id, commentId, isTest) {
     const endpointEnd = isTest ? 'comments' : 'profilecomments';
     return fetch(`/api/${endpointBase}/${id}/${endpointEnd}/${commentId}`, {
         method: 'DELETE'
-    });
-}
-
-function reportComment(data) {
-    return fetch('/api/report',{
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json;charset=utf-8',
-        },
-        body: JSON.stringify(data)
     });
 }
 
