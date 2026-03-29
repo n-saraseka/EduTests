@@ -36,7 +36,7 @@ function Comment({baseComment, currentUserId, onDelete}) {
                                                               subtitle="Отменить это действие будет невозможно. Все данные будут утеряны"
                                                               onConfirm={onDeleteModalConfirm}
                                                               onCancel={onDeleteModalCancel}/>)}
-                    <ReportButton reportFunction={reportComment} entityType={2} entityId={baseComment.id}/>
+                    <ReportButton entityType={2} entityId={baseComment.id}/>
                 </div>
             </div>)
 }
