@@ -21,7 +21,7 @@ function ReportButton({ entityType, entityId }) {
     }
     
     return ( <>
-            <img src="/files/icons/report.png" alt="Пожаловаться" onClick={openReportModal} className="comment-report"/>
+            <img src="/files/icons/report.png" alt="Пожаловаться" onClick={openReportModal} className="report"/>
             {isReportModalOpen && (<ConfirmationModalWithText title={"Пожаловаться?"}
                                                           onCancel={onReportModalCancel}
                                                           onConfirm={onReportModalConfirm}/>)}

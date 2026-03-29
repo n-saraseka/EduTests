@@ -39,6 +39,8 @@ public class UserController(IUserRepository userRepository,
         var result = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId);
         if (result)
             model.CurrentUserId = userId;
+        
+        model.CurrentUserGroup = User.FindFirstValue(ClaimTypes.Role);
 
         return View(model);
     }

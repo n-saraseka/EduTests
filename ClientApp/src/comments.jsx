@@ -1,22 +1,8 @@
 import {useState} from "react";
 import ReportButton from "./reportButton.jsx";
-import ConfirmationModal from "./modals/confirmationModal.jsx";
+import DeleteButton from "./deleteButton.jsx";
 
-function Comment({baseComment, currentUserId, onDelete}) {
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    
-    const openDeleteModal = () => {
-        setIsDeleteModalOpen(true);
-    }
-    
-    const onDeleteModalConfirm = async () => {
-        const postResult = await onDelete();
-        setIsDeleteModalOpen(false);
-    }
-    
-    const onDeleteModalCancel = () => {
-        setIsDeleteModalOpen(false);
-    }
+function Comment({baseComment, currentUserId, currentUserGroup, onDelete}) {
     
     return (<div className="comment-wrapper">
                 <div className="comment">
@@ -28,14 +14,8 @@ function Comment({baseComment, currentUserId, onDelete}) {
                     <p className="comment-content">{baseComment.content}</p>
                 </div>
                 <div className="comment-interact">
-                    {currentUserId === baseComment.userId && <img src="/files/icons/close.png"
-                                                                  alt="Удалить комментарий"
-                                                                  onClick={openDeleteModal}
-                                                                  className="comment-delete"/>}
-                    {isDeleteModalOpen && (<ConfirmationModal title="Удалить комментарий?"
-                                                              subtitle="Отменить это действие будет невозможно. Все данные будут утеряны"
-                                                              onConfirm={onDeleteModalConfirm}
-                                                              onCancel={onDeleteModalCancel}/>)}
+                    {(currentUserId === baseComment.userId || ["Moderator", "Administrator"].includes(currentUserGroup)) && 
+                        <DeleteButton entityType={2} onDelete={onDelete}/>}
                     <ReportButton entityType={2} entityId={baseComment.id}/>
                 </div>
             </div>)
@@ -69,7 +49,7 @@ function Pagination({ page, pageCount, onChangePage }) {
     )
 }
 
-function Comments({ dtoId, isTest, baseComments, basePages, commentsPerPage, currentUserId}) {
+function Comments({ dtoId, isTest, baseComments, basePages, commentsPerPage, currentUserId, currentUserGroup}) {
     const [comments, setComments] = useState(baseComments);
     const [page, setPage] = useState(1);
     const [pageCount, setPageCount] = useState(basePages);
@@ -139,6 +119,7 @@ function Comments({ dtoId, isTest, baseComments, basePages, commentsPerPage, cur
                     <img src="/files/icons/loading.png" alt="Загрузка контента" className="loading-icon"/>
                 </div> 
                 : comments.map(comment => <Comment key={comment.id} baseComment={comment} currentUserId={currentUserId} 
+                                                   currentUserGroup={currentUserGroup} 
                                                    onDelete={() => handleCommentDelete(comment.id)}/>)}
             {pageCount > 1 && <Pagination page={page} pageCount={pageCount} onChangePage={handlePageChange}/>}
         </>

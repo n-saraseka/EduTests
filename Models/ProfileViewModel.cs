@@ -9,4 +9,5 @@ public class ProfileViewModel
     public required int CommentPages { get; set; }
     public required int CommentsPerPage { get; set; }
     public int? CurrentUserId { get; set; }
+    public string? CurrentUserGroup { get; set; }
 }
