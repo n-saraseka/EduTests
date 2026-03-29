@@ -25,6 +25,12 @@
     align-items: flex-start;
 }
 
+#username {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
 #user-card  * {
     margin: 0 0;
 }
