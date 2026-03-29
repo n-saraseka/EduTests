@@ -19,15 +19,18 @@ public class ReportConfiguration : IEntityTypeConfiguration<Report>
         builder
             .HasOne(r => r.Test)
             .WithMany()
-            .HasForeignKey(r => r.TestId);
+            .HasForeignKey(r => r.TestId)
+            .OnDelete(DeleteBehavior.Cascade);
         builder
             .HasOne(r => r.User)
             .WithMany()
-            .HasForeignKey(r => r.UserId);
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
         builder
             .HasOne(r => r.Comment)
             .WithMany()
-            .HasForeignKey(r => r.CommentId);
+            .HasForeignKey(r => r.CommentId)
+            .OnDelete(DeleteBehavior.Cascade);
         builder
             .Property(r => r.Text)
             .HasMaxLength(256);

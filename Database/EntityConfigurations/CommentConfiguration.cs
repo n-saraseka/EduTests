@@ -15,11 +15,13 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
         builder
             .HasOne(c => c.Test)
             .WithMany()
-            .HasForeignKey(t => t.TestId);
+            .HasForeignKey(t => t.TestId)
+            .OnDelete(DeleteBehavior.Cascade);
         builder
             .HasOne(c => c.UserProfile)
             .WithMany()
-            .HasForeignKey(t => t.UserProfileId);
+            .HasForeignKey(t => t.UserProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
         builder
             .Property(c => c.Content)
             .HasMaxLength(256);
