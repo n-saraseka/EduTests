@@ -6,5 +6,5 @@ namespace EduTests.Commands.ReportCommands;
 public class ChangeReportStatusCommand
 {
     [Required]
-    public ReportStatus ReportStatus { get; set; }
+    public int ReportStatus { get; set; }
 }

@@ -3,9 +3,6 @@
 
 @{
     var userName = Model.User.Username;
-    var userId = Model.User.Id;
-    var registrationDate = Model.User.RegistrationDate.ToLocalTime();
-    var description = Model.User.Description;
     ViewBag.Title = "Личный кабинет пользователя " + userName;
 }
 
@@ -15,7 +12,7 @@
 
 @section Scripts {
     <script>
-        window.__INITIAL_DATA__ = @Html.Raw(Json.Serialize(Model.User));
+        window.__INITIAL_DATA__ = @Html.Raw(Json.Serialize(Model));
     </script>
     <script type="module" src="http://localhost:5173/src/settingsScripts.jsx"></script>
 }

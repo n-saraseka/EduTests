@@ -139,8 +139,11 @@ public class ReportController(IReportsRepository reportsRepository,
             return BadRequest("Invalid pagination parameters");
         
         var query = (status == null) ?
-            reportsRepository.GetLatest().Where(r => r.ReportStatus == ReportStatus.Pending)
+            reportsRepository.GetLatest()
             : reportsRepository.GetLatest().Where(r => r.ReportStatus == status);
+        
+        var commentCount = await query.CountAsync(cancellationToken);
+        var pages = Math.Ceiling((double)commentCount / amountPerPage);
         
         var reports = await query.Skip((page - 1) * amountPerPage)
             .Take(amountPerPage)
@@ -148,7 +151,7 @@ public class ReportController(IReportsRepository reportsRepository,
 
         var apiReports = reports.Select(entityToDtoService.ReportEntityToDto).ToList();
         
-        return Ok(apiReports);
+        return Ok(new {reports = apiReports, pages});
     }
 
     /// <summary>
@@ -158,7 +161,7 @@ public class ReportController(IReportsRepository reportsRepository,
     /// <param name="command">The <see cref="ChangeReportStatusCommand"/></param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>Updated <see cref="ApiReport"/> object</returns>
-    [HttpPatch("{id}")]
+    [HttpPatch("{id}/status")]
     [Authorize(Roles = "Moderator, Administrator")]
     public async Task<IActionResult> ChangeReportStatusAsync(int id, ChangeReportStatusCommand command,
         CancellationToken cancellationToken = default)
@@ -167,7 +170,7 @@ public class ReportController(IReportsRepository reportsRepository,
         if (report is null)
             return NotFound();
         
-        report.ReportStatus = command.ReportStatus;
+        report.ReportStatus = (ReportStatus)command.ReportStatus;
         reportsRepository.Update(report);
         
         await reportsRepository.SaveChangesAsync(cancellationToken);

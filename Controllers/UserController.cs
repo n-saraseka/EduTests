@@ -10,6 +10,8 @@ namespace EduTests.Controllers;
 
 public class UserController(IUserRepository userRepository,
     ICommentRepository commentRepository,
+    IReportsRepository reportsRepository,
+    IBannedUserRepository bannedUserRepository,
     IEntityToDtoService entityToDtoService,
     IConfiguration config) : Controller
 {
@@ -63,6 +65,30 @@ public class UserController(IUserRepository userRepository,
         
         var apiUser = entityToDtoService.UserEntityToDto(user);
         model.User = apiUser;
+
+        if (User.FindFirstValue(ClaimTypes.Role) is "Moderator" or "Administrator")
+        {
+            var pageSize = int.Parse(config["pageSize"]);
+            model.RowsPerTablePage = pageSize;
+
+            var reportsQuery = reportsRepository.GetLatest();
+            
+            var reportCount = await reportsQuery.CountAsync(cancellationToken);
+            var reportPages = (int)Math.Ceiling((double)reportCount / pageSize);
+            model.ReportPages = reportPages;
+            
+            var reports = await reportsQuery.Take(pageSize).ToListAsync(cancellationToken);
+            model.Reports = reports.Select(entityToDtoService.ReportEntityToDto).ToList();
+
+            var bansQuery = bannedUserRepository.GetLatestBans();
+            
+            var banCount = await bansQuery.CountAsync(cancellationToken);
+            var banPages = (int)Math.Ceiling((double)banCount / pageSize);
+            model.BanPages = banPages;
+            
+            var bans = await bansQuery.Take(pageSize).ToListAsync(cancellationToken);
+            model.Bans = bans.Select(entityToDtoService.BanEntityToDto).ToList();
+        }
         
         return View(model);
     }

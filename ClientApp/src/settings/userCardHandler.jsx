@@ -1,17 +1,15 @@
 import {useState} from "react";
 import ConfirmationModal from "../modals/confirmationModal.jsx";
 
-const initialData = window.__INITIAL_DATA__;
-
 function UserName({isEditing, name, onNameChange, isDisabled}) {
     return isEditing ? (<input type="text" value={name} onChange={onNameChange} autoFocus disabled={isDisabled}/> ) : 
         (<h2>{name}</h2>);
 }
 
-function ProfilePic({cacheTrickSeed}) {
+function ProfilePic({userId, cacheTrickSeed}) {
     return cacheTrickSeed === null ?
-        (<img src={`/files/users/${initialData.id}`} alt="Profile picture" id="profile-avatar"/>)
-        : (<img src={`/files/users/${initialData.id}#${cacheTrickSeed}`} alt="Profile picture" id="profile-avatar"/>);
+        (<img src={`/files/users/${userId}`} alt="Profile picture" id="profile-avatar"/>)
+        : (<img src={`/files/users/${userId}#${cacheTrickSeed}`} alt="Profile picture" id="profile-avatar"/>);
 }
 
 function UserAvatar({onAvatarChange, isDisabled}) {
@@ -40,12 +38,12 @@ function FieldChangeStatus({isSuccess}) {
         (isSuccess ? <p style={{color: "green"}}>Успешно</p> : <p style={{color: "red"}}>Ошибка</p>));
 }
 
-function UserCardHandler() {
+function UserCardHandler({userId, baseUsername, baseDescription}) {
     const [isEditingUsername, setIsEditingUsername] = useState(false);
-    const [username, setUsername] = useState(initialData.username);
+    const [username, setUsername] = useState(baseUsername);
     
     const [isEditingDescription, setIsEditingDescription] = useState(false);
-    const [description, setDescription] = useState(initialData.description);
+    const [description, setDescription] = useState(baseDescription);
     
     const [isLoginSuccess, setIsLoginSuccess] = useState(null);
     const [isPasswordSuccess, setIsPasswordSuccess] = useState(null);
@@ -64,11 +62,11 @@ function UserCardHandler() {
             const command = new ChangeUsernameCommand(username);
             
             setIsLoading(true);
-            const result = await changeUsername(command, initialData.id);
+            const result = await changeUsername(command, userId);
             setIsLoading(false);
             
             if (!result.ok) {
-                setUsername(initialData.username);
+                setUsername(baseUsername);
             }
         }
         setIsEditingUsername(!isEditingUsername);
@@ -92,11 +90,11 @@ function UserCardHandler() {
             const command = new ChangeDescriptionCommand(description);
             
             setIsLoading(true);
-            const result = await changeDescription(command, initialData.id);
+            const result = await changeDescription(command, userId);
             setIsLoading(false);
 
             if (!result.ok) {
-                setDescription(initialData.description);
+                setDescription(baseDescription);
             }
         }
         setIsEditingDescription(!isEditingDescription);
@@ -109,7 +107,7 @@ function UserCardHandler() {
         if (event.target.files.length === 1) {
             
             setIsLoading(true);
-            const result = await uploadAvatar(event.target.files[0], initialData.id);
+            const result = await uploadAvatar(event.target.files[0], userId);
             setIsLoading(false);
             
             if (result.ok) {
@@ -129,7 +127,7 @@ function UserCardHandler() {
         const command = new ChangeLoginCommand(newLogin.value, oldPassword.value);
         
         setIsLoading(true);
-        const result = await changeLogin(command, initialData.id);
+        const result = await changeLogin(command, userId);
         setIsLoading(false);
         
         if (result.ok) {
@@ -151,7 +149,7 @@ function UserCardHandler() {
         const command = new ChangePasswordCommand(oldPassword.value, newPassword.value);
 
         setIsLoading(true);
-        const result = await changePassword(command, initialData.id);
+        const result = await changePassword(command, userId);
         setIsLoading(false);
 
         if (result.ok) {
@@ -183,7 +181,7 @@ function UserCardHandler() {
     return (
         <>
             <div id="card-top">
-                <ProfilePic cacheTrickSeed={cacheTrick}/>
+                <ProfilePic userId={userId} cacheTrickSeed={cacheTrick}/>
                 <div id="card-username">
                     <div className="card-row">
                         <UserName name={username} isEditing={isEditingUsername} onNameChange={handleUsernameChange} isDisabled={isLoading}/>
