@@ -94,7 +94,7 @@ function Comments({ dtoId, isTest, baseComments, basePages, commentsPerPage, cur
     
     return (
         <>
-            { !isNaN(currentUserId) && <PostComment onPost={handleCommentSubmit}/>}
+            { !isNaN(currentUserId) && <PostComment onPost={handleCommentSubmit} isPosting={isLoading || isPosting}/>}
             {isLoading ? <div className="loading">
                     <img src="/files/icons/loading.png" alt="Загрузка контента" className="loading-icon"/>
                 </div> 
