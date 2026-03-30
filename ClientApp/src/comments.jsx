@@ -1,6 +1,7 @@
 import {useState} from "react";
 import ReportButton from "./buttons/reportButton.jsx";
 import DeleteButton from "./buttons/deleteButton.jsx";
+import Pagination from "./pagination.jsx";
 
 function Comment({baseComment, currentUserId, currentUserGroup, onDelete}) {
     
@@ -26,27 +27,6 @@ function PostComment({ isPosting, onPost}) {
             <textarea name="new-comment" id="new-comment" placeholder="Введите свой комментарий..." disabled={isPosting}></textarea>
             <button className="btn-primary" disabled={isPosting} onClick={onPost}>Опубликовать комментарий</button>
     </>)
-}
-
-function Pagination({ page, pageCount, onChangePage }) {
-    const windowSize = 2;
-    let firstPage = Math.max(1, page - windowSize);
-    let lastPage = Math.min(pageCount, page + windowSize);
-
-    const pages = Array.from(
-        { length: lastPage - firstPage + 1},
-        (_, i) => firstPage + i
-    );
-    
-    return (
-        <ul className="pagination">
-            <li className="page-item" onClick={() => onChangePage(page-1)}>&lt;</li>
-            {pages.map(p => (
-                <li key={p} className={`page-item${p === page ? ' active' : ''}`} onClick={() => onChangePage(p)}>{p}</li>
-            ))}
-            <li className="page-item" onClick={() => onChangePage(page+1)}>&gt;</li>
-        </ul>
-    )
 }
 
 function Comments({ dtoId, isTest, baseComments, basePages, commentsPerPage, currentUserId, currentUserGroup}) {
