@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import Comments from './comments.jsx';
-import ProfileUsername from "./profileUsername.jsx";
+import ProfileUsername from "./profile/profileUsername.jsx";
 
 const initialData = window.__INITIAL_DATA__;
 

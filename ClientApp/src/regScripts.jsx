@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import ErrorHandler from './errorHandler.jsx';
-import RegisterAccountHelper from './registerAccountHelper.jsx';
+import RegisterAccountHelper from './register/registerAccountHelper.jsx';
 
 const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 const form = document.getElementById('register-form');

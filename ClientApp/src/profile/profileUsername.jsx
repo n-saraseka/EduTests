@@ -1,5 +1,5 @@
-import ReportButton from "./reportButton.jsx";
-import DeleteButton from "./deleteButton.jsx";
+import ReportButton from "../buttons/reportButton.jsx";
+import DeleteButton from "../buttons/deleteButton.jsx";
 
 function ProfileUsername({username, userId, currentUserId, currentUserGroup}) {
     const handleUserDelete = async (id) => {

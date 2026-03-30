@@ -1,5 +1,5 @@
 import {useState} from "react";
-import ConfirmationModalWithText from "./modals/confirmationModalWithText.jsx";
+import ConfirmationModalWithText from "../modals/confirmationModalWithText.jsx";
 
 function ReportButton({ entityType, entityId }) {
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);

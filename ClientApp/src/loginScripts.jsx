@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import ErrorHandler from './errorHandler.jsx';
-import NavLogin from './NavLogin.jsx';
-import LoginAccountHelper from "./loginAccountHelper.jsx";
+import NavLogin from './login/NavLogin.jsx';
+import LoginAccountHelper from "./login/loginAccountHelper.jsx";
 
 const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 const form = document.getElementById('login-form');

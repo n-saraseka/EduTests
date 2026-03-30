@@ -1,6 +1,6 @@
 import {useState} from "react";
-import ReportButton from "./reportButton.jsx";
-import DeleteButton from "./deleteButton.jsx";
+import ReportButton from "./buttons/reportButton.jsx";
+import DeleteButton from "./buttons/deleteButton.jsx";
 
 function Comment({baseComment, currentUserId, currentUserGroup, onDelete}) {
     

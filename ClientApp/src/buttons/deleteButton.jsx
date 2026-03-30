@@ -1,5 +1,5 @@
 import {useState} from "react";
-import ConfirmationModal from "./modals/confirmationModal.jsx";
+import ConfirmationModal from "../modals/confirmationModal.jsx";
 
 function DeleteButton({entityType, onDelete}) {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
