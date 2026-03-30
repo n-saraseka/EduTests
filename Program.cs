@@ -110,4 +110,9 @@ app.MapControllerRoute(
     pattern: "{controller}/{id}/my_account",
     defaults: new {controller = "User", action = "Settings"});
 
+app.MapControllerRoute(
+    name: "comment_base",
+    pattern: "{controller}/{id}",
+    defaults: new {controller = "Comment", action = "GetCommentBase"});
+
 app.Run();
