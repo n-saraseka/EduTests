@@ -39,6 +39,29 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
         
         return testToReturn;
     }
+
+    /// <summary>
+    /// Map <see cref="Test"/> entity to simplified <see cref="ApiTest"/> DTO
+    /// This one doesn't include the rating, the completions or tags.
+    /// </summary>
+    /// <param name="entity">The <see cref="Test"/> entity</param>
+    /// <returns>The simplified <see cref="ApiTest"/> DTO</returns>
+    public ApiTest TestEntityToDto(Test entity)
+    {
+        var testToReturn = new ApiTest
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            Description = entity.Description,
+            ThumbnailUrl = entity.ThumbnailUrl,
+            CreatedAt = entity.CreatedAt,
+            UpdatedAt = entity.UpdatedAt,
+            AttemptLimit = entity.AttemptLimit,
+            TimeLimit = entity.TimeLimit,
+        };
+
+        return testToReturn;
+    }
     
     /// <summary>
     /// Map <see cref="UserRating"/> entity to <see cref="ApiRating"/> DTO
@@ -238,21 +261,18 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
     /// </summary>
     /// <param name="entity">The <see cref="Report"/> entity</param>
     /// <returns>The <see cref="ApiReport"/> DTO</returns>
-    /// <exception cref="ArgumentNullException">If <see cref="Report.UserId"/>, <see cref="Report.TestId"/> and
-    /// <see cref="Report.CommentId"/> are all null</exception>
     public ApiReport ReportEntityToDto(Report entity)
     {
-        var entityType = (entity.UserId != null) ? EntityType.User : (entity.TestId != null) ? EntityType.Test : EntityType.Comment;
-        var entityId = entity.UserId ?? entity.TestId ?? entity.CommentId;
+        var apiTest = entity.Test != null ? TestEntityToDto(entity.Test) : null;
+        var apiComment = entity.Comment != null ? CommentEntityToDto(entity.Comment) : null;
+        var apiUser = entity.User != null ? UserEntityToDto(entity.User) : null;
         
-        if (entityId is null)
-            throw new ArgumentNullException(nameof(entityId));
-
         var apiReport = new ApiReport
         {
             Id = entity.Id,
-            EntityType = entityType,
-            EntityId = (int)entityId,
+            ReportedTest = apiTest,
+            ReportedComment = apiComment,
+            ReportedUser = apiUser,
             ReportText = entity.Text,
             DateReported = entity.DateTime,
             ReportStatus = entity.ReportStatus

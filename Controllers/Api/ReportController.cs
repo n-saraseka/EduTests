@@ -139,11 +139,10 @@ public class ReportController(IReportsRepository reportsRepository,
             return BadRequest("Invalid pagination parameters");
         
         var query = (status == null) ?
-            reportsRepository.GetAll().Where(r => r.ReportStatus == ReportStatus.Pending)
-            : reportsRepository.GetAll().Where(r => r.ReportStatus == status);
+            reportsRepository.GetLatest().Where(r => r.ReportStatus == ReportStatus.Pending)
+            : reportsRepository.GetLatest().Where(r => r.ReportStatus == status);
         
-        var reports = await query.OrderByDescending(r => r.DateTime)
-            .Skip((page - 1) * amountPerPage)
+        var reports = await query.Skip((page - 1) * amountPerPage)
             .Take(amountPerPage)
             .ToListAsync(cancellationToken);
 

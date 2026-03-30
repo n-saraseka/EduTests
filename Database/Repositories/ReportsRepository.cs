@@ -25,8 +25,12 @@ public class ReportsRepository(DatabaseContext db) : BaseRepository<Report, int>
                 $"{nameof(reporterId)} and {nameof(anonReporterId)} can't both be provided");
 
         var query = Set
-            .AsQueryable()
-            .OrderByDescending(r => r.DateTime);
+            .OrderByDescending(r => r.DateTime)
+            .Include(r => r.Test)
+            .Include(r => r.User)
+            .Include(r => r.Comment)
+            .ThenInclude(c => c.Commenter)
+            .AsSplitQuery();
         
         if (reporterId is not null)
             return query.FirstOrDefaultAsync(r => r.TestId == id && r.ReportingUserId == reporterId, cancellationToken);
@@ -54,8 +58,12 @@ public class ReportsRepository(DatabaseContext db) : BaseRepository<Report, int>
                 $"{nameof(reporterId)} and {nameof(anonReporterId)} can't both be provided");
 
         var query = Set
-            .AsQueryable()
-            .OrderByDescending(r => r.DateTime);
+            .OrderByDescending(r => r.DateTime)
+            .Include(r => r.Test)
+            .Include(r => r.User)
+            .Include(r => r.Comment)
+            .ThenInclude(c => c.Commenter)
+            .AsSplitQuery();
         
         if (reporterId is not null)
             return query.FirstOrDefaultAsync(r => r.UserId == id && r.ReportingUserId == reporterId, cancellationToken);
@@ -82,12 +90,36 @@ public class ReportsRepository(DatabaseContext db) : BaseRepository<Report, int>
                 $"{nameof(reporterId)} and {nameof(anonReporterId)} can't both be provided");
 
         var query = Set
-            .AsQueryable()
-            .OrderByDescending(r => r.DateTime);
+            .OrderByDescending(r => r.DateTime)
+            .Include(r => r.Test)
+            .Include(r => r.User)
+            .Include(r => r.Comment)
+            .ThenInclude(c => c.Commenter)
+            .AsSplitQuery();
         
         if (reporterId is not null)
             return query.FirstOrDefaultAsync(r => r.CommentId == id && r.ReportingUserId == reporterId, cancellationToken);
         else
             return query.FirstOrDefaultAsync(r => r.CommentId == id && r.ReportingAnonymousUserId == anonReporterId, cancellationToken);
     }
+
+    public Task<Report?> GetByIdWithLoadedEntitiesAsync(int id, CancellationToken cancellationToken) => 
+        Set.Where(r => r.Id == id)
+            .Include(r => r.Test)
+            .Include(r => r.User)
+            .Include(r => r.Comment)
+            .ThenInclude(c => c.Commenter)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(cancellationToken);
+
+    /// <summary>
+    /// Get latest reports
+    /// </summary>
+    /// <returns>An <see cref="IQueryable"/> containing all <see cref="Report"/>s ordered by <see cref="Report.DateTime"/></returns>
+    public IQueryable<Report> GetLatest() => Set.OrderByDescending(r => r.DateTime)
+        .Include(r => r.Test)
+        .Include(r => r.User)
+        .Include(r => r.Comment)
+        .ThenInclude(c => c.Commenter)
+        .AsSplitQuery();
 }

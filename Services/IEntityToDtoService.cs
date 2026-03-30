@@ -6,6 +6,7 @@ namespace EduTests.Services;
 public interface IEntityToDtoService
 {
     Task<ApiTest> TestEntityToDtoAsync(Test entity, CancellationToken cancellationToken);
+    ApiTest TestEntityToDto(Test entity);
     ApiRating RatingEntityToDto(UserRating entity);
     ApiComment CommentEntityToDto(Comment entity);
     ApiQuestion QuestionEntityToDto(Question entity);

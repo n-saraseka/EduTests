@@ -12,4 +12,5 @@ public interface IReportsRepository : IRepository<Report, int>
 
     Task<Report?> GetByCommentAndReporterIdAsync(int id, int? reporterId, Guid? anonReporterId,
         CancellationToken cancellationToken);
+    IQueryable<Report> GetLatest();
 }
