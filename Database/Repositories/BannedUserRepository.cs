@@ -20,4 +20,10 @@ public class BannedUserRepository(DatabaseContext db) : BaseRepository<BannedUse
                 && (b.DateUnbanned <= DateTime.UtcNow || b.DateUnbanned == null))
             .FirstOrDefaultAsync(cancellationToken);
     }
+    
+    /// <summary>
+    /// Get the latest bans
+    /// </summary>
+    /// <returns>An <see cref="IQueryable"/> containing all <see cref="BannedUser"/> entries ordered by the <see cref="BannedUser.DateBanned"/></returns>
+    public IQueryable<BannedUser> GetLatestBans() => Set.OrderByDescending(b => b.DateBanned);
 }
