@@ -426,7 +426,7 @@ public class UsersController(
             UserBannedId = id,
             BanReason = command.Reason,
             DateBanned = DateTime.UtcNow,
-            DateUnbanned = DateTime.UtcNow,
+            DateUnbanned = command.UnbanDate,
         };
         
         bannedUserRepository.Create(ban);
