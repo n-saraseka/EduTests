@@ -129,7 +129,7 @@ public class ReportController(IReportsRepository reportsRepository,
     /// <param name="amountPerPage">Amount of <see cref="ApiReport"/>s per page</param>
     /// <param name="status">Filter by <see cref="ReportStatus"/></param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
-    /// <returns>A List of <see cref="ApiReport"/>s</returns>
+    /// <returns>A List of <see cref="ApiReport"/>s, as well as the amount of pages</returns>
     [HttpGet]
     [Authorize(Roles = "Moderator, Administrator")]
     public async Task<IActionResult> GetLatestReportsAsync([FromQuery] int page, [FromQuery] int amountPerPage, [FromQuery] ReportStatus? status,

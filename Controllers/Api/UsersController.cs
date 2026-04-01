@@ -273,7 +273,7 @@ public class UsersController(
     /// <param name="page">Page number</param>
     /// <param name="amountPerPage">Amount of <see cref="ApiReport"/>s per page</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
-    /// <returns>List of <see cref="ApiComment"/>s</returns>
+    /// <returns>List of <see cref="ApiComment"/>s, as well as the amount of pages</returns>
     [HttpGet("{id}/profilecomments")]
     [AllowAnonymous]
     public async Task<IActionResult> GetProfileCommentsAsync(int id, [FromQuery] int page,
