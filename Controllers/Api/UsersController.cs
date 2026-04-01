@@ -430,6 +430,7 @@ public class UsersController(
         };
         
         bannedUserRepository.Create(ban);
+        await bannedUserRepository.SaveChangesAsync(cancellationToken);
 
         var apiBan = entityToDtoService.BanEntityToDto(ban);
         
