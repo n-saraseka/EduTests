@@ -29,7 +29,7 @@ function ProfileUsername({username, userId, currentUserId, currentUserGroup, isB
             {(["Administrator", "Moderator"].includes(currentUserGroup) && currentUserId !== userId) &&
             <BanButton onBan={handleUserBan}/>}
             {(currentUserGroup === "Administrator" && currentUserId !== userId) &&
-            <DeleteButton entityType={0} onDelete={() => handleUserDelete}/>}
+            <DeleteButton entityType={"user"} onDelete={() => handleUserDelete}/>}
         </>}
     </>)
 }

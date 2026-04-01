@@ -22,7 +22,9 @@ function DeleteButton({entityType, onDelete}) {
              alt="Удалить"
              onClick={openDeleteModal}
              className="delete"/>
-        {isDeleteModalOpen && (<ConfirmationModal title={`Удалить ${entityType === 2 ? 'комментарий' : 'пользователя'}?`}
+        {isDeleteModalOpen && (<ConfirmationModal title={`Удалить ${entityType === "comment" ? 'комментарий' 
+            : entityType === "user" ? 'пользователя' : 
+                entityType === "test" ? "тест" : "блокировку"}?`}
                                                  subtitle="Отменить это действие будет невозможно. Все данные будут утеряны"
                                                  onConfirm={onDeleteModalConfirm}
                                                  onCancel={onDeleteModalCancel}/>)}

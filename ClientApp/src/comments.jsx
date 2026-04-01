@@ -17,8 +17,8 @@ function Comment({baseComment, currentUserId, currentUserGroup, onDelete, isBann
                 <div className="comment-interact">
                     {!isBanned && <>
                         {(currentUserId === baseComment.userId || ["Moderator", "Administrator"].includes(currentUserGroup)) &&
-                            <DeleteButton entityType={2} onDelete={onDelete}/>}
-                        <ReportButton entityType={2} entityId={baseComment.id}/>
+                            <DeleteButton entityType={"comment"} onDelete={onDelete}/>}
+                        <ReportButton entityType={"comment"} entityId={baseComment.id}/>
                     </>}
                 </div>
             </div>)
