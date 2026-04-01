@@ -101,3 +101,16 @@
 .settings-table thead td {
     font-weight: bold;
 }
+
+#banned-users {
+    display: flex;
+    flex-direction: column;
+    column-gap: 1rem;
+}
+
+.table-icon {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    object-fit: cover;
+}

@@ -231,6 +231,8 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
         {
             Id = entity.Id,
             BannedUserId = entity.UserBannedId,
+            BannedUser = UserEntityToDto(entity.UserBanned),
+            BannedByUser = UserEntityToDto(entity.BannedBy),
             BannedByUserId = entity.BannedById,
             BanReason = entity.BanReason,
             BanDate = entity.DateBanned,

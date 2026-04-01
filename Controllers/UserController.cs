@@ -91,7 +91,7 @@ public class UserController(IUserRepository userRepository,
             var reports = await reportsQuery.Take(pageSize).ToListAsync(cancellationToken);
             model.Reports = reports.Select(entityToDtoService.ReportEntityToDto).ToList();
 
-            var bansQuery = bannedUserRepository.GetLatestBans();
+            var bansQuery = bannedUserRepository.GetLatestBans(true);
             
             var banCount = await bansQuery.CountAsync(cancellationToken);
             var banPages = (int)Math.Ceiling((double)banCount / pageSize);
