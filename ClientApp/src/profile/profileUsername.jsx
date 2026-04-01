@@ -1,8 +1,9 @@
 import ReportButton from "../buttons/reportButton.jsx";
 import BanButton from "../buttons/banButton.jsx";
 import DeleteButton from "../buttons/deleteButton.jsx";
+import BannedLabel from "../bannedLabel.jsx";
 
-function ProfileUsername({username, userId, currentUserId, currentUserGroup}) {
+function ProfileUsername({username, userId, currentUserId, currentUserGroup, isBanned}) {
     const handleUserDelete = async () => {
         const result = await deleteUser(userId);
         window.location.replace("/home");
@@ -23,11 +24,13 @@ function ProfileUsername({username, userId, currentUserId, currentUserGroup}) {
     
     return (<>
         <h2>{username}</h2>
-        {userId !== currentUserId && <ReportButton entityType={0} entityId={userId}/>}
-        {(["Administrator", "Moderator"].includes(currentUserGroup) && currentUserId !== userId) && 
+        {isBanned ? <BannedLabel /> : <>
+            {userId !== currentUserId && <ReportButton entityType={0} entityId={userId}/>}
+            {(["Administrator", "Moderator"].includes(currentUserGroup) && currentUserId !== userId) &&
             <BanButton onBan={handleUserBan}/>}
-        {(currentUserGroup === "Administrator" && currentUserId !== userId) && 
+            {(currentUserGroup === "Administrator" && currentUserId !== userId) &&
             <DeleteButton entityType={0} onDelete={() => handleUserDelete}/>}
+        </>}
     </>)
 }
 

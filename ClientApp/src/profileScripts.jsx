@@ -9,11 +9,13 @@ const usernameRoot = createRoot(document.getElementById('username'));
 
 usernameRoot.render(<ProfileUsername username={initialData.user.username} userId={initialData.user.id} 
                                      currentUserId={parseInt(initialData.currentUserId)}
-                                     currentUserGroup={initialData.currentUserGroup}/>);
+                                     currentUserGroup={initialData.currentUserGroup} 
+                                     isBanned={initialData.isBanned}/>);
 commentRoot.render(<Comments commentsPerPage={parseInt(initialData.commentsPerPage)} 
                              dtoId={initialData.user.id} 
                              isTest={false} 
                              baseComments={initialData.comments} 
                              basePages={parseInt(initialData.commentPages)}
                              currentUserId={parseInt(initialData.currentUserId)} 
-                             currentUserGroup={initialData.currentUserGroup}/>);
+                             currentUserGroup={initialData.currentUserGroup} 
+                             isBanned={initialData.isCurrentBanned}/>);

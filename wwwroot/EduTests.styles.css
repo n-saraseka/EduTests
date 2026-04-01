@@ -332,3 +332,9 @@ input:focus {
     justify-content: center;
     gap: 0.5rem;
 }
+
+/* Bans */
+.banned-label {
+    color: #b06700;
+    font-weight: bold;
+}

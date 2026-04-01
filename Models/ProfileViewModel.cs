@@ -10,4 +10,6 @@ public class ProfileViewModel
     public required int CommentsPerPage { get; set; }
     public int? CurrentUserId { get; set; }
     public string? CurrentUserGroup { get; set; }
+    public bool IsBanned { get; set; } = false;
+    public bool IsCurrentBanned { get; set; } = false;
 }

@@ -42,6 +42,17 @@ public class UserController(IUserRepository userRepository,
         if (result)
             model.CurrentUserId = userId;
         
+        var activeBan = await bannedUserRepository.GetUsersActiveBanAsync(id, cancellationToken);
+        var isBanned = activeBan is not null;
+        model.IsBanned = isBanned;
+
+        if (result)
+        {
+            var activeBanCurr = await bannedUserRepository.GetUsersActiveBanAsync(userId, cancellationToken);
+            var currBanned = activeBanCurr is not null;
+            model.IsCurrentBanned = currBanned;
+        }
+        
         model.CurrentUserGroup = User.FindFirstValue(ClaimTypes.Role);
 
         return View(model);

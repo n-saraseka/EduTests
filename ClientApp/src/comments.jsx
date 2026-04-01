@@ -3,7 +3,7 @@ import ReportButton from "./buttons/reportButton.jsx";
 import DeleteButton from "./buttons/deleteButton.jsx";
 import Pagination from "./pagination.jsx";
 
-function Comment({baseComment, currentUserId, currentUserGroup, onDelete}) {
+function Comment({baseComment, currentUserId, currentUserGroup, onDelete, isBanned}) {
     
     return (<div className="comment-wrapper">
                 <div className="comment">
@@ -15,9 +15,11 @@ function Comment({baseComment, currentUserId, currentUserGroup, onDelete}) {
                     <p className="comment-content">{baseComment.content}</p>
                 </div>
                 <div className="comment-interact">
-                    {(currentUserId === baseComment.userId || ["Moderator", "Administrator"].includes(currentUserGroup)) && 
-                        <DeleteButton entityType={2} onDelete={onDelete}/>}
-                    <ReportButton entityType={2} entityId={baseComment.id}/>
+                    {!isBanned && <>
+                        {(currentUserId === baseComment.userId || ["Moderator", "Administrator"].includes(currentUserGroup)) &&
+                            <DeleteButton entityType={2} onDelete={onDelete}/>}
+                        <ReportButton entityType={2} entityId={baseComment.id}/>
+                    </>}
                 </div>
             </div>)
 }
@@ -29,7 +31,7 @@ function PostComment({ isPosting, onPost}) {
     </>)
 }
 
-function Comments({ dtoId, isTest, baseComments, basePages, commentsPerPage, currentUserId, currentUserGroup}) {
+function Comments({ dtoId, isTest, baseComments, basePages, commentsPerPage, currentUserId, currentUserGroup, isBanned}) {
     const [comments, setComments] = useState(baseComments);
     const [page, setPage] = useState(1);
     const [pageCount, setPageCount] = useState(basePages);
@@ -92,15 +94,19 @@ function Comments({ dtoId, isTest, baseComments, basePages, commentsPerPage, cur
         setIsLoading(false);
     }
     
+    console.log(!isNaN(currentUserId));
+    console.log(isBanned);
+    
     return (
         <>
-            { !isNaN(currentUserId) && <PostComment onPost={handleCommentSubmit} isPosting={isLoading || isPosting}/>}
+            { (!isNaN(currentUserId) && !isBanned) && <PostComment onPost={handleCommentSubmit} isPosting={isLoading || isPosting}/>}
             {isLoading ? <div className="loading">
                     <img src="/files/icons/loading.png" alt="Загрузка контента" className="loading-icon"/>
                 </div> 
                 : comments.map(comment => <Comment key={comment.id} baseComment={comment} currentUserId={currentUserId} 
                                                    currentUserGroup={currentUserGroup} 
-                                                   onDelete={() => handleCommentDelete(comment.id)}/>)}
+                                                   onDelete={() => handleCommentDelete(comment.id)} 
+                                                   isBanned={isBanned}/>)}
             {pageCount > 1 && <Pagination page={page} pageCount={pageCount} onChangePage={handlePageChange}/>}
         </>
     )
