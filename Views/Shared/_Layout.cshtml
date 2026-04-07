@@ -12,7 +12,7 @@
     <title>@ViewData["Title"] - EduTests</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/EduTests.styles.css" asp-append-version="true"/>
-    @RenderSection("Styles", required: false)
+    @await RenderSectionAsync("Styles", required: false)
     <script type="module">
         import RefreshRuntime from "http://localhost:5173/@@react-refresh"
         RefreshRuntime.injectIntoGlobalHook(window)
@@ -32,6 +32,12 @@
         {
             <li><img id="nav-avatar" src="/files/users/@userId" alt="Profile picture"/></li>
             <li><a href="/user/@userId" class="nav-link">@userName</a></li>
+            <li><a href="/user/@userId/my_account" class="nav-link">
+                <img src="/files/icons/myacocunt.png" alt="Личный кабинет" class="nav-icon">
+            </a></li>
+            <li><a asp-route="constructor" class="nav-link">
+                <img src="/files/icons/constructor.png" alt="Конструктор" class="nav-icon">
+            </a></li>
             <li><a asp-route="logout" class="nav-link">Выход</a></li>
         }
         else
