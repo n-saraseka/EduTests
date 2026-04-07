@@ -36,22 +36,35 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
     
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    const handleUsernameEditing = async (event) => {
+    const handleUsernameEditing = (event) => {
+        event.preventDefault();
+        if (isLoading) return;
+        setIsEditingUsername(true);
+    }
+    
+    const confirmUsernameEdit = async (event) => {
         event.preventDefault();
         if (isLoading) return;
         
-        if (isEditingUsername) {
-            const command = new ChangeUsernameCommand(username);
-            
-            setIsLoading(true);
-            const result = await changeUsername(command, userId);
-            setIsLoading(false);
-            
-            if (!result.ok) {
-                setUsername(baseUsername);
-            }
+        const command = new ChangeUsernameCommand(username);
+
+        setIsLoading(true);
+        const result = await changeUsername(command, userId);
+        setIsLoading(false);
+
+        if (!result.ok) {
+            setUsername(baseUsername);
         }
-        setIsEditingUsername(!isEditingUsername);
+
+        setIsEditingUsername(false);
+    }
+    
+    const cancelUsernameEdit = (event) => {
+        event.preventDefault();
+        if (isLoading) return;
+        
+        setUsername(baseUsername);
+        setIsEditingUsername(false);
     }
     
     const handleUsernameChange = (event) => {
@@ -67,19 +80,33 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
     const handleDescriptionEditing = async (event) => {
         event.preventDefault();
         if (isLoading) return;
-        
-        if (isEditingDescription) {
-            const command = new ChangeDescriptionCommand(description);
-            
-            setIsLoading(true);
-            const result = await changeDescription(command, userId);
-            setIsLoading(false);
 
-            if (!result.ok) {
-                setDescription(baseDescription);
-            }
+        setIsEditingDescription(true);
+    }
+    
+    const confirmDescriptionEdit = async (event) => {
+        event.preventDefault();
+        if (isLoading) return;
+
+        const command = new ChangeDescriptionCommand(description);
+
+        setIsLoading(true);
+        const result = await changeDescription(command, userId);
+        setIsLoading(false);
+
+        if (!result.ok) {
+            setDescription(baseDescription);
         }
-        setIsEditingDescription(!isEditingDescription);
+        
+        setIsEditingDescription(false);
+    }
+    
+    const cancelDescriptionEdit = (event) => {
+        event.preventDefault();
+        if (isLoading) return;
+
+        setDescription(baseDescription);
+        setIsEditingDescription(false);
     }
     
     const handleAvatarChange = async (event) => {
@@ -167,7 +194,8 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
                 <div id="card-username">
                     <div className="card-row">
                         <UserName name={username} isEditing={isEditingUsername} onNameChange={handleUsernameChange} isDisabled={isLoading}/>
-                        <EditButton isEditing={isEditingUsername} onEditToggle={handleUsernameEditing} isDisabled={isLoading}/>
+                        <EditButton isEditing={isEditingUsername} onEditToggle={handleUsernameEditing}
+                                    onConfirm={confirmUsernameEdit} onCancel={cancelUsernameEdit} isDisabled={isLoading}/>
                     </div>
                     <div className="card-row">
                         <FileUploader text="Изменить фото профиля" onChange={handleAvatarChange} isDisabled={isLoading}/>
@@ -176,7 +204,9 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
             </div>
             <div className="card-row">
                 <TextareaField text={description} placeholder="Нет описания" isEditing={isEditingDescription}
-                               onChange={handleDescriptionChange} isDisabled={isLoading} handleEdit={handleDescriptionEditing}/>
+                               onChange={handleDescriptionChange} isDisabled={isLoading} 
+                               handleEdit={handleDescriptionEditing} onConfirm={confirmDescriptionEdit}
+                               onCancel={cancelDescriptionEdit}/>
             </div>
             <h3>Настройки аккаунта</h3>
             <div className="account-settings-section">
