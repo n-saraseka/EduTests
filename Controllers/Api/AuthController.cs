@@ -1,7 +1,5 @@
 using System.Security.Claims;
-using EduTests.ApiObjects;
 using EduTests.Commands.AuthCommands;
-using EduTests.Database.Entities;
 using EduTests.Database.Repositories.Interfaces;
 using EduTests.Services;
 using Microsoft.AspNetCore.Authentication;

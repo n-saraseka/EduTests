@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using EduTests.Database.Enums;
 
 namespace EduTests.Commands.ReportCommands;
 
