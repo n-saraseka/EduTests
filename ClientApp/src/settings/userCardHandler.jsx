@@ -1,5 +1,8 @@
 import {useState} from "react";
 import ConfirmationModal from "../modals/confirmationModal.jsx";
+import FileUploader from "../inputs/fileUploader.jsx";
+import TextareaField from "../inputs/textareaField.jsx";
+import EditButton from "../buttons/editButton.jsx";
 
 function UserName({isEditing, name, onNameChange, isDisabled}) {
     return isEditing ? (<input type="text" value={name} onChange={onNameChange} autoFocus disabled={isDisabled}/> ) : 
@@ -10,27 +13,6 @@ function ProfilePic({userId, cacheTrickSeed}) {
     return cacheTrickSeed === null ?
         (<img src={`/files/users/${userId}`} alt="Profile picture" id="profile-avatar"/>)
         : (<img src={`/files/users/${userId}#${cacheTrickSeed}`} alt="Profile picture" id="profile-avatar"/>);
-}
-
-function UserAvatar({onAvatarChange, isDisabled}) {
-    return (<div className="card-row">
-        <p>Изменить фото профиля: </p>
-        <input type="file" onChange={onAvatarChange} disabled={isDisabled}/>
-    </div>)
-}
-
-function UserDescription({isEditing, text, onDescriptionChange, isDisabled}) {
-    return isEditing ? (
-        <input type="text" value={text} onChange={onDescriptionChange} autoFocus disabled={isDisabled}/>
-    ) : (<p>{text == null ? "Нет описания" : text}</p>);
-}
-
-function EditIcon({isEditing, onEditToggle, isDisabled}) {
-    return isEditing ? (
-        <img src="/files/icons/check.png" alt="Finish editing" onClick={onEditToggle} style={{opacity: isDisabled ? 0.5 : 1}} className="edit-icon"/>
-    ) : (
-        <img src="/files/icons/edit.png" alt="Edit" onClick={onEditToggle} style={{opacity: isDisabled ? 0.5 : 1}} className="edit-icon"/>
-    )
 }
 
 function FieldChangeStatus({isSuccess}) {
@@ -185,14 +167,16 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
                 <div id="card-username">
                     <div className="card-row">
                         <UserName name={username} isEditing={isEditingUsername} onNameChange={handleUsernameChange} isDisabled={isLoading}/>
-                        <EditIcon isEditing={isEditingUsername} onEditToggle={handleUsernameEditing} isDisabled={isLoading}/>
+                        <EditButton isEditing={isEditingUsername} onEditToggle={handleUsernameEditing} isDisabled={isLoading}/>
                     </div>
-                    <UserAvatar onAvatarChange={handleAvatarChange} isDisabled={isLoading}/>
+                    <div className="card-row">
+                        <FileUploader text="Изменить фото профиля" onChange={handleAvatarChange} isDisabled={isLoading}/>
+                    </div>
                 </div>
             </div>
             <div className="card-row">
-                <UserDescription text={description} isEditing={isEditingDescription} onDescriptionChange={handleDescriptionChange} isDisabled={isLoading}/>
-                <EditIcon isEditing={isEditingDescription} onEditToggle={handleDescriptionEditing} isDisabled={isLoading}/>
+                <TextareaField text={description} placeholder="Нет описания" isEditing={isEditingDescription}
+                               onChange={handleDescriptionChange} isDisabled={isLoading} handleEdit={handleDescriptionEditing}/>
             </div>
             <h3>Настройки аккаунта</h3>
             <div className="account-settings-section">
