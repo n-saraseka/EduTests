@@ -4,8 +4,9 @@ import FileUploader from "../inputs/fileUploader.jsx";
 import TextareaField from "../inputs/textareaField.jsx";
 import EditButton from "../buttons/editButton.jsx";
 
-function UserName({isEditing, name, onNameChange, isDisabled}) {
-    return isEditing ? (<input type="text" value={name} onChange={onNameChange} autoFocus disabled={isDisabled}/> ) : 
+function UserName({isEditing, name, isDisabled}) {
+    return isEditing ? (<input type="text" id="edit-text" defaultValue={name} autoFocus 
+                               disabled={isDisabled}/> ) :
         (<h2>{name}</h2>);
 }
 
@@ -46,7 +47,13 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
         event.preventDefault();
         if (isLoading) return;
         
-        const command = new ChangeUsernameCommand(username);
+        const newUsername = document.querySelector("#edit-text").value;
+        if (newUsername === username) {
+            setIsEditingUsername(false);
+            return;
+        }
+        
+        const command = new ChangeUsernameCommand(newUsername);
 
         setIsLoading(true);
         const result = await changeUsername(command, userId);
@@ -54,6 +61,9 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
 
         if (!result.ok) {
             setUsername(baseUsername);
+        }
+        else {
+            setUsername(newUsername);
         }
 
         setIsEditingUsername(false);
@@ -63,18 +73,7 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
         event.preventDefault();
         if (isLoading) return;
         
-        setUsername(baseUsername);
         setIsEditingUsername(false);
-    }
-    
-    const handleUsernameChange = (event) => {
-        event.preventDefault();
-        setUsername(event.target.value);
-    }
-
-    const handleDescriptionChange = (event) => {
-        event.preventDefault();
-        setDescription(event.target.value);
     }
 
     const handleDescriptionEditing = async (event) => {
@@ -87,8 +86,14 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
     const confirmDescriptionEdit = async (event) => {
         event.preventDefault();
         if (isLoading) return;
+        
+        const newDescription = document.querySelector("#edit-text").value;
+        if (newDescription === description) {
+            setIsEditingDescription(false);
+            return;
+        }
 
-        const command = new ChangeDescriptionCommand(description);
+        const command = new ChangeDescriptionCommand(newDescription);
 
         setIsLoading(true);
         const result = await changeDescription(command, userId);
@@ -97,6 +102,9 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
         if (!result.ok) {
             setDescription(baseDescription);
         }
+        else {
+            setDescription(newDescription);
+        }
         
         setIsEditingDescription(false);
     }
@@ -104,8 +112,7 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
     const cancelDescriptionEdit = (event) => {
         event.preventDefault();
         if (isLoading) return;
-
-        setDescription(baseDescription);
+        
         setIsEditingDescription(false);
     }
     
@@ -173,7 +180,7 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
         setIsDeleteModalOpen(true);
     }
     
-    const handleDeletion = async (event) => {
+    const handleDeletion = async () => {
         if (isLoading) return;
 
         let result = await deleteAccount();
@@ -193,7 +200,7 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
                 <ProfilePic userId={userId} cacheTrickSeed={cacheTrick}/>
                 <div id="card-username">
                     <div className="card-row">
-                        <UserName name={username} isEditing={isEditingUsername} onNameChange={handleUsernameChange} isDisabled={isLoading}/>
+                        <UserName name={username} isEditing={isEditingUsername} isDisabled={isLoading}/>
                         <EditButton isEditing={isEditingUsername} onEditToggle={handleUsernameEditing}
                                     onConfirm={confirmUsernameEdit} onCancel={cancelUsernameEdit} isDisabled={isLoading}/>
                     </div>
@@ -204,7 +211,7 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
             </div>
             <div className="card-row">
                 <TextareaField text={description} placeholder="Нет описания" isEditing={isEditingDescription}
-                               onChange={handleDescriptionChange} isDisabled={isLoading} 
+                               isDisabled={isLoading} 
                                handleEdit={handleDescriptionEditing} onConfirm={confirmDescriptionEdit}
                                onCancel={cancelDescriptionEdit}/>
             </div>
