@@ -17,14 +17,31 @@ function DeleteButton({entityType, onDelete}) {
         setIsDeleteModalOpen(false);
     }
     
+    const objectPrompt = (type) => {
+        switch (type) {
+            case "comment":
+                return "комментарий";
+            case "user":
+                return "пользователя";
+            case "test":
+                return "тест";
+            case "ban":
+                return "блокировку";
+            case "tag":
+                return "тег";
+            case "question":
+                return "вопрос";
+            default:
+                return "объект неизвестного типа";
+        }
+    }
+    
     return (<>
         <img src="/files/icons/close.png"
              alt="Удалить"
              onClick={openDeleteModal}
              className="delete"/>
-        {isDeleteModalOpen && (<ConfirmationModal title={`Удалить ${entityType === "comment" ? 'комментарий' 
-            : entityType === "user" ? 'пользователя' : 
-                entityType === "test" ? "тест" : "блокировку"}?`}
+        {isDeleteModalOpen && (<ConfirmationModal title={`Удалить ${objectPrompt(entityType)}?`}
                                                  subtitle="Отменить это действие будет невозможно. Все данные будут утеряны"
                                                  onConfirm={onDeleteModalConfirm}
                                                  onCancel={onDeleteModalCancel}/>)}
