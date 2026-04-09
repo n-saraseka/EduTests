@@ -31,6 +31,8 @@ function DeleteButton({entityType, onDelete}) {
                 return "тег";
             case "question":
                 return "вопрос";
+            case "answer":
+                return "ответ";
             default:
                 return "объект неизвестного типа";
         }
