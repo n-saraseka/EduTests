@@ -21,6 +21,7 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
         var ratings = await ratingRepository.GetTestRatingAsync(entity.Id, cancellationToken);
         var completions = await testCompletionRepository.GetTestCompletionCountAsync(entity.Id, cancellationToken);
         var tags = entity.Tags.Select(t => t.Name).ToList();
+        var questions = entity.Questions.Select(QuestionEntityToDto).ToList();
         
         var testToReturn = new ApiTest
         {

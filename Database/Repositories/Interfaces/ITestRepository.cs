@@ -7,4 +7,5 @@ public interface ITestRepository : IRepository<Test, int>
     IQueryable<Test> Search(string text);
     IQueryable<Test> GetAllByTag(string name);
     Task<Test?> GetByIdWithTagsAsync(int id, CancellationToken cancellationToken);
+    Task<Test?> GetByIdWithTagsAndQuestionsAsync(int id, CancellationToken cancellationToken);
 }

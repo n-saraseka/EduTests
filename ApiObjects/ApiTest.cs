@@ -7,6 +7,7 @@ public class ApiTest
     public string? Description { get; set; }
     public string? ThumbnailUrl { get; set; }
     public List<string>? Tags { get; set; }
+    public List<ApiQuestion>? Questions { get; set; }
     public int? Rating { get; set; }
     public int? CompletionCount { get; set; }
     public int? AttemptLimit { get; set; }
