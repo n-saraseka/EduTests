@@ -3,7 +3,7 @@ import EditButton from "../buttons/editButton.jsx";
 function TextField({isEditing, text, placeholder, onChange, isDisabled, handleEdit, onConfirm, onCancel}) {
     return (<>
         {isEditing ? (
-                <input id="edit-text" defaultValue={text === null ? undefined : text} 
+                <input id="edit-text" value={text === null ? undefined : text} onChange={onChange}
                        autoFocus disabled={isDisabled}/>)
             : <p>{text == null || text === "" ? placeholder : text}</p>}
         <EditButton isEditing={isEditing} onEditToggle={handleEdit} onConfirm={onConfirm} onCancel={onCancel} 

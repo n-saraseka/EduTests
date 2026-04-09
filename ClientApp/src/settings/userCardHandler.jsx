@@ -4,8 +4,8 @@ import FileUploader from "../inputs/fileUploader.jsx";
 import TextareaField from "../inputs/textareaField.jsx";
 import EditButton from "../buttons/editButton.jsx";
 
-function UserName({isEditing, name, isDisabled}) {
-    return isEditing ? (<input type="text" id="edit-text" defaultValue={name} autoFocus 
+function UserName({isEditing, name, onChange, isDisabled}) {
+    return isEditing ? (<input type="text" id="edit-text" value={name} onChange={onChange} autoFocus 
                                disabled={isDisabled}/> ) :
         (<h2>{name}</h2>);
 }
@@ -21,12 +21,13 @@ function FieldChangeStatus({isSuccess}) {
         (isSuccess ? <p style={{color: "green"}}>Успешно</p> : <p style={{color: "red"}}>Ошибка</p>));
 }
 
-function UserCardHandler({userId, baseUsername, baseDescription}) {
+function UserCardHandler({baseUser}) {
+    const [user, setUser] = useState(baseUser);
     const [isEditingUsername, setIsEditingUsername] = useState(false);
-    const [username, setUsername] = useState(baseUsername);
+    const [username, setUsername] = useState(user.username);
     
     const [isEditingDescription, setIsEditingDescription] = useState(false);
-    const [description, setDescription] = useState(baseDescription);
+    const [description, setDescription] = useState(user.description);
     
     const [isLoginSuccess, setIsLoginSuccess] = useState(null);
     const [isPasswordSuccess, setIsPasswordSuccess] = useState(null);
@@ -47,39 +48,33 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
         event.preventDefault();
         if (isLoading) return;
         
-        const newUsername = document.querySelector("#edit-text").value;
-        if (newUsername === username) {
-            setIsEditingUsername(false);
-            return;
-        }
-        
-        const command = new ChangeUsernameCommand(newUsername);
+        if (username !== user.username) {
+            const command = new ChangeUsernameCommand(username);
 
-        setIsLoading(true);
-        const result = await changeUsername(command, userId);
-        setIsLoading(false);
+            setIsLoading(true);
+            const result = await changeUsername(command, user.id);
+            setIsLoading(false);
 
-        if (!result.ok) {
-            setUsername(baseUsername);
+            if (!result.ok) {
+                setUsername(user.username);
+            }
+            else {
+                setUser({...user, username: username})
+            }
         }
-        else {
-            setUsername(newUsername);
-        }
-
         setIsEditingUsername(false);
     }
     
     const cancelUsernameEdit = (event) => {
         event.preventDefault();
         if (isLoading) return;
-        
+        setUsername(user.username);
         setIsEditingUsername(false);
     }
 
     const handleDescriptionEditing = async (event) => {
         event.preventDefault();
         if (isLoading) return;
-
         setIsEditingDescription(true);
     }
     
@@ -87,23 +82,19 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
         event.preventDefault();
         if (isLoading) return;
         
-        const newDescription = document.querySelector("#edit-text").value;
-        if (newDescription === description) {
-            setIsEditingDescription(false);
-            return;
-        }
+        if (description !== user.description) {
+            const command = new ChangeDescriptionCommand(description);
 
-        const command = new ChangeDescriptionCommand(newDescription);
+            setIsLoading(true);
+            const result = await changeDescription(command, user.id);
+            setIsLoading(false);
 
-        setIsLoading(true);
-        const result = await changeDescription(command, userId);
-        setIsLoading(false);
-
-        if (!result.ok) {
-            setDescription(baseDescription);
-        }
-        else {
-            setDescription(newDescription);
+            if (!result.ok) {
+                setDescription(user.description);
+            }
+            else {
+                setUser({...user, description: description});
+            }
         }
         
         setIsEditingDescription(false);
@@ -112,7 +103,7 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
     const cancelDescriptionEdit = (event) => {
         event.preventDefault();
         if (isLoading) return;
-        
+        setDescription(user.description);
         setIsEditingDescription(false);
     }
     
@@ -123,7 +114,7 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
         if (event.target.files.length === 1) {
             
             setIsLoading(true);
-            const result = await uploadAvatar(event.target.files[0], userId);
+            const result = await uploadAvatar(event.target.files[0], user.id);
             setIsLoading(false);
             
             if (result.ok) {
@@ -143,7 +134,7 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
         const command = new ChangeLoginCommand(newLogin.value, oldPassword.value);
         
         setIsLoading(true);
-        const result = await changeLogin(command, userId);
+        const result = await changeLogin(command, user.id);
         setIsLoading(false);
         
         if (result.ok) {
@@ -165,7 +156,7 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
         const command = new ChangePasswordCommand(oldPassword.value, newPassword.value);
 
         setIsLoading(true);
-        const result = await changePassword(command, userId);
+        const result = await changePassword(command, user.id);
         setIsLoading(false);
 
         if (result.ok) {
@@ -197,10 +188,11 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
     return (
         <>
             <div id="card-top">
-                <ProfilePic userId={userId} cacheTrickSeed={cacheTrick}/>
+                <ProfilePic userId={user.id} cacheTrickSeed={cacheTrick}/>
                 <div id="card-username">
                     <div className="card-row">
-                        <UserName name={username} isEditing={isEditingUsername} isDisabled={isLoading}/>
+                        <UserName name={username} onChange={(e) => setUsername(e.target.value)}
+                                  isEditing={isEditingUsername} isDisabled={isLoading}/>
                         <EditButton isEditing={isEditingUsername} onEditToggle={handleUsernameEditing}
                                     onConfirm={confirmUsernameEdit} onCancel={cancelUsernameEdit} isDisabled={isLoading}/>
                     </div>
@@ -211,7 +203,7 @@ function UserCardHandler({userId, baseUsername, baseDescription}) {
             </div>
             <div className="card-row">
                 <TextareaField text={description} placeholder="Нет описания" isEditing={isEditingDescription}
-                               isDisabled={isLoading} 
+                               onChange={(e) => setDescription(e.target.value)} isDisabled={isLoading} 
                                handleEdit={handleDescriptionEditing} onConfirm={confirmDescriptionEdit}
                                onCancel={cancelDescriptionEdit}/>
             </div>

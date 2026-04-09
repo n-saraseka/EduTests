@@ -6,8 +6,7 @@ import BannedTable from "./settings/bannedTable.jsx";
 const initialData = window.__INITIAL_DATA__;
 
 const cardRoot = createRoot(document.getElementById('user-card'));
-cardRoot.render(<UserCardHandler userId={initialData.user.id} baseUsername={initialData.user.username} 
-                                 baseDescription={initialData.user.description}/>);
+cardRoot.render(<UserCardHandler baseUser={initialData.user}/>);
 
 if (document.getElementById('reports')) {
     const reportRoot = createRoot(document.getElementById('reports'));
