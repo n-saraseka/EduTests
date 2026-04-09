@@ -8,6 +8,7 @@ public class Test : IEntity<int>, IAuditable
     public User User { get; set; }
     public required int UserId { get; set; }
     public List<Tag> Tags { get; set; } = new();
+    public List<Question> Questions { get; set; } = new();
     public required string Name { get; set; }
     public string? Description { get; set; }
     public string? ThumbnailUrl { get; set; }

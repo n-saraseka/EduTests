@@ -9,10 +9,6 @@ public class QuestionConfiguration : IEntityTypeConfiguration<Question>
     public void Configure(EntityTypeBuilder<Question> builder)
     {
         builder
-            .HasOne(q => q.Test)
-            .WithMany()
-            .HasForeignKey(q => q.TestId);
-        builder
             .Property(q => q.Description)
             .HasMaxLength(1024);
         builder
