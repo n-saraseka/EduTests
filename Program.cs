@@ -108,11 +108,25 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "my_account",
     pattern: "{controller}/{id}/my_account",
-    defaults: new {controller = "User", action = "Settings"});
+    defaults: new {controller = "User", action = "Settings"})
+    .WithStaticAssets();
 
 app.MapControllerRoute(
     name: "comment_base",
     pattern: "{controller}/{id}",
-    defaults: new {controller = "Comment", action = "GetCommentBase"});
+    defaults: new {controller = "Comment", action = "GetCommentBase"})
+    .WithStaticAssets();
+
+app.MapControllerRoute(
+    name: "test_constructor",
+    pattern: "{controller}/{id}/constructor",
+    defaults: new {controller = "Test", action = "Constructor"})
+    .WithStaticAssets();
+
+app.MapControllerRoute(
+    name: "constructor",
+    pattern: "constructor",
+    defaults: new {controller = "Constructor", action = "BaseConstructor"})
+    .WithStaticAssets();
 
 app.Run();

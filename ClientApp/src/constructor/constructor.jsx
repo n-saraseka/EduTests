@@ -1,0 +1,33 @@
+import {useState} from "react";
+import TestAside from "./testAside.jsx";
+import TestTab from "./testTab.jsx";
+
+const tabs = ["test", "result", "extra-settings", "publish"];
+
+function Constructor({baseTest, user}) {
+    const [test, setTest] = useState(baseTest !== null ? baseTest :
+        {
+            userId: user.id,
+            name: "Без названия",
+            description: null,
+            tags: [],
+            questions: []
+        });
+    const [currentTab, setCurrentTab] = useState(0); // Default to test and questions settings
+    
+    function TabSwitch() {
+        switch(currentTab) {
+            case 0:
+                return <TestTab test={test} setTest={setTest}/>;
+            default:
+                return <TestTab test={test} setTest={setTest}/>;
+        }
+    }
+    
+    return (<>
+        <TestAside tabs={tabs} currentTab={currentTab} setCurrentTab={setCurrentTab}/>
+        <TabSwitch/>
+    </>)
+}
+
+export default Constructor;

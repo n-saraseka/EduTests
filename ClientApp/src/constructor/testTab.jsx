@@ -1,0 +1,165 @@
+import {useState} from "react";
+import TextField from "../inputs/textField.jsx";
+import TextareaField from "../inputs/textareaField.jsx";
+import FileUploader from "../inputs/fileUploader.jsx";
+import DeleteButton from "../buttons/deleteButton.jsx";
+import ConstructorQuestion from "./constructorQuestion.jsx";
+
+function TestTab({test, setTest}){
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [name, setName] = useState(test.name);
+    const [isEditingDescription, setIsEditingDescription] = useState(false);
+    const [description, setDescription] = useState(test.description);
+    const [isAddingTag, setIsAddingTag] = useState(false);
+    
+    const handleNameEdit = () => {
+        setIsEditingName(true);
+    }
+    
+    const nameConfirm = () => {
+        if (name !== test.name) {
+            setTest({...test, name: name});
+        }
+        setIsEditingName(false);
+    }
+    
+    const nameCancel = () => {
+        setName(test.name);
+        setIsEditingName(false);
+    }
+    
+    const handleDescriptionEdit = () => {
+        setIsEditingDescription(true);
+    }
+    
+    const descriptionConfirm = () => {
+        if (description !== test.description) {
+            setTest({...test, description: description});
+        }
+        setIsEditingDescription(false);
+    }
+    
+    const descriptionCancel = () => {
+        setDescription(test.description);
+        setIsEditingDescription(false);
+    }
+    
+    const removeTag = (name) => {
+        let oldTest = test;
+        test.tags = test.tags.filter(t => t.name !== name);
+        setTest(oldTest);
+    }
+    
+    const showTagRemoveButton = (event) => {
+        event.target.after(<DeleteButton entityType="tag" onDelete={() => removeTag(event.target.key)}/>);
+    }
+    
+    const hideTagRemoveButton = (event) => {
+        event.target.nextSibling.remove();
+    }
+    
+    const addTag = (event) => {
+        event.preventDefault();
+        let oldTest = test;
+        const tagName = document.querySelector("#tag-input").value;
+        if (tagName === "" || tagName === null || oldTest.tags.indexOf(tagName) !== -1) return;
+        let prevTags = oldTest.tags;
+        prevTags.push(tagName);
+        oldTest.tags = prevTags;
+        setTest(oldTest);
+    }
+    
+    const handleTag = () => {
+        setIsAddingTag(false);
+    }
+    
+    const changeAccessType = (event) => {
+        let oldTest = test;
+        const newValue = parseInt(event.target.value);
+        if (newValue !== oldTest.accessType) {
+            oldTest.accessType = newValue;
+            setTest(oldTest);
+        }
+    }
+    
+    const updateQuestion = (index, updatedQuestion) => {
+        setTest(prevTest => ({...prevTest, questions: prevTest.questions.map(q =>
+            q.orderIndex === index ? updatedQuestion : q)}));
+    }
+    
+    const addQuestion = () => {
+        let newQuestions = test.questions;
+        const emptyQuestionData = {
+            options: [], 
+            leftColumn: [], 
+            rightColumn: [], 
+            pairs: [],
+            tolerance: null,
+            numberAnswer: null,
+            sequence: [],
+            textAnswer: null,
+            validAnswers: []
+        };
+        newQuestions.push({
+            orderIndex: newQuestions.length + 1,
+            type: 0,
+            description: null,
+            data: emptyQuestionData,
+            correctData: emptyQuestionData
+        });
+        setTest({...test, questions: newQuestions});
+    }
+    
+    return (<div className="constructor-tab">
+        <h1>Настройки теста</h1>
+        <div className="test-card">
+            <div className="test-card-row">
+                <TextField text={name} placeholder="Без названия"
+                           isEditing={isEditingName} handleEdit={handleNameEdit} onConfirm={nameConfirm}
+                           onChange={(e) => setName(e.target.value)} onCancel={nameCancel} isDisabled={false}/>
+            </div>
+            <div className="test-card-row">
+                <TextareaField text={description} placeholder="Без описания"
+                               isEditing={isEditingDescription} handleEdit={handleDescriptionEdit}
+                               onChange={(e) => setDescription(e.target.value)}
+                               onConfirm={descriptionConfirm} onCancel={descriptionCancel} isDisabled={false}/>
+            </div>
+            <div className="test-card-row">
+                <FileUploader text="Обложка: " isDisabled={false}/>
+            </div>
+            <div className="test-card-row">
+                <label htmlFor="access-type">Тип доступа:</label>
+                <select name="access-type" id="access-type" defaultValue={test.accessType} onChange={changeAccessType}>
+                    <option value="0">Публичный</option>
+                    <option value="1">Доступ по ссылке</option>
+                    <option value="2">Частный доступ</option>
+                </select>
+            </div>
+            <div className="test-card-row">
+                <label htmlFor="test-type">Теги: </label>
+                <div id="test-tags">
+                    <ul className="tags-list">
+                        {test.tags.map(tag => (<li className="test-tag" key={tag.name} onMouseEnter={showTagRemoveButton}
+                                              onMouseLeave={hideTagRemoveButton}>{tag.name}</li>))}
+                    </ul>
+                    {isAddingTag ? <>
+                        <input type="text" placeholder="Текст тега..." id="tag-input"/>
+                            <img src="/files/icons/check.png" alt="Confirm addition" onClick={addTag} 
+                                 className="edit-icon"/>
+                            <img src="/files/icons/close.png" alt="Cancel addition" onClick={handleTag} 
+                                 className="edit-icon"/>
+                    </>
+                        : <button className="btn-primary" onClick={handleTag}>Добавить</button>}
+                </div>
+            </div>
+        </div>
+        <h1>Вопросы</h1>
+        <div id="questions">
+            {test.questions.map(q => <ConstructorQuestion question={q} key={q.orderIndex} 
+                                                          onChange={(updated) => updateQuestion(q.orderIndex, updated)}/>)}
+            <button className="btn-primary" onClick={addQuestion}>Добавить вопрос</button>
+        </div>
+    </div>)
+}
+
+export default TestTab;

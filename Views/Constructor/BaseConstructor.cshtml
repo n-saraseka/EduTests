@@ -1,0 +1,15 @@
+@model EduTests.Models.ConstructorViewModel
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/constructor.css">
+}
+
+@section Scripts
+{
+    <script>
+        window.__INITIAL_DATA__ = @Html.Raw(Json.Serialize(Model));
+    </script>
+    <script type="module" src="http://localhost:5173/src/constructorScripts.jsx"></script>
+}
+
+<div id="app"></div>
