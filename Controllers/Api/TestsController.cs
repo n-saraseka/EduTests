@@ -72,7 +72,7 @@ public class TestsController(ITestRepository testRepository,
         foreach (var question in questions)
             try
             {
-                questionValidatorService.Validate(question.Data, question.CorrectData, question.Type, true);
+                questionValidatorService.Validate(question.Data, question.CorrectData, question.Type);
             }
             catch (Exception)
             {
@@ -178,7 +178,7 @@ public class TestsController(ITestRepository testRepository,
             foreach (var question in questions)
                 try
                 {
-                    questionValidatorService.Validate(question.Data, question.CorrectData, question.Type, true);
+                    questionValidatorService.Validate(question.Data, question.CorrectData, question.Type);
                 }
                 catch (Exception)
                 {

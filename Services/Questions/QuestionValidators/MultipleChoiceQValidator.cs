@@ -3,7 +3,7 @@ using EduTests.Database.Enums;
 
 namespace EduTests.Services.Questions.QuestionValidators;
 
-public class MultipleChoiceValidator : IValidator
+public class MultipleChoiceQValidator : IQuestionValidator
 {
     /// <summary>
     /// Check if a <see cref="QuestionType.MultipleChoice"/> type of <see cref="QuestionData"/> had been filled out correctly
@@ -26,21 +26,21 @@ public class MultipleChoiceValidator : IValidator
     /// <summary>
     /// Validate a <see cref="QuestionType.MultipleChoice"/> type of question / answer
     /// </summary>
-    /// <param name="data">The question / answer data</param>
-    /// <param name="correctData">The valid answers data</param>
-    /// <param name="isQuestion">Whether the <see cref="QuestionData"/> to validate comes from a <see cref="Question"/> or <see cref="UserAnswer"/></param>
+    /// <param name="data">The question <see cref="QuestionData"/></param>
+    /// <param name="correctData">The correct <see cref="QuestionData"/></param>
     /// <exception cref="ArgumentOutOfRangeException">If <paramref name="data"/>.Options are out of range</exception>
     /// <exception cref="ArgumentException">If <paramref name="correctData"/>.Options don't match options from <paramref name="data"/>.Options</exception>
-    public void Validate(QuestionData data, QuestionData? correctData, bool isQuestion)
+    public void Validate(QuestionData data, QuestionData correctData)
     {
         CheckFields(data);
+        CheckFields(correctData);
         if (data.Options.Count is 0 or > 10)
             throw new ArgumentOutOfRangeException($"{nameof(data.Options)} must have between 1 and 10 items");
-        if (isQuestion)
-        {
-            CheckFields(correctData);
-            if (!correctData.Options.All(o => data.Options.Contains(o)))
-                throw new ArgumentException("All correct options must be present from the available options");
-        }
+        
+        if (correctData.ValidIndices.Min() < 0 || correctData.ValidIndices.Max() > data.Options.Count - 1)
+            throw new ArgumentOutOfRangeException($"{nameof(correctData.ValidIndices)}");
+        
+        if (correctData.ValidIndices.Count > data.Options.Count)
+            throw new ArgumentException($"{nameof(correctData.ValidIndices)} should have less or equal to {nameof(data.Options)} amount of items");
     }
 }

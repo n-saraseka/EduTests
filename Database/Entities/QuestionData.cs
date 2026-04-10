@@ -5,6 +5,10 @@ public class QuestionData
 {
     // multiple or single choice question, also base for sequence
     public List<string> Options { get; set; } = new();
+    // Correct data for multiple / single choice
+    public List<int> ValidIndices { get; set; } = new();
+    // ONLY for Answers, not Question.Data or Question.CorrectData
+    public List<int> ChosenIndices { get; set; } = new();
     
     // match pairs
     public List<string> LeftColumn { get; set; } = new();
