@@ -202,7 +202,8 @@ function ConstructorQuestion({question, onChange}) {
                     <div id="asnwers">
                         {question.data.options.map((option, index) => (<div className="test-card-row" key={index}>
                             <input type="checkbox" id={`option-${index}`} value={option} name="answer"
-                                   checked={question.correctData.validIndices.includes(index)}/>
+                                   checked={question.correctData.validIndices.includes(index)}
+                                   onChange={(e) => editChoiceData(e, index, type)}/>
                             {editingAnswerIndex === index ? <input type="text" key={`input-${index}`} 
                                                                    value={editingAnswer} autoFocus={true}
                                                                    onChange={(e) => setEditingAnswer(e.target.value)}/>
