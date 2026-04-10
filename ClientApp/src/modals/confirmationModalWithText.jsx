@@ -6,8 +6,8 @@ function ConfirmationModalWithText({title, subtitle, onConfirm, onCancel}) {
                 {subtitle !== undefined && (<span className="modal-window-subtitle">{subtitle}</span>)}
                 <textarea name="modal-text" id="modal-text" maxLength={256} placeholder="Введите текст..."></textarea>
                 <div className="modal-confirmation">
-                    <button className="btn-secondary" onClick={onConfirm}>Подтвердить</button>
-                    <button className="btn-primary" onClick={onCancel}>Отмена</button>
+                    <button className="btn btn-secondary" onClick={onConfirm}>Подтвердить</button>
+                    <button className="btn btn-primary" onClick={onCancel}>Отмена</button>
                 </div>
             </div>
         </div>

@@ -149,7 +149,7 @@ function TestTab({test, setTest}){
                             <img src="/files/icons/close.png" alt="Cancel addition" onClick={handleTag} 
                                  className="edit-icon"/>
                     </>
-                        : <button className="btn-primary" onClick={handleTag}>Добавить</button>}
+                        : <button className="btn btn-primary" onClick={handleTag}>Добавить</button>}
                 </div>
             </div>
         </div>
@@ -157,7 +157,7 @@ function TestTab({test, setTest}){
         <div id="questions">
             {test.questions.map(q => <ConstructorQuestion question={q} key={q.orderIndex} 
                                                           onChange={(updated) => updateQuestion(q.orderIndex, updated)}/>)}
-            <button className="btn-primary" onClick={addQuestion}>Добавить вопрос</button>
+            <button className="btn btn-primary" onClick={addQuestion}>Добавить вопрос</button>
         </div>
     </div>)
 }

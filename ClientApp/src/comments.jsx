@@ -27,7 +27,7 @@ function Comment({baseComment, currentUserId, currentUserGroup, onDelete, isBann
 function PostComment({ isPosting, onPost}) {
     return ( <>
             <textarea name="new-comment" id="new-comment" placeholder="Введите свой комментарий..." disabled={isPosting}></textarea>
-            <button className="btn-primary" disabled={isPosting} onClick={onPost}>Опубликовать комментарий</button>
+            <button className="btn btn-primary" disabled={isPosting} onClick={onPost}>Опубликовать комментарий</button>
     </>)
 }
 

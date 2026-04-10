@@ -179,7 +179,7 @@ function ConstructorQuestion({question, onChange}) {
                                         isDisabled={editingAnswerIndex !== null && editingAnswerIndex !== index}/>
                             <DeleteButton entityType="answer" onDelete={() => onDeleteAnswer(index, type)}/>
                         </div>))}
-                        <button className="btn-primary" onClick={() => addAnswer(0)}>Добавить</button>
+                        <button className="btn btn-primary" onClick={() => addAnswer(0)}>Добавить</button>
                     </div>
                 </>
             // Multiple choice
@@ -200,7 +200,7 @@ function ConstructorQuestion({question, onChange}) {
                                         isDisabled={editingAnswerIndex !== null && editingAnswerIndex !== index}/>
                             <DeleteButton entityType="answer" onDelete={() => onDeleteAnswer(index, type)}/>
                         </div>))}
-                        <button className="btn-primary" onClick={() => addAnswer(1)}>Добавить</button>
+                        <button className="btn btn-primary" onClick={() => addAnswer(1)}>Добавить</button>
                     </div>
                 </>
             // Number input
@@ -235,7 +235,7 @@ function ConstructorQuestion({question, onChange}) {
                         </div>)
                         )
                         }
-                        <button className="btn-primary" onClick={() => addAnswer(3)}>Добавить</button>
+                        <button className="btn btn-primary" onClick={() => addAnswer(3)}>Добавить</button>
                     </div>
                 </>
         }

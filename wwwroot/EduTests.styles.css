@@ -65,23 +65,23 @@ a {
     color: #4f98ff;
 }
 
-.btn {
-    padding: 0.5rem 1rem;
+.btn, input::file-selector-button {
+    padding: 0.25rem 0.25rem;
     border-radius: 0.2rem;
     font-weight: bold;
 }
 
-.btn:hover {
+.btn:hover, input::file-selector-button:hover {
     cursor: pointer;
 }
 
-.btn-primary {
+.btn-primary, input::file-selector-button {
     color: #fff;
     background-color: #4f98ff;
     border-color: #2E85FF;
 }
 
-.btn-primary:hover {
+.btn-primary:hover, input::file-selector-button:hover {
     background-color: #2e85ff;
     border-color: #006aff;
 }

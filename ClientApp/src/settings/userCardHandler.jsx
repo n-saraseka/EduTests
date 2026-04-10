@@ -212,7 +212,7 @@ function UserCardHandler({baseUser}) {
                 <span className="account-section-header">Логин</span>
                 <label htmlFor="new-login">Новый логин: </label> <input type="text" id="new-login"/>
                 <label htmlFor="login-confirm-password">Пароль для подтверждения: </label> <input type="password" id="login-confirm-password"/>
-                <button className="btn-primary" onClick={handleLoginChange} disabled={isLoading}>Изменить логин</button>
+                <button className="btn btn-primary" onClick={handleLoginChange} disabled={isLoading}>Изменить логин</button>
                 <FieldChangeStatus isSuccess={isLoginSuccess}/>
                 
             </div>
@@ -220,10 +220,10 @@ function UserCardHandler({baseUser}) {
                 <span className="account-section-header">Пароль</span>
                 <label htmlFor="new-password">Новый пароль: </label> <input type="password" id="new-password"/>
                 <label htmlFor="password-confirm-password">Пароль для подтверждения: </label> <input type="password" id="password-confirm-password"/>
-                <button className="btn-primary" onClick={handlePasswordChange} disabled={isLoading}>Изменить пароль</button>
+                <button className="btn btn-primary" onClick={handlePasswordChange} disabled={isLoading}>Изменить пароль</button>
                 <FieldChangeStatus isSuccess={isPasswordSuccess}/>
             </div>
-            <button className="btn-danger" onClick={openDeleteModal}>Удалить аккаунт</button>
+            <button className="btn btn-danger" onClick={openDeleteModal}>Удалить аккаунт</button>
             {isDeleteModalOpen && <ConfirmationModal onConfirm={handleDeletion} onCancel={onDeleteModalCancel} 
                                                      title="Вы действительно хотите удалить аккаунт?" 
                                                      subtitle="Отменить это действие будет невозможно. Все данные, комментарии и тесты будут утеряны."/>}

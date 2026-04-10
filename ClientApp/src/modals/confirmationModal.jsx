@@ -5,8 +5,8 @@ function ConfirmationModal({title, subtitle, onConfirm, onCancel}) {
                 <span className="modal-window-title">{title}</span>
                 {subtitle !== undefined && (<span className="modal-window-subtitle">{subtitle}</span>)}
                 <div className="modal-confirmation">
-                    <button className="btn-secondary" onClick={onConfirm}>Подтвердить</button>
-                    <button className="btn-primary" onClick={onCancel}>Отмена</button>
+                    <button className="btn btn-secondary" onClick={onConfirm}>Подтвердить</button>
+                    <button className="btn btn-primary" onClick={onCancel}>Отмена</button>
                 </div>
             </div>
         </div>

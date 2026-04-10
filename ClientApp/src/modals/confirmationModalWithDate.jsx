@@ -10,8 +10,8 @@ function ConfirmationModalWithDate({title, subtitle, dateTitle, dateMin, onConfi
                     <input type="date" min={dateMin} id="modal-date"/>
                 </div>
                 <div className="modal-confirmation">
-                    <button className="btn-secondary" onClick={onConfirm}>Подтвердить</button>
-                    <button className="btn-primary" onClick={onCancel}>Отмена</button>
+                    <button className="btn btn-secondary" onClick={onConfirm}>Подтвердить</button>
+                    <button className="btn btn-primary" onClick={onCancel}>Отмена</button>
                 </div>
             </div>
         </div>
