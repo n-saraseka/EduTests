@@ -17,4 +17,5 @@ public interface IEntityToDtoService
     ApiBan BanEntityToDto(BannedUser entity);
     ApiTag TagEntityToDto(Tag tag);
     ApiReport ReportEntityToDto(Report entity);
+    ApiTestResult TestResultEntityToDto(TestResult entity);
 }

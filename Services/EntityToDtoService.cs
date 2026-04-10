@@ -37,7 +37,7 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
             TimeLimit = entity.TimeLimit,
             Tags = tags,
             Questions = questions,
-            Results = entity.Results.ToDictionary(c => c.PercentageThreshold, c => c.Result),
+            Results = entity.Results.Select(TestResultEntityToDto).ToList(),
             DefaultResult = entity.DefaultResult
         };
         
@@ -285,5 +285,16 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
         };
         
         return apiReport;
+    }
+
+    public ApiTestResult TestResultEntityToDto(TestResult entity)
+    {
+        var apiResult = new ApiTestResult
+        {
+            PercentageThreshold = entity.PercentageThreshold,
+            Result = entity.Result
+        };
+        
+        return apiResult;
     }
 }
