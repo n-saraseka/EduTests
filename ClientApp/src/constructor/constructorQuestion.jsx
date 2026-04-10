@@ -24,7 +24,21 @@ function ConstructorQuestion({question, onChange}) {
                     numberAnswer: null,
                     sequence: [],
                     textAnswer: null,
-                    validAnswers: []
+                    validAnswers: [],
+                    validIndices: [],
+                },
+                correctData: {
+                ...question.correctData,
+                    options: [],
+                    leftColumn: [],
+                    rightColumn: [],
+                    pairs: [],
+                    tolerance: null,
+                    numberAnswer: null,
+                    sequence: [],
+                    textAnswer: null,
+                    validAnswers: [],
+                    validIndices: []
                 },
                 type: newType});
         }
@@ -141,20 +155,19 @@ function ConstructorQuestion({question, onChange}) {
         switch (type) {
             // Single choice
             case 0:
-                const newOptions = [question.data.options[index]];
-                onChange({...question, correctData: {...question.correctData, options: newOptions}});
+                const newIndices = [index];
+                onChange({...question, correctData: {...question.correctData, validIndices: newIndices}});
                 break;
             // Multiple choice
             case 1:
-                const option = question.data.options[index];
-                let options = question.correctData.options;
+                let indices = question.correctData.validIndices;
                 if (event.target.checked) {
-                    options.push(option);
+                    indices.push(index);
                 }
                 else {
-                    options = options.filter(o => o !== option);
+                    indices = indices.filter(i => i !== index);
                 }
-                onChange({...question, correctData: {...question.correctData, options: options}});
+                onChange({...question, correctData: {...question.correctData, validIndices: indices}});
                 break;
         }
     }
@@ -168,7 +181,7 @@ function ConstructorQuestion({question, onChange}) {
                     <div id="asnwers">
                         {question.data.options.map((option, index) => (<div className="test-card-row" key={index}>
                             <input type="radio" id={`option-${index}`} value={option} name="answer" 
-                                   checked={question.correctData.options.indexOf(option) !== -1} 
+                                   checked={question.correctData.validIndices.includes(index)} 
                                    onChange={(e) => editChoiceData(e, index, type)}/>
                             {editingAnswerIndex === index ? <input type="text" key={`input-${index}`} 
                                                                    value={editingAnswer} autoFocus={true}
@@ -189,7 +202,7 @@ function ConstructorQuestion({question, onChange}) {
                     <div id="asnwers">
                         {question.data.options.map((option, index) => (<div className="test-card-row" key={index}>
                             <input type="checkbox" id={`option-${index}`} value={option} name="answer"
-                                   checked={question.correctData.options.indexOf(option) !== -1}/>
+                                   checked={question.correctData.validIndices.includes(index)}/>
                             {editingAnswerIndex === index ? <input type="text" key={`input-${index}`} 
                                                                    value={editingAnswer} autoFocus={true}
                                                                    onChange={(e) => setEditingAnswer(e.target.value)}/>

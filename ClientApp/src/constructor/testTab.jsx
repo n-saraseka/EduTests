@@ -98,7 +98,8 @@ function TestTab({test, setTest}){
             numberAnswer: null,
             sequence: [],
             textAnswer: null,
-            validAnswers: []
+            validAnswers: [],
+            validIndices: []
         };
         newQuestions.push({
             orderIndex: newQuestions.length + 1,
