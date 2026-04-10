@@ -90,27 +90,31 @@ function BannedTable({baseBans, basePages, rowsPerPage}) {
             <label htmlFor="activeFilter">Показывать только активные блокировки: </label>
             <input type="checkbox" name="activeFilter" id="activeFilter" onChange={filterBans} checked={active}/>
         </div>
-        <table className="settings-table">
-            <thead>
-            <tr>
-                <td colSpan="2">Заблокированный пользователь</td>
-                <td colSpan="2">Заблокировавший пользователь</td>
-                <td>Причина блокировки</td>
-                <td>Дата блокировки</td>
-                <td>Дата снятия блокировки</td>
-                <td></td>
-            </tr>
-            </thead>
-            <tbody>
-            {isLoading ? <tr>
-                    <td colSpan={8} className="loading">
-                        <img src="/files/icons/loading.png" alt="Загрузка контента" className="loading-icon"/>
-                    </td>
+        {bans.length > 0 ? <>
+            <table className="settings-table">
+                <thead>
+                <tr>
+                    <td colSpan="2">Заблокированный пользователь</td>
+                    <td colSpan="2">Заблокировавший пользователь</td>
+                    <td>Причина блокировки</td>
+                    <td>Дата блокировки</td>
+                    <td>Дата снятия блокировки</td>
+                    <td></td>
                 </tr>
-                : bans.map(ban => <BanRow key={ban.id} baseBan={ban} onDelete={() => handleBanDeletion(ban.id)}/>)}
-            </tbody>
-        </table>
-        {basePages > 1 && <Pagination page={page} pageCount={pageCount} onChangePage={handlePageChange}/>}
+                </thead>
+                <tbody>
+                {isLoading ? <tr>
+                        <td colSpan={8} className="loading">
+                            <img src="/files/icons/loading.png" alt="Загрузка контента" className="loading-icon"/>
+                        </td>
+                    </tr>
+                    : bans.map(ban => <BanRow key={ban.id} baseBan={ban} onDelete={() => handleBanDeletion(ban.id)}/>)}
+                </tbody>
+            </table>
+            {basePages > 1 && <Pagination page={page} pageCount={pageCount} onChangePage={handlePageChange}/>}
+            </>
+            : <p>Нет блокировок... Ура!</p>
+        }
     </>)
 }
 

@@ -105,24 +105,26 @@ function ReportsTable({baseReports, basePages, rowsPerPage}) {
                 <option value="2">Отклонена</option>
             </select>
         </div>
-        <table className="settings-table">
-            <thead>
-            <tr>
-                <td>Объект жалобы</td>
-                <td>Текст жалобы</td>
-                <td>Статус жалобы</td>
-            </tr>
-            </thead>
-            <tbody>
-            {isLoading ? <tr>
-                <td colSpan={3} className="loading">
-                    <img src="/files/icons/loading.png" alt="Загрузка контента" className="loading-icon"/>
-                </td>
+        {reports.length > 0 ? <>
+            <table className="settings-table">
+                <thead>
+                <tr>
+                    <td>Объект жалобы</td>
+                    <td>Текст жалобы</td>
+                    <td>Статус жалобы</td>
                 </tr>
-                : reports.map(report => <ReportRow key={report.id} baseReport={report} onStatusChange={handleReportStatusChange}/>)}
-            </tbody>
-        </table>
-        {basePages > 1 && <Pagination page={page} pageCount={pageCount} onChangePage={handlePageChange}/>}
+                </thead>
+                <tbody>
+                {isLoading ? <tr>
+                        <td colSpan={3} className="loading">
+                            <img src="/files/icons/loading.png" alt="Загрузка контента" className="loading-icon"/>
+                        </td>
+                    </tr>
+                    : reports.map(report => <ReportRow key={report.id} baseReport={report} onStatusChange={handleReportStatusChange}/>)}
+                </tbody>
+            </table>
+            {basePages > 1 && <Pagination page={page} pageCount={pageCount} onChangePage={handlePageChange}/>}
+        </> : <p>Жалоб нет... Хорошо.</p>}
     </>)
 }
 
