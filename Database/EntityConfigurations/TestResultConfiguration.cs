@@ -9,10 +9,6 @@ public class TestResultConfiguration : IEntityTypeConfiguration<TestResult>
     public void Configure(EntityTypeBuilder<TestResult> builder)
     {
         builder
-            .HasOne(tr => tr.Test)
-            .WithMany()
-            .HasForeignKey(tr => tr.TestId);
-        builder
             .Property(tr => tr.Result)
             .HasMaxLength(32);
         builder
