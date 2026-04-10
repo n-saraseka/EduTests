@@ -41,9 +41,10 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
     /// </summary>
     /// <param name="id"><see cref="Test"/> ID</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
-    /// <returns>An <see cref="IQueryable"/> with the <see cref="Test"/> and its loaded <see cref="Tag"/>s and <see cref="Question"/>s</returns>
-    public Task<Test?> GetByIdWithTagsAndQuestionsAsync(int id, CancellationToken cancellationToken = default) =>
+    /// <returns>An <see cref="IQueryable"/> with the <see cref="Test"/> and its loaded <see cref="Tag"/>s, <see cref="Question"/>s</returns>
+    public Task<Test?> GetByIdWithExtendedDataAsync(int id, CancellationToken cancellationToken = default) =>
         Set.Include(t => t.Questions)
             .Include(t => t.Tags)
+            .Include(t => t.Results)
             .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 }

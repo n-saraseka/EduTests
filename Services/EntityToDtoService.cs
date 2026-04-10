@@ -36,6 +36,9 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
             AttemptLimit = entity.AttemptLimit,
             TimeLimit = entity.TimeLimit,
             Tags = tags,
+            Questions = questions,
+            Results = entity.Results.ToDictionary(c => c.PercentageThreshold, c => c.Result),
+            DefaultResult = entity.DefaultResult
         };
         
         return testToReturn;

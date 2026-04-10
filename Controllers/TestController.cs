@@ -25,7 +25,7 @@ public class TestController(ITestRepository testRepository,
             viewModel.User = entityToDtoService.UserEntityToDto(user);
         }
         
-        var test = await testRepository.GetByIdWithTagsAndQuestionsAsync(id, cancellationToken);
+        var test = await testRepository.GetByIdWithExtendedDataAsync(id, cancellationToken);
         if (test == null)
             return NotFound("Test not found");
         var apiTest = await entityToDtoService.TestEntityToDtoAsync(test, cancellationToken);

@@ -11,7 +11,9 @@ function Constructor({baseTest, user}) {
             name: "Без названия",
             description: null,
             tags: [],
-            questions: []
+            questions: [],
+            results: [],
+            defaultResult: null
         });
     const [currentTab, setCurrentTab] = useState(0); // Default to test and questions settings
     

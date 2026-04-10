@@ -36,6 +36,9 @@ public class TestConfiguration : IEntityTypeConfiguration<Test>
                     "time_limit IS NULL OR (time_limit >= '0 hours'::interval AND time_limit <= '5 hours'::interval)");
             });
         builder
+            .Property(t => t.DefaultResult)
+            .HasMaxLength(32);
+        builder
             .HasIndex(t => t.Name);
         builder
             .HasIndex(t => t.Description);

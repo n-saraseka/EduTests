@@ -17,6 +17,7 @@ public class Test : IEntity<int>, IAuditable
     public string? Password { get; set; }
     public int? AttemptLimit { get; set; }
     public TimeSpan? TimeLimit { get; set; }
+    public string? DefaultResult { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }
