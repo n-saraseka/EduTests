@@ -3,6 +3,19 @@ import ConfirmationModal from "../modals/confirmationModal.jsx";
 
 function DeleteButton({entityType, onDelete}) {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    
+    const deletePrompts = {
+        "comment": "комментарий",
+        "user": "пользователя",
+        "test": "тест",
+        "ban": "блокировку",
+        "tag": "тег",
+        "question": "вопрос",
+        "answer": "ответ",
+        "result": "результат"
+    }
+    
+    const objectPrompt = (type) => type in deletePrompts ? deletePrompts[type] : "объект неизвестного типа"; 
 
     const openDeleteModal = () => {
         setIsDeleteModalOpen(true);
@@ -15,27 +28,6 @@ function DeleteButton({entityType, onDelete}) {
 
     const onDeleteModalCancel = () => {
         setIsDeleteModalOpen(false);
-    }
-    
-    const objectPrompt = (type) => {
-        switch (type) {
-            case "comment":
-                return "комментарий";
-            case "user":
-                return "пользователя";
-            case "test":
-                return "тест";
-            case "ban":
-                return "блокировку";
-            case "tag":
-                return "тег";
-            case "question":
-                return "вопрос";
-            case "answer":
-                return "ответ";
-            default:
-                return "объект неизвестного типа";
-        }
     }
     
     return (<>
