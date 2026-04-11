@@ -1,4 +1,3 @@
-import {useState} from "react";
 import ConstructorResult from "./constructorResult.jsx";
 
 function ResultTab({test, setTest}){
@@ -22,6 +21,7 @@ function ResultTab({test, setTest}){
     }
 
     return (<div className="constructor-tab">
+        <h1>Настройки результатов</h1>
         <div className="test-card">
             <ConstructorResult isDefault={true} result={test.defaultResult} onChange={(updated) => updateDefaultResult(updated)}/>
             {test.results.map((r, i) => <ConstructorResult key={i} isDefault={false} result={r}

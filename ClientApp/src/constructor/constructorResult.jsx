@@ -1,6 +1,5 @@
 import {useState} from "react";
 import TextField from "../inputs/textField.jsx";
-import DeleteButton from "../buttons/deleteButton.jsx";
 
 function ConstructorResult({isDefault, result, onChange})  {
     const [isEditingText, setIsEditingText] = useState(false);
