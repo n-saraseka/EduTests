@@ -99,7 +99,8 @@ function TestTab({test, setTest}){
             sequence: [],
             textAnswer: null,
             validAnswers: [],
-            validIndices: []
+            validIndices: [],
+            orderIndex: newQuestions.length + 1,
         };
         newQuestions.push({
             orderIndex: newQuestions.length + 1,
@@ -109,6 +110,36 @@ function TestTab({test, setTest}){
             correctData: emptyQuestionData
         });
         setTest({...test, questions: newQuestions});
+    }
+    
+    const moveQuestion = (question, isMovingDown) => {
+        const questions = test.questions;
+        const oldIndex = question.orderIndex;
+        const newIndex = isMovingDown ? oldIndex + 1 : oldIndex - 1;
+        
+        if (newIndex < 1 || newIndex > questions.length) return;
+        
+        let newQuestions = [...questions];
+        
+        const temp = newQuestions[oldIndex - 1];
+        newQuestions[oldIndex - 1] = newQuestions[newIndex - 1];
+        newQuestions[oldIndex - 1].orderIndex = oldIndex;
+        newQuestions[newIndex - 1] = temp;
+        newQuestions[newIndex - 1].orderIndex = newIndex;
+
+        setTest(prevTest => ({...prevTest, questions: newQuestions}));
+    }
+    
+    const removeQuestion = (question) => {
+        const questionIndex = question.orderIndex;
+        const newQuestions = test.questions.filter(q => q.orderIndex !== questionIndex);
+        const fixedQuestions = newQuestions.map(q => {
+            if (q.orderIndex > questionIndex) {
+                q.orderIndex -= 1;
+            }
+            return q;
+        });
+        setTest(prevTest => ({...prevTest, questions: fixedQuestions}));
     }
     
     return (<div className="constructor-tab">
@@ -156,8 +187,16 @@ function TestTab({test, setTest}){
         </div>
         <h1>Вопросы</h1>
         <div id="questions">
-            {test.questions.map(q => <ConstructorQuestion question={q} key={q.orderIndex} 
-                                                          onChange={(updated) => updateQuestion(q.orderIndex, updated)}/>)}
+            {test.questions.map(q => <div className="constructor-question" key={q.orderIndex}>
+                <div className="question-control">
+                    <img src="/files/icons/up.png" alt="Move up" onClick={() => moveQuestion(q, false)} 
+                         className="question-icon"/>
+                    <img src="/files/icons/down.png" alt="Move up" onClick={() => moveQuestion(q, true)}
+                         className="question-icon"/>
+                    <DeleteButton entityType="question" onDelete={() => removeQuestion(q)}/>
+                </div>
+                <ConstructorQuestion question={q} onChange={(updated) => updateQuestion(q.orderIndex, updated)}/>
+            </div>)}
             <button className="btn btn-primary" onClick={addQuestion}>Добавить вопрос</button>
         </div>
     </div>)
