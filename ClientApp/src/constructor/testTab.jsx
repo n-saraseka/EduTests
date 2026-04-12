@@ -5,7 +5,7 @@ import FileUploader from "../inputs/fileUploader.jsx";
 import DeleteButton from "../buttons/deleteButton.jsx";
 import ConstructorQuestion from "./constructorQuestion.jsx";
 
-function TestTab({test, setTest}){
+function TestTab({test, setTest, onSetThumbnail}) {
     const [isEditingName, setIsEditingName] = useState(false);
     const [name, setName] = useState(test.name);
     const [isEditingDescription, setIsEditingDescription] = useState(false);
@@ -157,7 +157,7 @@ function TestTab({test, setTest}){
                                onConfirm={descriptionConfirm} onCancel={descriptionCancel} isDisabled={false}/>
             </div>
             <div className="test-card-row">
-                <FileUploader text="Обложка: " isDisabled={false}/>
+                <FileUploader text="Обложка: " isDisabled={false} onChange={onSetThumbnail}/>
             </div>
             <div className="test-card-row">
                 <label htmlFor="access-type">Тип доступа:</label>

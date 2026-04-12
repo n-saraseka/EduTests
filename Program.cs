@@ -32,6 +32,8 @@ builder.Services.AddScoped<IBannedUserRepository, BannedUserRepository>();
 builder.Services.AddScoped<IReportsRepository, ReportsRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
+builder.Services.AddScoped<ITestResultRepository, TestResultRepository>();
+builder.Services.AddScoped<IUserAnswerRepository, UserAnswerRepository>();
 builder.Services.AddScoped<IAnonymousUserRepository, AnonymousUserRepository>();
 // services
 builder.Services.AddScoped<IQuestionValidatorService, QuestionValidatorService>();

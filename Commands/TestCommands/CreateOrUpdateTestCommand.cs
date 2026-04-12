@@ -15,5 +15,5 @@ public class CreateOrUpdateTestCommand
     [Required]
     public List<ApiQuestion> Questions { get; set; }
     [Required]
-    public Dictionary<double, string> Results { get; set; }
+    public List<ApiTestResult> Results { get; set; }
 }

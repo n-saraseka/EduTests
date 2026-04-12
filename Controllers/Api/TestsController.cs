@@ -45,22 +45,8 @@ public class TestsController(ITestRepository testRepository,
         if (command.Questions.Count == 0)
             return BadRequest("No questions were added");
         
-        var test = new Test
-        {
-            UserId = id,
-            Name = command.Name,
-            Description = command.Description,
-            AttemptLimit = command.AttemptLimit,
-            TimeLimit = command.TimeLimit,
-            Password = command.Password
-        };
-        
-        testRepository.Create(test);
-        await testRepository.SaveChangesAsync(cancellationToken);
-        
         var questions = command.Questions.Select(question => new Question
             {
-                TestId = test.Id,
                 OrderIndex = question.OrderIndex,
                 Type = question.Type,
                 Description = question.Description,
@@ -78,6 +64,25 @@ public class TestsController(ITestRepository testRepository,
             {
                 return BadRequest("One or more questions are invalid");
             }
+        
+        var test = new Test
+        {
+            UserId = id,
+            Name = command.Name,
+            Description = command.Description,
+            AttemptLimit = command.AttemptLimit,
+            TimeLimit = command.TimeLimit,
+            Password = command.Password
+        };
+        
+        testRepository.Create(test);
+        await testRepository.SaveChangesAsync(cancellationToken);
+
+        questions = questions.Select(q =>
+        {
+            q.TestId = test.Id;
+            return q;
+        }).ToList();
         
         questionRepository.CreateBulk(questions);
         
@@ -98,8 +103,8 @@ public class TestsController(ITestRepository testRepository,
         var results = command.Results.Select(r => new TestResult
         {
             TestId = test.Id,
-            PercentageThreshold = (float)r.Key,
-            Result = r.Value
+            PercentageThreshold = r.PercentageThreshold,
+            Result = r.Result
         });
         testResultRepository.CreateBulk(results);
         
@@ -161,34 +166,40 @@ public class TestsController(ITestRepository testRepository,
         test.AttemptLimit = command.AttemptLimit;
         test.TimeLimit = command.TimeLimit;
         test.Password = command.Password;
+        
+        if (command.Questions.Count == 0)
+            return BadRequest("No questions were added");
+        
+        var questions = command.Questions.Select(question => new Question
+            {
+                OrderIndex = question.OrderIndex,
+                Type = question.Type,
+                Description = question.Description,
+                Data = question.Data,
+                CorrectData = question.CorrectData,
+            })
+            .ToList();
 
-        if (command.Questions.Count > 0)
+        foreach (var question in questions)
+            try
+            {
+                questionValidatorService.Validate(question.Data, question.CorrectData, question.Type);
+            }
+            catch (Exception)
+            {
+                return BadRequest("One or more questions are invalid");
+            }
+        
+        var existingQuestions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
+        questionRepository.DeleteBulk(existingQuestions);
+        
+        questions = questions.Select(q =>
         {
-            var questions = command.Questions.Select(question => new Question
-                {
-                    TestId = test.Id,
-                    OrderIndex = question.OrderIndex,
-                    Type = question.Type,
-                    Description = question.Description,
-                    Data = question.Data,
-                    CorrectData = question.CorrectData,
-                })
-                .ToList();
+            q.TestId = test.Id;
+            return q;
+        }).ToList();
         
-            foreach (var question in questions)
-                try
-                {
-                    questionValidatorService.Validate(question.Data, question.CorrectData, question.Type);
-                }
-                catch (Exception)
-                {
-                    return BadRequest("One or more questions are invalid");
-                }
-        
-            var existingQuestions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
-            questionRepository.DeleteBulk(existingQuestions);
-            questionRepository.CreateBulk(questions);
-        }
+        questionRepository.CreateBulk(questions);
         
         var tags = await tagRepository.GetByNameBulkAsync(command.Tags, cancellationToken);
         var newTags = command.Tags.Where(t => 
@@ -213,8 +224,8 @@ public class TestsController(ITestRepository testRepository,
         var results = command.Results.Select(r => new TestResult
         {
             TestId = test.Id,
-            PercentageThreshold = (float)r.Key,
-            Result = r.Value
+            PercentageThreshold = r.PercentageThreshold,
+            Result = r.Result
         });
         testResultRepository.CreateBulk(results);
         
