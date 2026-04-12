@@ -51,10 +51,32 @@
     height: 100%;
 }
 
+#tabs li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.aside-title {
+    text-wrap: wrap;
+    text-align: center;
+    cursor: pointer;
+}
+
+.aside-title.active {
+    font-weight: bold;
+}
+
 #tabs li img {
     width: 3rem;
     height: 3rem;
     cursor: pointer;
+    opacity: 0.5;
+}
+
+#tabs li img.active {
+    opacity: 1.0;
 }
 
 #questions {
