@@ -11,6 +11,8 @@ function TestTab({test, setTest, onSetThumbnail}) {
     const [isEditingDescription, setIsEditingDescription] = useState(false);
     const [description, setDescription] = useState(test.description);
     const [isAddingTag, setIsAddingTag] = useState(false);
+    const [showingTagRemoveButton, setShowingTagRemoveButton] = useState(false);
+    const [newTag, setNewTag] = useState("");
     
     const handleNameEdit = () => {
         setIsEditingName(true);
@@ -46,7 +48,7 @@ function TestTab({test, setTest, onSetThumbnail}) {
     
     const removeTag = (name) => {
         let oldTest = test;
-        test.tags = test.tags.filter(t => t.name !== name);
+        test.tags = test.tags.filter(t => t !== name);
         setTest(oldTest);
     }
     
@@ -60,17 +62,21 @@ function TestTab({test, setTest, onSetThumbnail}) {
     
     const addTag = (event) => {
         event.preventDefault();
-        let oldTest = test;
-        const tagName = document.querySelector("#tag-input").value;
-        if (tagName === "" || tagName === null || oldTest.tags.indexOf(tagName) !== -1) return;
-        let prevTags = oldTest.tags;
-        prevTags.push(tagName);
-        oldTest.tags = prevTags;
-        setTest(oldTest);
+        let oldTags = test.tags;
+        const tagName = document.querySelector("#tag-input").value.toLowerCase();
+        if (tagName === "" || tagName === null || oldTags.indexOf(tagName) === -1) {
+            oldTags.push(tagName);
+            setTest(prevTest => ({...prevTest, tags: oldTags}));
+        }
+        setIsAddingTag(false);
+    }
+    
+    const cancelAddingTag = () => {
+        setIsAddingTag(false);
     }
     
     const handleTag = () => {
-        setIsAddingTag(false);
+        setIsAddingTag(true);
     }
     
     const changeAccessType = (event) => {
@@ -168,17 +174,22 @@ function TestTab({test, setTest, onSetThumbnail}) {
                 </select>
             </div>
             <div className="test-card-row">
-                <label htmlFor="test-type">Теги: </label>
+                <span>Теги: </span>
                 <div id="test-tags">
                     <ul className="tags-list">
-                        {test.tags.map(tag => (<li className="test-tag" key={tag.name} onMouseEnter={showTagRemoveButton}
-                                              onMouseLeave={hideTagRemoveButton}>{tag.name}</li>))}
+                        {test.tags.map(tag => (<li className="test-tag" key={tag}
+                                                   onMouseEnter={() => setShowingTagRemoveButton(true)}
+                                              onMouseLeave={() => setShowingTagRemoveButton(false)}>
+                            <span>{tag}</span>
+                            {showingTagRemoveButton && <DeleteButton entityType="tag" onDelete={() => removeTag(tag)}/>}
+                        </li>))}
                     </ul>
                     {isAddingTag ? <>
-                        <input type="text" placeholder="Текст тега..." id="tag-input"/>
+                        <input type="text" placeholder="Текст тега..." defaultValue={newTag} 
+                               onChange={(e) => setNewTag(e.target.value)} id="tag-input" maxLength="32"/>
                             <img src="/files/icons/check.png" alt="Confirm addition" onClick={addTag} 
                                  className="edit-icon"/>
-                            <img src="/files/icons/close.png" alt="Cancel addition" onClick={handleTag} 
+                            <img src="/files/icons/close.png" alt="Cancel addition" onClick={cancelAddingTag}
                                  className="edit-icon"/>
                     </>
                         : <button className="btn btn-primary" onClick={handleTag}>Добавить</button>}
