@@ -34,8 +34,8 @@ public class MultipleChoiceQValidator : IQuestionValidator
     {
         CheckFields(data);
         CheckFields(correctData);
-        if (data.Options.Count is 0 or > 10)
-            throw new ArgumentOutOfRangeException($"{nameof(data.Options)} must have between 1 and 10 items");
+        if (data.Options.Count is < 2 or > 10)
+            throw new ArgumentOutOfRangeException($"{nameof(data.Options)} must have between 2 and 10 items");
         
         if (correctData.ValidIndices.Min() < 0 || correctData.ValidIndices.Max() > data.Options.Count - 1)
             throw new ArgumentOutOfRangeException($"{nameof(correctData.ValidIndices)}");
