@@ -87,14 +87,12 @@ public class TestsController(ITestRepository testRepository,
         questionRepository.CreateBulk(questions);
         
         var tags = await tagRepository.GetByNameBulkAsync(command.Tags, cancellationToken);
-        var newTags = command.Tags.Except(tags.Select(t => t.Name));
+        var newTags = command.Tags.Except(tags.Select(t => t.Name)).Select(t => t.ToLower()).Distinct();
 
         var tagsToAdd = newTags.Select(t => new Tag
         {
             Name = t
         });
-        
-        tagRepository.CreateBulk(tagsToAdd);
 
         var allTags = tags.Concat(tagsToAdd).ToList();
         foreach (var tag in allTags)
@@ -202,15 +200,12 @@ public class TestsController(ITestRepository testRepository,
         questionRepository.CreateBulk(questions);
         
         var tags = await tagRepository.GetByNameBulkAsync(command.Tags, cancellationToken);
-        var newTags = command.Tags.Where(t => 
-            tags.Select(tag => tag.Name).Contains(t)).ToList();
+        var newTags = command.Tags.Except(tags.Select(t => t.Name)).Select(t => t.ToLower()).Distinct();
 
         var tagsToAdd = newTags.Select(t => new Tag
         {
             Name = t
         });
-        
-        tagRepository.CreateBulk(tagsToAdd);
         
         var allTags = tags.Concat(tagsToAdd).ToList();
         
