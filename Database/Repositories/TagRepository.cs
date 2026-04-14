@@ -27,4 +27,9 @@ public class TagRepository(DatabaseContext db) : BaseRepository<Tag, int>(db), I
     {
         return Set.Where(t => names.Contains(t.Name)).ToListAsync(cancellationToken);
     }
+
+    public IQueryable<Tag> GetPopularTags() =>
+        Set.Include(t => t.Tests)
+            .AsSplitQuery()
+            .OrderByDescending(t => t.Tests.Count);
 }
