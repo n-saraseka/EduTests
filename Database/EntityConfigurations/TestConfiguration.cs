@@ -10,7 +10,7 @@ public class TestConfiguration : IEntityTypeConfiguration<Test>
     {
         builder
             .HasMany(t => t.Tags)
-            .WithMany();
+            .WithMany(t => t.Tests);
         builder.HasMany(t => t.Questions)
             .WithOne(q => q.Test)
             .HasForeignKey(q => q.TestId);

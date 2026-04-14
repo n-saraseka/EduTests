@@ -4,4 +4,5 @@ public class Tag : IEntity<int>
 {
     public int Id { get; set; }
     public required string Name { get; set; }
+    public List<Test> Tests { get; set; } = new();
 }
