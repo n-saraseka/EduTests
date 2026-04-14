@@ -11,41 +11,6 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
     IAnswerVerifierService answerVerifierService) : IEntityToDtoService
 {
     /// <summary>
-    /// Map <see cref="Test"/> entity to <see cref="ApiTest"/> DTO
-    /// </summary>
-    /// <param name="entity">The <see cref="Test"/> entity</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
-    /// <returns>The <see cref="ApiTest"/> DTO</returns>
-    public async Task<ApiTest> TestEntityToDtoAsync(Test entity, CancellationToken cancellationToken)
-    {
-        var ratings = await ratingRepository.GetTestRatingAsync(entity.Id, cancellationToken);
-        var completions = await testCompletionRepository.GetTestCompletionCountAsync(entity.Id, cancellationToken);
-        var tags = entity.Tags.Select(t => t.Name).ToList();
-        var questions = entity.Questions.Select(QuestionEntityToDto).ToList();
-        
-        var testToReturn = new ApiTest
-        {
-            Id = entity.Id,
-            Name = entity.Name,
-            User = UserEntityToDto(entity.User),
-            Description = entity.Description,
-            ThumbnailUrl = entity.ThumbnailUrl,
-            Rating = ratings,
-            CompletionCount = completions,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt,
-            AttemptLimit = entity.AttemptLimit,
-            TimeLimit = entity.TimeLimit,
-            Tags = tags,
-            Questions = questions,
-            Results = entity.Results.Select(TestResultEntityToDto).ToList(),
-            DefaultResult = entity.DefaultResult
-        };
-        
-        return testToReturn;
-    }
-
-    /// <summary>
     /// Map <see cref="Test"/> entity to simplified <see cref="ApiTest"/> DTO
     /// This one doesn't include the rating, the completions or tags.
     /// </summary>
@@ -57,6 +22,8 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
         {
             Id = entity.Id,
             Name = entity.Name,
+            Tags = entity.Tags.Select(t => t.Name).ToList(),
+            DefaultResult = entity.DefaultResult,
             User = UserEntityToDto(entity.User),
             Description = entity.Description,
             ThumbnailUrl = entity.ThumbnailUrl,

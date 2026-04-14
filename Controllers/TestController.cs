@@ -28,7 +28,9 @@ public class TestController(ITestRepository testRepository,
         var test = await testRepository.GetByIdWithExtendedDataAsync(id, cancellationToken);
         if (test == null)
             return NotFound("Test not found");
-        var apiTest = await entityToDtoService.TestEntityToDtoAsync(test, cancellationToken);
+        var apiTest = entityToDtoService.TestEntityToDto(test);
+        apiTest.Questions = test.Questions.Select(entityToDtoService.QuestionEntityToDto).ToList();
+        apiTest.Results = test.Results.Select(entityToDtoService.TestResultEntityToDto).ToList();
         viewModel.Test = apiTest;
         
         return View(viewModel);

@@ -107,8 +107,8 @@ public class TestsController(ITestRepository testRepository,
         testResultRepository.CreateBulk(results);
         
         await testRepository.SaveChangesAsync(cancellationToken);
-        
-        var apiTest = await entityToDtoService.TestEntityToDtoAsync(test, cancellationToken);
+
+        var apiTest = entityToDtoService.TestEntityToDto(test);
         
         return CreatedAtAction("GetTest", new { id = apiTest.Id }, apiTest);
     }
@@ -127,7 +127,9 @@ public class TestsController(ITestRepository testRepository,
         if (test is null)
             return NotFound();
 
-        var testToReturn = await entityToDtoService.TestEntityToDtoAsync(test, cancellationToken);
+        var testToReturn = entityToDtoService.TestEntityToDto(test);
+        testToReturn.Rating = await ratingRepository.GetTestRatingAsync(test.Id, cancellationToken);
+        testToReturn.CompletionCount = await testCompletionRepository.GetTestCompletionCountAsync(test.Id, cancellationToken);
         
         return Ok(testToReturn);
     }
@@ -226,7 +228,7 @@ public class TestsController(ITestRepository testRepository,
         
         await testRepository.SaveChangesAsync(cancellationToken);
 
-        var apiTest = await entityToDtoService.TestEntityToDtoAsync(test, cancellationToken);
+        var apiTest = entityToDtoService.TestEntityToDto(test);
 
         return Ok(apiTest);
     }
