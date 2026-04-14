@@ -36,6 +36,7 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
     /// <returns>An <see cref="IQueryable"/> with the <see cref="Test"/> and its loaded <see cref="Tag"/>s</returns>
     public Task<Test?> GetByIdWithTagsAsync(int id, CancellationToken cancellationToken = default) =>
         Set.Include(t => t.Tags)
+            .Include(t => t.User)
             .AsSplitQuery()
             .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
     
@@ -49,6 +50,7 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
         Set.Include(t => t.Questions)
             .Include(t => t.Tags)
             .Include(t => t.Results)
+            .Include(t => t.User)
             .AsSplitQuery()
             .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 }

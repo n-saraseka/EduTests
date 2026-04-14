@@ -4,6 +4,7 @@ public class ApiTest
 {
     public int Id { get; set; }
     public required string Name { get; set; }
+    public required ApiUser User { get; set; }
     public string? Description { get; set; }
     public string? ThumbnailUrl { get; set; }
     public List<string>? Tags { get; set; }
