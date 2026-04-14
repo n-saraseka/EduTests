@@ -24,7 +24,9 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
     /// <param name="name">Name to match</param>
     /// <returns>An <see cref="IQueryable"/> of all <see cref="Test"/>s with the <see cref="Tag"/></returns>
     public IQueryable<Test> GetAllByTag(string name) =>
-        Set.Where(t => t.Tags.Any(tag => tag.Name == name));
+        Set.Include(t => t.Tags)
+            .AsSplitQuery()
+            .Where(t => t.Tags.Any(tag => tag.Name == name));
 
     /// <summary>
     /// Get a <see cref="Test"/> by its ID, including tags
