@@ -1,8 +1,96 @@
-﻿@{
+﻿@model EduTests.Models.HomeViewModel
+
+@{
     ViewData["Title"] = "Главная";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/test-catalog.css">
+}
+
 <div class="text-center">
-    <h1>EduTests</h1>
-    <p>Это плейсхолдер. Здесь будет все недавние тесты</p>
+    @if (Model.TagName == null)
+    {
+        <h1>Каталог тестов</h1>
+    }
+    else
+    {
+        <h1>Каталог тестов по тегу @Model.TagName</h1>
+    }
 </div>
+@if (Model.PopularTags.Count > 0)
+{
+    <div class="text-center">
+        <h2>Популярные теги</h2>
+    </div>
+    <ul id="popular-tags">
+        @foreach (var tag in Model.PopularTags)
+        {
+            <li>
+                <a asp-controller="Home" asp-action="Index" asp-route-tagName=@tag.Name class="card-tag">@tag.Name</a>
+            </li>
+        }
+    </ul>
+}
+<div class="text-center">
+    <h2>Последние тесты</h2>
+</div>
+<ul id="test-cards">
+    @foreach (var test in Model.Tests)
+    {
+        <div class="card">
+            <img src="/files/tests/@test.Id" alt="Изображение теста" class="card-image"/>
+            <strong class="test-name">@test.Name</strong>
+            @if (test.Description?.Length > 0)
+            {
+                <p class="test-description">@test.Description</p>
+            }
+            @if (test.Tags?.Count > 0)
+            {
+                <ul class="test-tags">
+                    @foreach (var tag in test.Tags)
+                    {
+                        <li>
+                            <a asp-controller="Home" asp-action="Index" asp-route-tagName=@tag class="card-tag">@tag</a>
+                        </li>
+                    }
+                </ul>
+            }
+            <div class="author-ratings">
+                <div class="author-column">
+                    <img src="/files/users/@test.User.Id" alt="Автор"/>
+                    <a asp-controller="User" asp-action="Profile" asp-route-id=@test.User.Id>@test.User.Username</a>
+                </div>
+                <div className="ratings-completions-column">
+                    <div class="stat-row">
+                        <img src="~/files/icons/rating.png" alt="Рейтинг"/>
+                        <span>@test.Rating</span>
+                    </div>
+                    <div class="stat-row">
+                        <img src="~/files/icons/completions.png" alt="Прохождения"/>
+                        <span>@test.CompletionCount</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary">Пройти тест</button>
+        </div>
+    }
+</ul>
+
+@if (Model.Pages > 1)
+{
+    <ul className="pagination">
+        @if (Model.Page != 1)
+        {
+            <li class="page-item"><a asp-controller="Home" asp-action="Index" asp-route-page=@(Model.Page - 1)>&lt;</a></li>
+        }
+        @for (int i = 0; i < Model.Pages; i++)
+        {
+            <li class="page-item"><a asp-controller="Home" asp-action="Index" asp-route-page=@(i + 1)>@(i + 1)</a></li>
+        }
+        @if (Model.Page != Model.Pages)
+        {
+            <li class="page-item"><a asp-controller="Home" asp-action="Index" asp-route-page=@(Model.Page + 1)>&gt;</a></li>
+        }
+    </ul>
+}

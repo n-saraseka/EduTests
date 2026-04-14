@@ -25,9 +25,15 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
     /// <returns>An <see cref="IQueryable"/> of all <see cref="Test"/>s with the <see cref="Tag"/></returns>
     public IQueryable<Test> GetAllByTag(string name) =>
         Set.Include(t => t.Tags)
+            .Include(t => t.User)
             .AsSplitQuery()
             .Where(t => t.Tags.Any(tag => tag.Name == name));
 
+    public IQueryable<Test> GetAllWithTags() => Set
+        .Include(t => t.Tags)
+        .Include(t => t.User)
+        .AsSplitQuery();
+    
     /// <summary>
     /// Get a <see cref="Test"/> by its ID, including tags
     /// </summary>
