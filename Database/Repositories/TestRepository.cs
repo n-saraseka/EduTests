@@ -59,4 +59,10 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
             .Include(t => t.User)
             .AsSplitQuery()
             .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+
+    public IQueryable<Test> GetByUserId(int userId) => Set
+        .Include(t => t.User)
+        .Include(t => t.Tags)
+        .AsSplitQuery()
+        .Where(t => t.UserId == userId);
 }

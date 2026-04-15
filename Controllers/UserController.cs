@@ -12,6 +12,8 @@ public class UserController(IUserRepository userRepository,
     ICommentRepository commentRepository,
     IReportsRepository reportsRepository,
     IBannedUserRepository bannedUserRepository,
+    ITestRepository testRepository,
+    ITestStatsService testStatsService,
     IEntityToDtoService entityToDtoService,
     IConfiguration config) : Controller
 {
@@ -54,6 +56,22 @@ public class UserController(IUserRepository userRepository,
         }
         
         model.CurrentUserGroup = User.FindFirstValue(ClaimTypes.Role);
+        
+        var testQuery = testRepository.GetByUserId(id).OrderByDescending(entity => entity.UpdatedAt);
+        var testPageSize = int.Parse(config["testsProfilePageSize"]);
+        model.TestPageSize = testPageSize;
+        var testsCount = await testQuery.CountAsync(cancellationToken);
+        model.TestPages = (int)Math.Ceiling((double)testsCount / testPageSize);
+        
+        var tests = await testQuery.Take(testPageSize).ToListAsync(cancellationToken);
+        var apiTests = tests.Select(entityToDtoService.TestEntityToDto).ToList();
+        if (apiTests.Count > 0)
+        {
+            var filledTests = await testStatsService.GetTestsStatsAsync(apiTests, cancellationToken);
+            apiTests = filledTests.ToList();
+        }
+
+        model.Tests = apiTests;
 
         return View(model);
     }

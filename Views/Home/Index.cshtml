@@ -38,7 +38,7 @@
 <ul id="test-cards">
     @foreach (var test in Model.Tests)
     {
-        <div class="card">
+        <li class="card">
             <img src="/files/tests/@test.Id" alt="Изображение теста" class="card-image"/>
             <strong class="test-name">@test.Name</strong>
             @if (test.Description?.Length > 0)
@@ -73,7 +73,7 @@
                 </div>
             </div>
             <button class="btn btn-primary">Пройти тест</button>
-        </div>
+        </li>
     }
 </ul>
 

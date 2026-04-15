@@ -9,4 +9,5 @@ public interface ITestRepository : IRepository<Test, int>
     IQueryable<Test> GetAllWithTags();
     Task<Test?> GetByIdWithTagsAsync(int id, CancellationToken cancellationToken);
     Task<Test?> GetByIdWithExtendedDataAsync(int id, CancellationToken cancellationToken);
+    IQueryable<Test> GetByUserId(int userId);
 }

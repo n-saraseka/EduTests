@@ -133,6 +133,44 @@ public class TestsController(ITestRepository testRepository,
         
         return Ok(testToReturn);
     }
+    
+    /// <summary>
+    /// Get <see cref="ApiTest"/>s
+    /// </summary>
+    /// <param name="userId">The <see cref="ApiUser"/> ID</param>
+    /// <param name="page">Page number</param>
+    /// <param name="amountPerPage">Amount of <see cref="ApiTest"/>s per page</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>List of <see cref="ApiTest"/>s</returns>
+    public async Task<IActionResult> GetTestsAsync(int? userId, int page, int amountPerPage, CancellationToken cancellationToken = default)
+    {
+        var query = testRepository.GetAll();
+        if (userId != null)
+        {
+            query = testRepository.GetByUserId(userId.Value);
+        }
+
+        if (page < 1 || amountPerPage < 1) return BadRequest("Invalid pagination parameters");
+        var count = await query.CountAsync(cancellationToken);
+        var pages = (int)Math.Ceiling((double)count / amountPerPage);
+        var actualPage = Math.Min(page, pages);
+        query = query.Skip((actualPage - 1) * amountPerPage).Take(amountPerPage);
+
+        var tests = await query.ToListAsync(cancellationToken);
+        var apiTests = tests.Select(entityToDtoService.TestEntityToDto);
+        var ids = apiTests.Select(t => t.Id);
+        var ratings = await ratingRepository.GetTestRatingsAsync(ids, cancellationToken);
+        var completions = await testCompletionRepository.GetTestCompletionCountsAsync(ids, cancellationToken);
+
+        apiTests = apiTests.Select(t =>
+        {
+            t.Rating = ratings[t.Id];
+            t.CompletionCount = completions[t.Id];
+            return t;
+        }).ToList();
+
+        return Ok(new { tests = apiTests, pages });
+    }
 
     /// <summary>
     /// Update a <see cref="ApiTest"/>
@@ -423,7 +461,7 @@ public class TestsController(ITestRepository testRepository,
     /// </summary>
     /// <param name="id">The <see cref="ApiTest"/> ID</param>
     /// <param name="page">Page number</param>
-    /// <param name="amountPerPage">Amount of <see cref="ApiReport"/>s per page</param>
+    /// <param name="amountPerPage">Amount of <see cref="ApiComment"/>s per page</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>List of <see cref="ApiComment"/>s</returns>
     [HttpGet("{id}/comments")]

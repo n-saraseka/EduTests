@@ -41,6 +41,7 @@ builder.Services.AddScoped<IAnswerValidatorService, AnswerValidatorService>();
 builder.Services.AddScoped<IAnswerVerifierService, AnswerVerifierService>();
 builder.Services.AddScoped<IDatabaseSeederService, DatabaseSeederService>();
 builder.Services.AddScoped<IEntityToDtoService, EntityToDtoService>();
+builder.Services.AddScoped<ITestStatsService, TestStatsService>();
 builder.Services.AddScoped<FileExtensionContentTypeProvider>();
 builder.Services.AddHostedService<DbInitializerHostedService>();
 

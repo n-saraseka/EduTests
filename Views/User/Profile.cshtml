@@ -31,6 +31,13 @@
     <p id="user-card-description">@description</p>
 </div>
 <h2>Тесты</h2>
-<div id="test-cards">Пользователь пока не создал ни одного теста.</div>
+@if (Model.Tests.Count > 0)
+{
+    <div id="tests"></div>
+}
+else
+{
+    <p>Пользователь ещё не создал ни одного теста...</p>
+}
 <h2>Комментарии</h2>
 <div id="comments"></div>

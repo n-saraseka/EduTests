@@ -8,8 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EduTests.Controllers;
 
 public class HomeController(ITestRepository testRepository,
-    IUserRatingRepository userRatingRepository,
-    ITestCompletionRepository testCompletionRepository,
+    ITestStatsService testStatsService,
     ITagRepository tagRepository,
     IEntityToDtoService entityToDtoService,
     IConfiguration config) : Controller
@@ -30,17 +29,13 @@ public class HomeController(ITestRepository testRepository,
         var tests = await testsQuery.Skip((actualPage - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
         
         var apiTests = tests.Select(entityToDtoService.TestEntityToDto);
-        
-        var ids = apiTests.Select(t => t.Id);
-        var ratings = await userRatingRepository.GetTestRatingsAsync(ids, cancellationToken);
-        var completions = await testCompletionRepository.GetTestCompletionCountsAsync(ids, cancellationToken);
 
-        var testList = apiTests.Select(t =>
+        if (apiTests.Count() > 0)
         {
-            t.Rating = ratings[t.Id];
-            t.CompletionCount = completions[t.Id];
-            return t;
-        }).ToList();
+            apiTests = await testStatsService.GetTestsStatsAsync(apiTests, cancellationToken);
+        }
+
+        var testList = apiTests.ToList();
 
         model.Tests = testList;
         if (tagName == null)

@@ -1,9 +1,13 @@
 import { createRoot } from 'react-dom/client';
 import Comments from './comments.jsx';
 import ProfileUsername from "./profile/profileUsername.jsx";
+import ProfileTests from "./profile/profileTests.jsx";
 
 const initialData = window.__INITIAL_DATA__;
 
+window.onLoad = () => {
+    
+}
 const commentRoot = createRoot(document.getElementById('comments'));
 const usernameRoot = createRoot(document.getElementById('username'));
 
@@ -19,3 +23,8 @@ commentRoot.render(<Comments commentsPerPage={parseInt(initialData.commentsPerPa
                              currentUserId={parseInt(initialData.currentUserId)} 
                              currentUserGroup={initialData.currentUserGroup} 
                              isBanned={initialData.isCurrentBanned}/>);
+
+if (document.getElementById('tests')) {
+    const testRoot = createRoot(document.getElementById('tests'));
+    testRoot.render(<ProfileTests basePages={initialData.testPages} baseTests={initialData.tests} pageSize={initialData.testPageSize}/>);
+}
