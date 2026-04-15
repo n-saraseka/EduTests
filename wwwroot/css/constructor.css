@@ -20,6 +20,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 2rem;
+    padding: 1rem;
 }
 
 .test-card {
@@ -28,6 +30,7 @@
     border: 1px solid #e5e5e5;
     gap: 1rem;
     padding: 1rem;
+    border-radius: 0.2rem;
 }
 
 .test-card * {
