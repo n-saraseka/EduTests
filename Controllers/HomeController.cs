@@ -20,7 +20,7 @@ public class HomeController(ITestRepository testRepository,
         
         var testsQuery = tagName == null ? testRepository.GetAllWithTags() : testRepository.GetAllByTag(tagName);
         
-        var pageSize = int.Parse(config["pageSize"]);
+        var pageSize = int.Parse(config["testsCatalogPageSize"]);
         var testCount = await testsQuery.CountAsync(cancellationToken);
         model.Pages = (int)Math.Ceiling((double)testCount / pageSize);
         // To avoid querying for empty pages

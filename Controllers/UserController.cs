@@ -25,7 +25,7 @@ public class UserController(IUserRepository userRepository,
         model.User = apiUser;
         
         var commentQuery = commentRepository.GetProfileComments(id);
-        var pageSize = int.Parse(config["pageSize"]);
+        var pageSize = int.Parse(config["commentPageSize"]);
         model.CommentsPerPage = pageSize;
         
         var commentCount = await commentQuery.CountAsync(cancellationToken);
@@ -79,7 +79,7 @@ public class UserController(IUserRepository userRepository,
 
         if (User.FindFirstValue(ClaimTypes.Role) is "Moderator" or "Administrator")
         {
-            var pageSize = int.Parse(config["pageSize"]);
+            var pageSize = int.Parse(config["modTablePageSize"]);
             model.RowsPerTablePage = pageSize;
 
             var reportsQuery = reportsRepository.GetLatest();
