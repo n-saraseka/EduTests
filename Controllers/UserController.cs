@@ -117,6 +117,14 @@ public class UserController(IUserRepository userRepository,
             
             var bans = await bansQuery.Take(pageSize).ToListAsync(cancellationToken);
             model.Bans = bans.Select(entityToDtoService.BanEntityToDto).ToList();
+            
+            var testQuery = testRepository.GetByUserId(id).OrderByDescending(entity => entity.UpdatedAt);
+            
+            var testCount = await testQuery.CountAsync(cancellationToken);
+            model.TestPages = (int)Math.Ceiling((double)testCount / pageSize);
+            
+            var tests =  await testQuery.Take(pageSize).ToListAsync(cancellationToken);
+            model.Tests = tests.Select(entityToDtoService.TestEntityToDto).ToList();
         }
         
         return View(model);

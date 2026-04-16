@@ -9,5 +9,7 @@ public class UserSettingsViewModel
     public int? ReportPages { get; set; }
     public List<ApiBan>? Bans { get; set; }
     public int? BanPages { get; set; }
+    public List<ApiTest>? Tests { get; set; }
+    public int? TestPages { get; set; }
     public int? RowsPerTablePage { get; set; }
 }

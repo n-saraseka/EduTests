@@ -19,7 +19,7 @@
 
 <div id="user-card"></div>
 <h2>Ваши тесты</h2>
-<p>Вы ещё не создали ни одного теста...</p>
+<div id="tests"></div>
 @if (User.FindFirstValue(ClaimTypes.Role) is "Administrator" or "Moderator")
 {
     <h2>Жалобы</h2>
