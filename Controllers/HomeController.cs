@@ -23,7 +23,7 @@ public class HomeController(ITestRepository testRepository,
         var testCount = await testsQuery.CountAsync(cancellationToken);
         model.Pages = (int)Math.Ceiling((double)testCount / pageSize);
         // To avoid querying for empty pages
-        actualPage = Math.Min(actualPage, model.Pages);
+        actualPage = Math.Max(Math.Min(actualPage, model.Pages), 1);
         model.Page = actualPage;
         
         var tests = await testsQuery.Skip((actualPage - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);

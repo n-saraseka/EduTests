@@ -153,7 +153,7 @@ public class TestsController(ITestRepository testRepository,
         if (page < 1 || amountPerPage < 1) return BadRequest("Invalid pagination parameters");
         var count = await query.CountAsync(cancellationToken);
         var pages = (int)Math.Ceiling((double)count / amountPerPage);
-        var actualPage = Math.Min(page, pages);
+        var actualPage = Math.Max(Math.Min(page, pages), 1);
         query = query.Skip((actualPage - 1) * amountPerPage).Take(amountPerPage);
 
         var tests = await query.ToListAsync(cancellationToken);

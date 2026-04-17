@@ -80,7 +80,7 @@ function TestsTable({userId, baseTests, basePages, rowsPerPage}) {
             </>
             : <>
                 <p>Вы не создали ни одного теста.</p>
-                <button className="btn btn-active" onClick={() => window.location.href = constructorUrl}>Перейти в конструктор</button>
+                <button className="btn btn-primary" onClick={() => window.location.href = constructorUrl}>Перейти в конструктор</button>
             </>
         }
     </>)
