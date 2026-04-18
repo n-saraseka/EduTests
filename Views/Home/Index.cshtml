@@ -8,6 +8,13 @@
     <link rel="stylesheet" href="~/css/test-catalog.css">
 }
 
+@section Scripts {
+    <script>
+        window.__INITIAL_DATA__ = @Html.Raw(Json.Serialize(Model.Tests));
+    </script>
+    <script src="~/js/index.js"></script>
+}
+
 <div class="text-center">
     @if (Model.TagName == null)
     {

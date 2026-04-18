@@ -25,7 +25,7 @@ function TestCard({test}) {
                 </div>
             </div>
         </div>
-        <button className="btn btn-primary">Пройти тест</button>
+        <button className="btn btn-primary" onClick={() => window.location.href = `/test/${test.id}`}>Пройти тест</button>
     </>
 }
 

@@ -134,4 +134,10 @@ app.MapControllerRoute(
     defaults: new {controller = "Constructor", action = "BaseConstructor"})
     .WithStaticAssets();
 
+app.MapControllerRoute(
+    name: "test-page",
+    pattern: "{controller}/{id}",
+    defaults: new { controller = "Test", action = "TestPage" })
+    .WithStaticAssets();
+
 app.Run();

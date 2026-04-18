@@ -108,6 +108,8 @@ public class TestsController(ITestRepository testRepository,
         
         await testRepository.SaveChangesAsync(cancellationToken);
 
+        test = await testRepository.GetByIdWithTagsAsync(test.Id, cancellationToken);
+
         var apiTest = entityToDtoService.TestEntityToDto(test);
         
         return CreatedAtAction("GetTest", new { id = apiTest.Id }, apiTest);

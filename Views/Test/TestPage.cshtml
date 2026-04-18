@@ -1,0 +1,64 @@
+@model EduTests.Models.TestPageViewModel
+
+@{
+    ViewBag.Title = $"Тест {Model.Test.Name}";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/test-page.css">
+}
+
+@section Scripts
+{
+    <script>
+        window.__INITIAL_DATA__ = @Html.Raw(Json.Serialize(Model));
+    </script>
+    <script type="module" src="http://localhost:5173/src/testPageScripts.jsx"></script>
+}
+
+<div id="test">
+    <div id="test-info">
+        <div id="test-info-header">
+            <div id="test-img">
+                <img src="/files/tests/@Model.Test.Id" alt="Изображение теста" id="test-icon">
+            </div>
+            <div id="test-data">
+                <h1>@Model.Test.Name</h1>
+                <span id="created-by">Создан пользователем <img src="/files/users/@Model.Test.User.Id" alt="Аватар" class="test-avatar">
+                    <a asp-controller="User" asp-action="Profile" asp-route-id="@Model.Test.User.Id">@Model.Test.User.Username</a>
+                    <span title="@Model.Test.CreatedAt">@Model.Test.CreatedAt.ToShortDateString()</span></span>
+                @if (Model.Test.Description?.Length > 0)
+                {
+                    <p>@Model.Test.Description</p>
+                }
+                <div id="stats">
+                    <div class="stat-row">
+                        <img src="~/files/icons/completions.png" alt="Число прохождений">
+                        <span>@Model.Test.CompletionCount</span>
+                    </div>
+                    <div class="stat-row">
+                        <img src="~/files/icons/rating.png" alt="Рейтинг теста">
+                        <span>@Model.Test.Rating</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @if (Model.Test.Tags?.Count > 0)
+        {
+            <div id="tags">
+                <span>Теги: </span>
+                <ul class="test-tags">
+                    @foreach (var tag in Model.Test.Tags)
+                    {
+                        <li>
+                            <a asp-controller="Home" asp-action="Index" asp-route-tagName=@tag class="card-tag">@tag</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+        <button id="start-test-button" class="btn btn-primary">Начать тест</button>
+    </div>
+</div>
+<h2>Комментарии</h2>
+<div id="comments"></div>

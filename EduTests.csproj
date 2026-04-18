@@ -22,6 +22,7 @@
       <Folder Include="ClientApp\dist\" />
       <Folder Include="ClientApp\public\" />
       <Folder Include="ClientApp\src\assets\" />
+      <Folder Include="ClientApp\src\test\" />
       <Folder Include="wwwroot\files\icons\" />
       <Folder Include="wwwroot\files\tests\" />
     </ItemGroup>
