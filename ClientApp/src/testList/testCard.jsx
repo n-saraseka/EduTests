@@ -21,7 +21,7 @@ function TestCard({test}) {
                 </div>
                 <div className="stat-row">
                     <img src="/files/icons/completions.png" alt="Прохождения"/>
-                    <span>{test.completions}</span>
+                    <span>{test.completionCount}</span>
                 </div>
             </div>
         </div>
