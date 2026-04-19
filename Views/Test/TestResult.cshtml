@@ -1,0 +1,65 @@
+@model EduTests.Models.TestResultModel
+
+@{
+    ViewBag.Title = $"Прохождение теста {Model.Completion.Test.Name}";
+    var completedAt = DateTime.Now;
+    var completedString = "";
+    var completionTime = TimeSpan.Zero;
+    var timeString = "";
+    
+    if (Model.Completion.CompletedAt != null)
+    {
+        completedAt = (DateTime)Model.Completion.CompletedAt;
+        completedString = completedAt.ToShortDateString();
+        completionTime = completedAt - Model.Completion.StartedAt;
+        timeString = $"{completionTime.Hours}:{completionTime.Minutes}:{completionTime.Seconds}";
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/test-page.css">
+}
+
+@section Scripts
+{
+    <script>
+        window.__INITIAL_DATA__ = @Html.Raw(Json.Serialize(Model));
+    </script>
+    <script type="module" src="http://localhost:5173/src/testResultScripts.jsx"></script>
+}
+
+@if (completedString != "")
+{
+    <div id="test">
+        <div id="test-info">
+            <div id="test-info-header">
+                <div id="test-img">
+                    <img src="/files/tests/@Model.Completion.Test.Id" alt="Изображение теста" id="test-icon">
+                </div>
+                <div id="test-data">
+                    <h1>@Model.Completion.Test.Name</h1>
+                    @if (Model.Completion.UserId != null)
+                    {
+                        <span id="completed-at">Пройден пользователем <img src="/files/users/@Model.Completion.User.Id" alt="Аватар" class="test-avatar">
+                            <a asp-controller="User" asp-action="Profile" asp-route-id="@Model.Completion.User.Id">@Model.Completion.User.Username</a>
+                            <span title="@completedAt">@completedString</span></span>
+                    }
+                    else
+                    {
+                        <span id="completed-at">Пройден <span title="@completedAt">@completedString</span></span>
+                    }
+                    <span id="percentage">Результат: @Model.Completion.CompletionPercentage%</span>
+                    <span id="completion-time">Время прохождения: @timeString</span>
+                    <div id="test-interact"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h2>Комментарии</h2>
+    <div id="comments"></div>
+}
+else
+{
+    <span>Вы ещё не прошли этот тест до конца. <a asp-controller="Test" asp-action="TestPlaythrough" asp-route-id="@Model.Completion.TestId" 
+                                         asp-route-playthroughId="@Model.Completion.Id">Вернуться назад</a></span>
+}

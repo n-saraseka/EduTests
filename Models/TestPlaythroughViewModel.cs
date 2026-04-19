@@ -4,6 +4,7 @@ namespace EduTests.Models;
 
 public class TestPlaythroughViewModel
 {
+    public ApiCompletion Completion { get; set; }
     public ApiTest Test { get; set; }
     public List<ApiQuestion> Questions { get; set; } = new();
     public List<ApiAnswer> Answers { get; set; } = new();

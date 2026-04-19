@@ -12,7 +12,7 @@ public class UserAnswerRepository(DatabaseContext db) : BaseRepository<UserAnswe
     /// <param name="id">The <see cref="TestCompletion"/> ID</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>A List of all <see cref="UserAnswer"/>s</returns>
-    public Task<List<UserAnswer>> GetByCompletionId(int id, CancellationToken cancellationToken)
+    public Task<List<UserAnswer>> GetByCompletionIdAsync(int id, CancellationToken cancellationToken)
     {
         return Set.Where(ua => ua.TestCompletionId == id).ToListAsync(cancellationToken);
     }

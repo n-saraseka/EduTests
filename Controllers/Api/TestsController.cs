@@ -721,7 +721,7 @@ public class TestsController(ITestRepository testRepository,
             return BadRequest("The completion is already finished");
         
         var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
-        var userAnswers = await userAnswerRepository.GetByCompletionId(completionId, cancellationToken);
+        var userAnswers = await userAnswerRepository.GetByCompletionIdAsync(completionId, cancellationToken);
         
         if (questions.Count != userAnswers.Count)
             return BadRequest("Not all questions have been answered");
@@ -811,6 +811,42 @@ public class TestsController(ITestRepository testRepository,
     }
     
     /// <summary>
+    /// Get <see cref="ApiAnswer"/>s for this <see cref="ApiTest"/>'s <see cref="ApiCompletion"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="completionId">The <see cref="ApiCompletion"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>List of <see cref="ApiAnswer"/> objects</returns>
+    [HttpGet("{id}/completions/{completionId}/answers")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetTestAnswersAsync(int id, int completionId,
+        CancellationToken cancellationToken = default)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+        int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
+        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var completion = await testCompletionRepository.GetByIdAsync(completionId, cancellationToken);
+        if (completion is null)
+            return NotFound();
+        
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
+            return Forbid();
+        
+        var answers = await userAnswerRepository.GetByCompletionIdAsync(completionId, cancellationToken);
+
+        var apiAnswers = answers.Select(entityToDtoService.AnswerEntityToDto).ToList();
+        
+        return Ok(apiAnswers);
+    }
+    
+    /// <summary>
     /// Add a <see cref="ApiAnswer"/> to this <see cref="ApiTest"/>'s <see cref="ApiCompletion"/>
     /// </summary>
     /// <param name="id">The <see cref="ApiTest"/> ID</param>
@@ -818,7 +854,7 @@ public class TestsController(ITestRepository testRepository,
     /// <param name="command"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    [HttpPost("{id}/completions/{completionId}/answers/")]
+    [HttpPost("{id}/completions/{completionId}/answers")]
     [AllowAnonymous]
     public async Task<IActionResult> AddTestAnswerAsync(int id, int completionId, 
         [FromBody] AnswerTestCommand command, CancellationToken cancellationToken = default)
@@ -841,18 +877,11 @@ public class TestsController(ITestRepository testRepository,
             return Forbid();
         
         if (completion.CompletedAt != null)
-            return BadRequest("The completion is already answered");
+            return BadRequest("The completion is already finished");
         
         var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
-        if (questions.Any(q => q.Id == command.QuestionId))
-            return BadRequest("The question is already answered");
-
         if (questions.All(q => q.Id != command.QuestionId))
-            return NotFound();
-        
-        var answers = await userAnswerRepository.GetByCompletionId(completionId, cancellationToken);
-        if (answers.Count == questions.Count)
-            return BadRequest("All  questions have been answered");
+            return BadRequest("The question does not exist");
 
         var answer = new UserAnswer
         {

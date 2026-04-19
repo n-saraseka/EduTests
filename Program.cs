@@ -145,4 +145,9 @@ app.MapControllerRoute(
     pattern: "{controller}/{id}/playthrough/{playthroughId}",
     defaults: new { controller = "Test", action = "TestPlaythrough" });
 
+app.MapControllerRoute(
+    name: "result",
+    pattern: "{controller}/{id}/playthrough/{playthroughId}/result",
+    defaults: new { controller = "Test", action = "TestResult" });
+
 app.Run();

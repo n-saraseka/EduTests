@@ -15,6 +15,7 @@ public class TestController(ITestRepository testRepository,
     IBannedUserRepository bannedUserRepository,
     ITestCompletionRepository testCompletionRepository,
     IUserAnswerRepository userAnswerRepository,
+    IQuestionRepository questionRepository,
     IConfiguration config,
     ITestStatsService testStatsService,
     IEntityToDtoService entityToDtoService) : Controller
@@ -85,6 +86,8 @@ public class TestController(ITestRepository testRepository,
         var completion = await testCompletionRepository.GetByIdAsync(playthroughId, cancellationToken);
         if (completion is null) return NotFound("Playthrough not found");
         
+        model.Completion = entityToDtoService.CompletionEntityToDto(completion, null, null);
+        
         var test = await testRepository.GetByIdWithExtendedDataAsync(id, cancellationToken);
         if (test == null) return NotFound("Test not found");
 
@@ -109,7 +112,7 @@ public class TestController(ITestRepository testRepository,
         
         model.Questions = questions;
         
-        var answers = await userAnswerRepository.GetByCompletionId(completion.Id, cancellationToken);
+        var answers = await userAnswerRepository.GetByCompletionIdAsync(completion.Id, cancellationToken);
         model.Answers = answers.Select(entityToDtoService.AnswerEntityToDto).ToList();
         
         // we need to retrieve the latest unanswered question order index to save progress
@@ -120,6 +123,47 @@ public class TestController(ITestRepository testRepository,
             var lastOrderIndex = correspondingAnsweredQuestions.Max(q => q.OrderIndex);
             model.LastUnansweredQuestion = lastOrderIndex != questions.Count ? lastOrderIndex + 1 : lastOrderIndex;
         }
+        return View(model);
+    }
+
+    public async Task<IActionResult> TestResult(int id, int playthroughId, TestResultModel model,
+        CancellationToken cancellationToken = default)
+    {
+        var completion = await testCompletionRepository.GetWithExtendedDataAsync(playthroughId, cancellationToken);
+        if (completion is null) return NotFound("Playthrough not found");
+        
+        var questions = await questionRepository.GetByTestIdAsync(completion.TestId, cancellationToken);
+        var answers = await userAnswerRepository.GetByCompletionIdAsync(completion.Id, cancellationToken);
+        
+        var apiCompletion = entityToDtoService.CompletionEntityToDto(completion, answers, questions);
+        apiCompletion.Test = entityToDtoService.TestEntityToDto(completion.Test);
+        if (completion.UserId != null)
+        {
+            apiCompletion.User = entityToDtoService.UserEntityToDto(completion.User);
+        }
+        
+        model.Completion = apiCompletion;
+        
+        model.CurrentUserGroup = User.FindFirstValue(ClaimTypes.Role);
+        var result = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId);
+        if (result)
+        {
+            model.CurrentUserId = userId;
+            var activeBanCurr = await bannedUserRepository.GetUsersActiveBanAsync(userId, cancellationToken);
+            var currBanned = activeBanCurr is not null;
+            model.IsCurrentBanned = currBanned;
+        }
+        
+        var query = commentRepository.GetTestComments(id);
+        var pageSize = int.Parse(config["commentPageSize"]);
+        model.CommentsPerPage = pageSize;
+        
+        var count = await query.CountAsync(cancellationToken);
+        model.CommentPages = (int)Math.Ceiling((double)count / pageSize);
+        
+        var comments = await query.Take(pageSize).ToListAsync(cancellationToken);
+        model.Comments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
+        
         return View(model);
     }
 }

@@ -117,17 +117,14 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
     /// <exception cref="ArgumentNullException">If there's no corresponding <see cref="Question"/> for a <see cref="UserAnswer"/></exception>
     public ApiCompletion CompletionEntityToDto(TestCompletion entity, List<UserAnswer>? userAnswers, List<Question>? questions)
     {
-        var userId = entity.UserId;
-        var anonymousId = entity.AnonymousUserId;
-        
-        if (userId is null && anonymousId is null)
+        if (entity.UserId is null && entity.AnonymousUserId is null)
             throw new ArgumentException($"Neither {nameof(entity.UserId)} or {nameof(entity.AnonymousUserId)} are not null");
         
         var completionToReturn = new ApiCompletion
         {
             Id = entity.Id,
             TestId = entity.TestId,
-            UserId = userId,
+            UserId = entity.UserId,
             StartedAt = entity.StartedAt,
             CompletedAt = entity.CompletedAt,
         };

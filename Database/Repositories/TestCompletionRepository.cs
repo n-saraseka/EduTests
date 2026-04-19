@@ -86,4 +86,10 @@ public class TestCompletionRepository(DatabaseContext db) : BaseRepository<TestC
         else
             return Set.FirstOrDefaultAsync(tc => tc.TestId == testId && tc.AnonymousUserId == anonymousUserId && tc.CompletedAt == null, cancellationToken);
     }
+
+    public Task<TestCompletion?> GetWithExtendedDataAsync(int id, CancellationToken cancellationToken = default) => Set
+        .Include(tc => tc.User)
+        .Include(tc => tc.Test)
+        .AsSplitQuery()
+        .FirstOrDefaultAsync(tc => tc.Id == id, cancellationToken);
 }
