@@ -1,0 +1,19 @@
+@model EduTests.Models.TestPlaythroughViewModel
+
+@{
+    ViewBag.Title = $"Прохождение теста {Model.Test.Name}";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/test-playthrough.css">
+}
+
+@section Scripts
+{
+    <script>
+        window.__INITIAL_DATA__ = @Html.Raw(Json.Serialize(Model));
+    </script>
+    <script type="module" src="http://localhost:5173/src/testPlaythroughScripts.jsx"></script>
+}
+
+<div id="app"></div>

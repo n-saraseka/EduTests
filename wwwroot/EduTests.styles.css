@@ -274,8 +274,8 @@ input:focus {
     justify-content: center;
     align-items: center;
     border: 1px solid #e5e5e5;
-    width: 2rem;
-    height: 2rem;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
     font-size: 1.2rem;
 }
 

@@ -13,6 +13,8 @@ public class TestController(ITestRepository testRepository,
     IUserRepository userRepository,
     ICommentRepository commentRepository,
     IBannedUserRepository bannedUserRepository,
+    ITestCompletionRepository testCompletionRepository,
+    IUserAnswerRepository userAnswerRepository,
     IConfiguration config,
     ITestStatsService testStatsService,
     IEntityToDtoService entityToDtoService) : Controller
@@ -75,5 +77,49 @@ public class TestController(ITestRepository testRepository,
         viewModel.Comments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
         
         return View(viewModel);
+    }
+
+    public async Task<IActionResult> TestPlaythrough(int id, int playthroughId, TestPlaythroughViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        var completion = await testCompletionRepository.GetByIdAsync(playthroughId, cancellationToken);
+        if (completion is null) return NotFound("Playthrough not found");
+        
+        var test = await testRepository.GetByIdWithExtendedDataAsync(id, cancellationToken);
+        if (test == null) return NotFound("Test not found");
+
+        model.Test = entityToDtoService.TestEntityToDto(test);
+        
+        var questions = test.Questions.Select(q =>
+        {
+            // this is pretty ugly, maybe refactor so that this uses a service instead
+            q.CorrectData.ChosenIndices.Clear();
+            q.CorrectData.LeftColumn.Clear();
+            q.CorrectData.RightColumn.Clear();
+            q.CorrectData.Options.Clear();
+            q.CorrectData.Pairs.Clear();
+            q.CorrectData.Sequence.Clear();
+            q.CorrectData.NumberAnswer = null;
+            q.CorrectData.Tolerance = null;
+            q.CorrectData.TextAnswer = null;
+            q.CorrectData.ValidAnswers.Clear();
+            
+            return entityToDtoService.QuestionEntityToDto(q);
+        }).ToList();
+        
+        model.Questions = questions;
+        
+        var answers = await userAnswerRepository.GetByCompletionId(completion.Id, cancellationToken);
+        model.Answers = answers.Select(entityToDtoService.AnswerEntityToDto).ToList();
+        
+        // we need to retrieve the latest unanswered question order index to save progress
+        if (answers.Count > 0)
+        {
+            var correspondingAnsweredQuestions = questions.Where(q => 
+                answers.Select(a => a.QuestionId).Contains(q.Id));
+            var lastOrderIndex = correspondingAnsweredQuestions.Max(q => q.OrderIndex);
+            model.LastUnansweredQuestion = lastOrderIndex != questions.Count ? lastOrderIndex + 1 : lastOrderIndex;
+        }
+        return View(model);
     }
 }

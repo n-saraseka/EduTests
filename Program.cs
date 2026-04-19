@@ -140,4 +140,9 @@ app.MapControllerRoute(
     defaults: new { controller = "Test", action = "TestPage" })
     .WithStaticAssets();
 
+app.MapControllerRoute(
+    name: "playthrough",
+    pattern: "{controller}/{id}/playthrough/{playthroughId}",
+    defaults: new { controller = "Test", action = "TestPlaythrough" });
+
 app.Run();

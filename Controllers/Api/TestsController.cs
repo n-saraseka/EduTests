@@ -626,6 +626,9 @@ public class TestsController(ITestRepository testRepository,
         else
             completion.AnonymousUserId = anonymousUserId;
         
+        testCompletionRepository.Create(completion);
+        await testCompletionRepository.SaveChangesAsync(cancellationToken);
+        
         var apiCompletion = entityToDtoService.CompletionEntityToDto(completion, null, null);
         return CreatedAtAction("GetTestCompletion", new { id = test.Id, completionId = completion.Id }, apiCompletion);
     }
@@ -660,6 +663,28 @@ public class TestsController(ITestRepository testRepository,
             return Forbid();
         
         var apiCompletion = entityToDtoService.CompletionEntityToDto(completion, null, null);
+        return Ok(apiCompletion);
+    }
+
+    [HttpGet("{id}/completions/active")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetActiveCompletionAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+        int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
+        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+
+        var completion =
+            await testCompletionRepository.GetActiveCompletionAsync(id, authenticatedUserId, anonymousUserId,
+                cancellationToken);
+        
+        var apiCompletion = completion is null ? null : entityToDtoService.CompletionEntityToDto(completion, null, null);
         return Ok(apiCompletion);
     }
 
@@ -705,8 +730,45 @@ public class TestsController(ITestRepository testRepository,
         testCompletionRepository.Update(completion);
         await testCompletionRepository.SaveChangesAsync(cancellationToken);
         
-        var apiCompletion =  entityToDtoService.CompletionEntityToDto(completion, null, null);
+        var apiCompletion =  entityToDtoService.CompletionEntityToDto(completion, userAnswers, questions);
         return Ok(apiCompletion);
+    }
+
+    /// <summary>
+    /// Delete a unfinished <see cref="ApiCompletion"/>
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="completionId">The <see cref="ApiCompletion"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="OkResult"/></returns>
+    [HttpDelete("{id}/completions/{completionId}")]
+    public async Task<IActionResult> DeleteTestCompletionAsync(int id, int completionId,
+        CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+        int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
+        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        
+        var completion = await testCompletionRepository.GetByIdAsync(completionId, cancellationToken);
+        if (completion is null)
+            return NotFound();
+
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
+            return Forbid();
+        
+        if (completion.CompletedAt != null)
+            return BadRequest("The completion is already finished");
+        
+        testCompletionRepository.Delete(completion);
+        await testCompletionRepository.SaveChangesAsync(cancellationToken);
+        
+        return Ok();
     }
 
     /// <summary>

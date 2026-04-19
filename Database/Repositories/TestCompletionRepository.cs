@@ -61,4 +61,29 @@ public class TestCompletionRepository(DatabaseContext db) : BaseRepository<TestC
         else
             return Set.Where(tc => tc.TestId == testId && tc.AnonymousUserId == anonymousUserId).ToListAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// Get a <see cref="TestCompletion"/> that hasn't been completed yet
+    /// </summary>
+    /// <param name="testId"><see cref="Test"/> ID</param>
+    /// <param name="userId"><see cref="User"/> ID</param>
+    /// <param name="anonymousUserId"><see cref="AnonymousUser"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>The corresponding <see cref="TestCompletion"/> or null</returns>
+    /// <exception cref="ArgumentException">If <paramref name="userId"/> and <paramref name="anonymousUserId"/> input is invalid</exception>
+    public Task<TestCompletion?> GetActiveCompletionAsync(int testId, int? userId, Guid? anonymousUserId,
+        CancellationToken cancellationToken = default)
+    {
+        if (userId == null && anonymousUserId == null)
+            throw new ArgumentException($"Either {nameof(userId)} or {nameof(anonymousUserId)} must be provided");
+        
+        if (userId != null && anonymousUserId != null)
+            throw new ArgumentException(
+                $"{nameof(userId)} and {nameof(anonymousUserId)} can't both be provided");
+        
+        if (userId != null)
+            return Set.FirstOrDefaultAsync(tc => tc.TestId == testId && tc.UserId == userId && tc.CompletedAt == null, cancellationToken);
+        else
+            return Set.FirstOrDefaultAsync(tc => tc.TestId == testId && tc.AnonymousUserId == anonymousUserId && tc.CompletedAt == null, cancellationToken);
+    }
 }
