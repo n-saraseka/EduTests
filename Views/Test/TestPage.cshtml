@@ -23,7 +23,10 @@
                 <img src="/files/tests/@Model.Test.Id" alt="Изображение теста" id="test-icon">
             </div>
             <div id="test-data">
-                <h1>@Model.Test.Name</h1>
+                <div id="test-title">
+                    <h1>@Model.Test.Name</h1>
+                    <div id="report-button"></div>
+                </div>
                 <span id="created-by">Создан пользователем <img src="/files/users/@Model.Test.User.Id" alt="Аватар" class="test-avatar">
                     <a asp-controller="User" asp-action="Profile" asp-route-id="@Model.Test.User.Id">@Model.Test.User.Username</a>
                     <span title="@Model.Test.CreatedAt">@Model.Test.CreatedAt.ToShortDateString()</span></span>

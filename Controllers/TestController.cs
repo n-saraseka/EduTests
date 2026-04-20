@@ -16,6 +16,7 @@ public class TestController(ITestRepository testRepository,
     ITestCompletionRepository testCompletionRepository,
     IUserAnswerRepository userAnswerRepository,
     IQuestionRepository questionRepository,
+    IUserRatingRepository ratingRepository,
     IConfiguration config,
     ITestStatsService testStatsService,
     IEntityToDtoService entityToDtoService) : Controller
@@ -152,6 +153,9 @@ public class TestController(ITestRepository testRepository,
             var activeBanCurr = await bannedUserRepository.GetUsersActiveBanAsync(userId, cancellationToken);
             var currBanned = activeBanCurr is not null;
             model.IsCurrentBanned = currBanned;
+            var currentRating = await ratingRepository.GetUsersRatingAsync(id, userId, cancellationToken);
+            if (currentRating != null)
+                model.CurrentRating = entityToDtoService.RatingEntityToDto(currentRating);
         }
         
         var query = commentRepository.GetTestComments(id);

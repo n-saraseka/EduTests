@@ -11,4 +11,5 @@ public class TestResultModel
     public int? CurrentUserId { get; set; }
     public string? CurrentUserGroup { get; set; }
     public bool IsCurrentBanned { get; set; } = false;
+    public ApiRating? CurrentRating { get; set; }
 }

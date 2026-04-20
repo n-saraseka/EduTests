@@ -359,6 +359,15 @@ input:focus {
     height: 1rem;
 }
 
+.edit-icon.inactive {
+    opacity: 0.5;
+}
+
+.edit-icon.inactive:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+
 .error {
     color: #b06700;
     font-weight: bold;
@@ -441,4 +450,10 @@ input:focus {
 .stat-row img {
     width: 1rem;
     height: 1rem;
+}
+
+#test-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }

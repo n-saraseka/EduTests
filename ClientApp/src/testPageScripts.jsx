@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import Comments from "./comments.jsx";
 import StartTestButton from "./test/startTestButton.jsx";
+import ReportButton from "./buttons/reportButton.jsx";
 
 const initialData = window.__INITIAL_DATA__;
 
@@ -12,3 +13,6 @@ commentRoot.render(<Comments baseComments={initialData.comments} basePages={init
 
 const startRoot = createRoot(document.getElementById('test-start'));
 startRoot.render(<StartTestButton testId={initialData.test.id}/>)
+
+const reportRoot = createRoot(document.getElementById('report-button'));
+reportRoot.render(<ReportButton entityType={1} entityId={initialData.test.id}/>)
