@@ -30,7 +30,7 @@ function ReportButton({ entityType, entityId }) {
 
 class ReportCommand {
     constructor(entityType, entityId, text) {
-        this.entityType = entityType;
+        this.entityType = entityType; // 0 = user; 1 = test; 2 = comment
         this.entityId = entityId;
         this.text = text;
     }
