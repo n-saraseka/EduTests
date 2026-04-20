@@ -24,7 +24,6 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
             Name = entity.Name,
             Tags = entity.Tags.Select(t => t.Name).ToList(),
             DefaultResult = entity.DefaultResult,
-            User = UserEntityToDto(entity.User),
             Description = entity.Description,
             ThumbnailUrl = entity.ThumbnailUrl,
             CreatedAt = entity.CreatedAt,
@@ -32,6 +31,8 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
             AttemptLimit = entity.AttemptLimit,
             TimeLimit = entity.TimeLimit,
         };
+
+        testToReturn.User = entity.User != null ? UserEntityToDto(entity.User) : null;
 
         return testToReturn;
     }
