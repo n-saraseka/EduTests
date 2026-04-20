@@ -18,9 +18,7 @@ public class SingleChoiceVerifier : IVerifier
             || data.ValidAnswers.Count != 0
             || data.Sequence.Count != 0
             || data.TextAnswer != null
-            || data.NumberAnswer != null
-            || data.ValidIndices != null
-            || data.ChosenIndices != null)
+            || data.NumberAnswer != null)
             throw new ArgumentException(
                 $"{nameof(data)} should only have single or multiple choice related fields filled out");
     }
