@@ -18,7 +18,9 @@ public class SingleChoiceVerifier : IVerifier
             || data.ValidAnswers.Count != 0
             || data.Sequence.Count != 0
             || data.TextAnswer != null
-            || data.NumberAnswer != null)
+            || data.NumberAnswer != null
+            || data.ValidIndices != null
+            || data.ChosenIndices != null)
             throw new ArgumentException(
                 $"{nameof(data)} should only have single or multiple choice related fields filled out");
     }
@@ -33,8 +35,8 @@ public class SingleChoiceVerifier : IVerifier
     public bool Verify(QuestionData answerData, QuestionData correctData)
     {
         CheckFields(answerData);
-        if (answerData.Options.Count != correctData.Options.Count)
+        if (answerData.ChosenIndices.Count != correctData.ValidIndices.Count)
             throw new ArgumentException($"{nameof(answerData)} doesn't have an answer selected");
-        return answerData.Options.All(o => correctData.Options.Contains(o));
+        return answerData.ChosenIndices.All(o => correctData.ValidIndices.Contains(o));
     }
 }

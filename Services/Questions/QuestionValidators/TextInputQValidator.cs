@@ -17,7 +17,9 @@ public class TextInputQValidator : IQuestionValidator
             || data.RightColumn.Count != 0
             || data.Options.Count != 0
             || data.Sequence.Count != 0
-            || data.NumberAnswer != null)
+            || data.NumberAnswer != null
+            || data.ValidIndices != null
+            || data.ChosenIndices != null)
             throw new ArgumentException($"{nameof(data)} should only have the text answer or valid answers filled out");
     }
 

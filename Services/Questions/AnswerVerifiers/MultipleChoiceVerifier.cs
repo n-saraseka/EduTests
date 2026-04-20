@@ -32,6 +32,6 @@ public class MultipleChoiceVerifier : IVerifier
     public bool Verify(QuestionData answerData, QuestionData correctData)
     {
         CheckFields(answerData);
-        return answerData.Options.Count == correctData.Options.Count && answerData.Options.All(o => correctData.Options.Contains(o));
+        return answerData.ChosenIndices.Count == correctData.ValidIndices.Count && answerData.ChosenIndices.All(o => correctData.ValidIndices.Contains(o));
     }
 }

@@ -18,7 +18,9 @@ public class SingleChoiceQValidator : IQuestionValidator
             || data.ValidAnswers.Count != 0
             || data.Sequence.Count != 0
             || data.TextAnswer != null
-            || data.NumberAnswer != null)
+            || data.NumberAnswer != null
+            || data.ValidIndices != null
+            || data.ChosenIndices != null)
             throw new ArgumentException(
                 $"{nameof(data)} should only have single or multiple choice related fields filled out");
     }

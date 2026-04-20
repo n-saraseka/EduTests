@@ -18,7 +18,9 @@ public class NumberInputQValidator : IQuestionValidator
             || data.Options.Count != 0
             || data.ValidAnswers.Count != 0
             || data.Sequence.Count != 0
-            || data.TextAnswer != null)
+            || data.TextAnswer != null
+            || data.ValidIndices != null
+            || data.ChosenIndices != null)
             throw new ArgumentException(
                 $"{nameof(data)} should only have the number filled out");
     }
