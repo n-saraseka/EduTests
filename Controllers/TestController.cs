@@ -39,6 +39,7 @@ public class TestController(ITestRepository testRepository,
                 return BadRequest("User not found");
             viewModel.User = entityToDtoService.UserEntityToDto(user);
         }
+        else return Unauthorized();
         
         var apiTest = entityToDtoService.TestEntityToDto(test);
         apiTest.Questions = test.Questions.Select(entityToDtoService.QuestionEntityToDto).ToList();
