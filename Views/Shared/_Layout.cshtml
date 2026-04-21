@@ -25,7 +25,7 @@
 <header class="border-bottom">
     <ul class="header-navigation">
         <li class="site-title"><a asp-controller="Home" asp-action="Index">EduTests</a></li>
-        <li>Популярные тесты</li>
+        <li><a asp-controller="Home" asp-action="PopularTests" class="nav-link">Популярные тесты</a></li>
     </ul>
     <ul class="header-navigation auth-navigation">
         @if (User.Identity.IsAuthenticated)

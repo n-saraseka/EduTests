@@ -150,4 +150,9 @@ app.MapControllerRoute(
     pattern: "{controller}/{id}/playthrough/{playthroughId}/result",
     defaults: new { controller = "Test", action = "TestResult" });
 
+app.MapControllerRoute(
+    name: "popular",
+    pattern: "popular",
+    defaults: new { controller = "Home", action = "PopularTests" });
+
 app.Run();

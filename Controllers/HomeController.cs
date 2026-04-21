@@ -49,6 +49,43 @@ public class HomeController(ITestRepository testRepository,
         return View(model);
     }
 
+    public async Task<IActionResult> PopularTests(int? page, HomeViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        var actualPage = page ?? 1;
+        
+        var testsQuery = testRepository.GetAllWithTags();
+        
+        var pageSize = int.Parse(config["testsCatalogPageSize"]);
+        var testCount = await testsQuery.CountAsync(cancellationToken);
+        model.Pages = (int)Math.Ceiling((double)testCount / pageSize);
+        // To avoid querying for empty pages
+        actualPage = Math.Max(Math.Min(actualPage, model.Pages), 1);
+        model.Page = actualPage;
+        
+        var tests = await testsQuery.Skip((actualPage - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        
+        var apiTests = tests.Select(entityToDtoService.TestEntityToDto);
+
+        if (apiTests.Count() > 0)
+        {
+            apiTests = await testStatsService.GetTestsStatsAsync(apiTests, cancellationToken);
+        }
+
+        var testList = apiTests
+            .OrderByDescending(t => t.CompletionCount)
+            .ThenByDescending(t => t.Rating)
+            .ToList();
+
+        model.Tests = testList;
+        var tags = await tagRepository.GetPopularTags().Take(pageSize).ToListAsync(cancellationToken);
+        var apiTags = tags.Select(entityToDtoService.TagEntityToDto).ToList();
+
+        model.PopularTags = apiTags;
+        
+        return View(model);
+    }
+
     public IActionResult Privacy()
     {
         return View();
