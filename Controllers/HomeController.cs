@@ -33,6 +33,11 @@ public class HomeController(ITestRepository testRepository,
         if (apiTests.Count() > 0)
         {
             apiTests = await testStatsService.GetTestsStatsAsync(apiTests, cancellationToken);
+            var testCardTagCount = int.Parse(config["testCardTagCount"]);
+            foreach (var test in apiTests)
+            {
+                test.Tags = test.Tags.Take(testCardTagCount).ToList();
+            }
         }
 
         var testList = apiTests.ToList();
@@ -40,7 +45,8 @@ public class HomeController(ITestRepository testRepository,
         model.Tests = testList;
         if (tagName == null)
         {
-            var tags = await tagRepository.GetPopularTags().Take(pageSize).ToListAsync(cancellationToken);
+            var tagCount = int.Parse(config["popularTagCount"]);
+            var tags = await tagRepository.GetPopularTags().Take(tagCount).ToListAsync(cancellationToken);
             var apiTags = tags.Select(entityToDtoService.TagEntityToDto).ToList();
 
             model.PopularTags = apiTags;
@@ -70,6 +76,11 @@ public class HomeController(ITestRepository testRepository,
         if (apiTests.Count() > 0)
         {
             apiTests = await testStatsService.GetTestsStatsAsync(apiTests, cancellationToken);
+            var testCardTagCount = int.Parse(config["testCardTagCount"]);
+            foreach (var test in apiTests)
+            {
+                test.Tags = test.Tags.Take(testCardTagCount).ToList();
+            }
         }
 
         var testList = apiTests
@@ -78,7 +89,9 @@ public class HomeController(ITestRepository testRepository,
             .ToList();
 
         model.Tests = testList;
-        var tags = await tagRepository.GetPopularTags().Take(pageSize).ToListAsync(cancellationToken);
+        
+        var tagCount = int.Parse(config["popularTagCount"]);
+        var tags = await tagRepository.GetPopularTags().Take(tagCount).ToListAsync(cancellationToken);
         var apiTags = tags.Select(entityToDtoService.TagEntityToDto).ToList();
 
         model.PopularTags = apiTags;
