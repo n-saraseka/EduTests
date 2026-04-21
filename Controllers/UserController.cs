@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using EduTests.Database.Enums;
 using EduTests.Database.Repositories.Interfaces;
 using EduTests.Models;
 using EduTests.Services;
@@ -57,7 +58,9 @@ public class UserController(IUserRepository userRepository,
         
         model.CurrentUserGroup = User.FindFirstValue(ClaimTypes.Role);
         
-        var testQuery = testRepository.GetByUserId(id).OrderByDescending(entity => entity.UpdatedAt);
+        var testQuery = testRepository.GetByUserId(id)
+            .Where(t => t.AccessType == AccessType.Public)
+            .OrderByDescending(entity => entity.UpdatedAt);
         var testPageSize = int.Parse(config["testsProfilePageSize"]);
         model.TestPageSize = testPageSize;
         var testsCount = await testQuery.CountAsync(cancellationToken);

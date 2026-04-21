@@ -27,12 +27,13 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
         Set.Include(t => t.Tags)
             .Include(t => t.User)
             .AsSplitQuery()
-            .Where(t => t.Tags.Any(tag => tag.Name == name));
+            .Where(t => t.Tags.Any(tag => tag.Name == name) && t.AccessType == AccessType.Public);
 
     public IQueryable<Test> GetAllWithTags() => Set
         .Include(t => t.Tags)
         .Include(t => t.User)
-        .AsSplitQuery();
+        .AsSplitQuery()
+        .Where(t => t.AccessType == AccessType.Public);
     
     /// <summary>
     /// Get a <see cref="Test"/> by its ID, including tags
