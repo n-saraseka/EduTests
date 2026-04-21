@@ -1,0 +1,86 @@
+@model EduTests.Models.SearchViewModel
+
+@{
+    ViewData["Title"] = "Поиск тестов по запросу " + Model.SearchQuery;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/test-catalog.css">
+    <link rel="stylesheet" href="~/css/search.css">
+}
+
+@section Scripts {
+    <script>
+        window.__INITIAL_DATA__ = @Html.Raw(Json.Serialize(Model.Tests));
+    </script>
+    <script src="~/js/index.js"></script>
+}
+
+<input type="text" class="searchbar" value="@Model.SearchQuery" maxlength="64" placeholder="Поиск...">
+
+<div class="text-center">
+    <h2>Найденные тесты</h2>
+</div>
+
+<ul id="test-cards">
+    @foreach (var test in Model.Tests)
+    {
+        <li class="card">
+            <img src="/files/tests/@test.Id" alt="Изображение теста" class="card-image"/>
+            <strong class="test-name">@test.Name</strong>
+            @if (test.Description?.Length > 0)
+            {
+                <p class="test-description">@test.Description</p>
+            }
+            @if (test.Tags?.Count > 0)
+            {
+                <ul class="test-tags">
+                    @foreach (var tag in test.Tags)
+                    {
+                        <li>
+                            <a asp-controller="Home" asp-action="Index" asp-route-tagName=@tag class="card-tag">@tag</a>
+                        </li>
+                    }
+                </ul>
+            }
+            <div class="author-ratings">
+                <div class="author-column">
+                    <img src="/files/users/@test.User.Id" alt="Автор"/>
+                    <a asp-controller="User" asp-action="Profile" asp-route-id=@test.User.Id>@test.User.Username</a>
+                </div>
+                <div className="ratings-completions-column">
+                    <div class="stat-row">
+                        <img src="~/files/icons/rating.png" alt="Рейтинг"/>
+                        <span>@test.Rating</span>
+                    </div>
+                    <div class="stat-row">
+                        <img src="~/files/icons/completions.png" alt="Прохождения"/>
+                        <span>@test.CompletionCount</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary">Пройти тест</button>
+        </li>
+    }
+</ul>
+
+@if (Model.Pages > 1)
+{
+    <ul className="pagination">
+        @if (Model.Page != 1)
+        {
+            <li class="page-item"><a asp-controller="Home" asp-action="Search" asp-route-query="@Model.SearchQuery" 
+                                     asp-route-page=@(Model.Page - 1)>&lt;</a></li>
+        }
+        @for (int i = 0; i < Model.Pages; i++)
+        {
+            <li class="page-item"><a asp-controller="Home" asp-action="Search" asp-route-query="@Model.SearchQuery" 
+                                     asp-route-page=@(i + 1)>@(i + 1)</a></li>
+        }
+        @if (Model.Page != Model.Pages)
+        {
+            <li class="page-item"><a asp-controller="Home" asp-action="Search" asp-route-query="@Model.SearchQuery" 
+                                     asp-route-page=@(Model.Page + 1)>&gt;</a></li>
+        }
+    </ul>
+}

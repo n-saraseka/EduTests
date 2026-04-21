@@ -99,6 +99,42 @@ public class HomeController(ITestRepository testRepository,
         return View(model);
     }
 
+    public async Task<IActionResult> Search(string query, int? page, SearchViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        model.SearchQuery = query;
+        
+        var actualPage = page ?? 1;
+        
+        var testsQuery = testRepository.Search(query);
+        
+        var pageSize = int.Parse(config["testsCatalogPageSize"]);
+        var testCount = await testsQuery.CountAsync(cancellationToken);
+        model.Pages = (int)Math.Ceiling((double)testCount / pageSize);
+        // To avoid querying for empty pages
+        actualPage = Math.Max(Math.Min(actualPage, model.Pages), 1);
+        model.Page = actualPage;
+        
+        var tests = await testsQuery.Skip((actualPage - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        var apiTests = tests.Select(entityToDtoService.TestEntityToDto);
+
+        if (apiTests.Count() > 0)
+        {
+            apiTests = await testStatsService.GetTestsStatsAsync(apiTests, cancellationToken);
+            var testCardTagCount = int.Parse(config["testCardTagCount"]);
+            foreach (var test in apiTests)
+            {
+                test.Tags = test.Tags.Take(testCardTagCount).ToList();
+            }
+        }
+
+        var testList = apiTests.ToList();
+
+        model.Tests = testList;
+        
+        return View(model);
+    }
+
     public IActionResult Privacy()
     {
         return View();

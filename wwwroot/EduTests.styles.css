@@ -56,6 +56,10 @@ header {
     font-size: 1.5rem;
 }
 
+header .searchbar {
+    width: 10rem;
+}
+
 a.navbar-brand {
     white-space: normal;
     text-align: center;

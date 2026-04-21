@@ -20,6 +20,7 @@
         window.$RefreshSig$ = () => (type) => type
         window.__vite_plugin_react_preamble_installed__ = true
     </script>
+    <script src="~/js/search.js"></script>
 </head>
 <body>
 <header class="border-bottom">
@@ -33,15 +34,16 @@
             <li><img id="nav-avatar" src="/files/users/@userId" alt="Profile picture"/></li>
             <li><a href="/user/@userId" class="nav-link">@userName</a></li>
             <li><a href="/user/@userId/my_account" class="nav-link">
-                <img src="/files/icons/myacocunt.png" alt="Личный кабинет" class="nav-icon">
+                <img src="~/files/icons/myacocunt.png" alt="Личный кабинет" class="nav-icon">
             </a></li>
             <li><a asp-route="constructor" class="nav-link">
-                <img src="/files/icons/constructor.png" alt="Конструктор" class="nav-icon">
+                <img src="~/files/icons/constructor.png" alt="Конструктор" class="nav-icon">
             </a></li>
             <li><a asp-route="logout" class="nav-link">Выход</a></li>
         }
         else
         {
+            <li><input type="text" maxlength="64" class="searchbar" placeholder="Поиск..."></li>
             <li><a asp-route="login" class="nav-link">Вход</a></li>
             <li><a asp-route="register" class="nav-link">Регистрация</a></li>
         }

@@ -12,12 +12,19 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
     /// </summary>
     /// <param name="text">Text to match</param>
     /// <returns>List of all <see cref="Test"/>s matching the text</returns>
-    public IQueryable<Test> Search(string text) =>
-        Set.Where(t => (t.Name.Contains(text)
-                        || t.Description != null && t.Description.Contains(text)
-                        || t.Tags.Any(tag => tag.Name.Contains(text)))
-                       && t.AccessType == AccessType.Public);
-    
+    public IQueryable<Test> Search(string text)
+    {
+        var textLower = text.ToLower();
+        return Set
+            .Include(t => t.Tags)
+            .Include(t => t.User)
+            .AsSplitQuery()
+            .Where(t => (t.Name.ToLower().Contains(textLower)
+                         || t.Description != null && t.Description.ToLower().Contains(textLower)
+                         || t.Tags.Any(tag => tag.Name.ToLower().Contains(textLower)))
+                        && t.AccessType == AccessType.Public);
+    }
+
     /// <summary>
     /// Get all <see cref="Test"/>s that have matching <see cref="Tag"/> name
     /// </summary>
