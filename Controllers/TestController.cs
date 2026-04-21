@@ -26,18 +26,20 @@ public class TestController(ITestRepository testRepository,
         ConstructorViewModel viewModel,
         CancellationToken cancellationToken = default)
     {
+        var test = await testRepository.GetByIdWithExtendedDataAsync(id, cancellationToken);
+        if (test == null)
+            return NotFound("Test not found");
+        
         var result = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId);
         if (result)
         {
+            if (test.UserId != userId) return Forbid();
             var user = await userRepository.GetByIdAsync(userId, cancellationToken);
             if (user == null)
                 return BadRequest("User not found");
             viewModel.User = entityToDtoService.UserEntityToDto(user);
         }
         
-        var test = await testRepository.GetByIdWithExtendedDataAsync(id, cancellationToken);
-        if (test == null)
-            return NotFound("Test not found");
         var apiTest = entityToDtoService.TestEntityToDto(test);
         apiTest.Questions = test.Questions.Select(entityToDtoService.QuestionEntityToDto).ToList();
         apiTest.Results = test.Results.Select(entityToDtoService.TestResultEntityToDto).ToList();
@@ -86,6 +88,16 @@ public class TestController(ITestRepository testRepository,
     {
         var completion = await testCompletionRepository.GetByIdAsync(playthroughId, cancellationToken);
         if (completion is null) return NotFound("Playthrough not found");
+
+        if (completion.CompletedAt != null) return Forbid();
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+        int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
+        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId) return Forbid();
         
         model.Completion = entityToDtoService.CompletionEntityToDto(completion, null, null);
         
@@ -133,6 +145,31 @@ public class TestController(ITestRepository testRepository,
         var completion = await testCompletionRepository.GetWithExtendedDataAsync(playthroughId, cancellationToken);
         if (completion is null) return NotFound("Playthrough not found");
         
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        model.CurrentUserGroup = User.FindFirstValue(ClaimTypes.Role);
+        var authRes = int.TryParse(userId, out var authenticatedUserId);
+        var anonRes = Guid.TryParse(userId, out var anonymousUserId);
+        if (authRes)
+        {
+            if (completion.UserId != authenticatedUserId) return Forbid();
+            model.CurrentUserId = authenticatedUserId;
+            var activeBanCurr = await bannedUserRepository.GetUsersActiveBanAsync(authenticatedUserId, cancellationToken);
+            var currBanned = activeBanCurr is not null;
+            model.IsCurrentBanned = currBanned;
+            var currentRating = await ratingRepository.GetUsersRatingAsync(id, authenticatedUserId, cancellationToken);
+            if (currentRating != null)
+                model.CurrentRating = entityToDtoService.RatingEntityToDto(currentRating);
+        }
+        else
+        {
+            if (anonRes)
+                if (completion.AnonymousUserId != anonymousUserId) return Forbid();
+            else return BadRequest("Neither anonymous or authenticated user ID were assigned. WTF?");
+        }
+
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId) return Forbid();
+        
         var questions = await questionRepository.GetByTestIdAsync(completion.TestId, cancellationToken);
         var answers = await userAnswerRepository.GetByCompletionIdAsync(completion.Id, cancellationToken);
         
@@ -144,19 +181,6 @@ public class TestController(ITestRepository testRepository,
         }
         
         model.Completion = apiCompletion;
-        
-        model.CurrentUserGroup = User.FindFirstValue(ClaimTypes.Role);
-        var result = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId);
-        if (result)
-        {
-            model.CurrentUserId = userId;
-            var activeBanCurr = await bannedUserRepository.GetUsersActiveBanAsync(userId, cancellationToken);
-            var currBanned = activeBanCurr is not null;
-            model.IsCurrentBanned = currBanned;
-            var currentRating = await ratingRepository.GetUsersRatingAsync(id, userId, cancellationToken);
-            if (currentRating != null)
-                model.CurrentRating = entityToDtoService.RatingEntityToDto(currentRating);
-        }
         
         var query = commentRepository.GetTestComments(id);
         var pageSize = int.Parse(config["commentPageSize"]);
