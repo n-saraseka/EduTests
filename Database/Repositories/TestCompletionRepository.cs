@@ -14,7 +14,7 @@ public class TestCompletionRepository(DatabaseContext db) : BaseRepository<TestC
     /// <returns>The <see cref="Test"/>'s completion count</returns>
     public Task<int> GetTestCompletionCountAsync(int id, CancellationToken cancellationToken = default) => 
         Set
-            .Where(tc => tc.TestId == id)
+            .Where(tc => tc.TestId == id && tc.CompletedAt != null)
             .CountAsync(cancellationToken);
 
     /// <summary>
@@ -26,7 +26,7 @@ public class TestCompletionRepository(DatabaseContext db) : BaseRepository<TestC
     public async Task<Dictionary<int, int>> GetTestCompletionCountsAsync(IEnumerable<int> ids, CancellationToken cancellationToken = default)
     {
         var counts = await Set
-            .Where(tc => ids.Contains(tc.TestId))
+            .Where(tc => ids.Contains(tc.TestId) && tc.CompletedAt != null)
             .GroupBy(tc => tc.TestId)
             .Select(g => new { TestId = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.TestId, x => x.Count, cancellationToken);
@@ -87,6 +87,12 @@ public class TestCompletionRepository(DatabaseContext db) : BaseRepository<TestC
             return Set.FirstOrDefaultAsync(tc => tc.TestId == testId && tc.AnonymousUserId == anonymousUserId && tc.CompletedAt == null, cancellationToken);
     }
 
+    /// <summary>
+    /// Get a <see cref="TestCompletion"/> with <see cref="User"/> and <see cref="Test"/> data
+    /// </summary>
+    /// <param name="id">The <see cref="TestCompletion"/> ID</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="TestCompletion"/> or null</returns>
     public Task<TestCompletion?> GetWithExtendedDataAsync(int id, CancellationToken cancellationToken = default) => Set
         .Include(tc => tc.User)
         .Include(tc => tc.Test)
