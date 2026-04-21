@@ -424,8 +424,12 @@ input:focus {
     color: #0b0b11;
 }
 
+.card-tag:hover {
+    background-color: #f5f5f5;
+}
+
 .card-tag::before {
-    content: '#';
+    content: '# ';
     font-weight: bold;
 }
 
