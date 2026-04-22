@@ -27,18 +27,28 @@ function StartTestButton({testId}) {
         if (response.ok) {
             const newCompletion = await response.json();
             setCompletionId(newCompletion.id);
+            return newCompletion.id;
         }
     }
     
-    const redirectToPlaythrough = () => {
-        window.location.href = `/test/${testId}/playthrough/${completionId}`;
+    const redirectToPlaythrough = (id) => {
+        window.location.href = `/test/${testId}/playthrough/${id}`;
     }
     
     const startPlaythrough = async () => {
         setIsLoading(true);
-        await createNewCompletion();
-        setIsLoading(false);
-        redirectToPlaythrough();
+        const newId = await createNewCompletion();
+        setIsLoading(false)
+        redirectToPlaythrough(newId);
+    }
+    
+    const restartPlaythrough = async () => {
+        setIsLoading(true);
+        console.log(testId);
+        await deleteCompletion(testId, completionId);
+        const newId = await createNewCompletion();
+        setIsLoading(false)
+        redirectToPlaythrough(newId);
     }
      
     return (<>
@@ -49,7 +59,7 @@ function StartTestButton({testId}) {
             </div>
         </div>)}
         {isModalOpen && (<ConfirmationModal title="Вы уже начали прохождение этого теста. Хотите продолжить?"
-                                            onCancel={startPlaythrough} 
+                                            onCancel={restartPlaythrough}
                                             onConfirm={redirectToPlaythrough}/>)}
     </>);
 }
