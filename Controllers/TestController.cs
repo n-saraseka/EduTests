@@ -96,9 +96,18 @@ public class TestController(ITestRepository testRepository,
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 
         int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
-        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
+        Guid? anonId = null;
+        
+        if (!isAuthenticated && anonUserResult && anonIdObj is string anonIdStr)
+        {
+            if (Guid.TryParse(anonIdStr, out var anonymousUserId))
+            {
+                anonId = anonymousUserId;
+            }
+        }
 
-        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId) return Forbid();
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonId) return Forbid();
         
         model.Completion = entityToDtoService.CompletionEntityToDto(completion, null, null);
         
@@ -140,7 +149,7 @@ public class TestController(ITestRepository testRepository,
         return View(model);
     }
 
-    public async Task<IActionResult> TestResult(int id, int playthroughId, TestResultModel model,
+    public async Task<IActionResult> TestResult(int id, int playthroughId, TestResultViewModel viewModel,
         CancellationToken cancellationToken = default)
     {
         var completion = await testCompletionRepository.GetWithExtendedDataAsync(playthroughId, cancellationToken);
@@ -148,28 +157,38 @@ public class TestController(ITestRepository testRepository,
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        model.CurrentUserGroup = User.FindFirstValue(ClaimTypes.Role);
+        viewModel.CurrentUserGroup = User.FindFirstValue(ClaimTypes.Role);
         var authRes = int.TryParse(userId, out var authenticatedUserId);
-        var anonRes = Guid.TryParse(userId, out var anonymousUserId);
+        var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
+        Guid? anonId = null;
+        
+        if (!authRes && anonUserResult && anonIdObj is string anonIdStr)
+        {
+            if (Guid.TryParse(anonIdStr, out var anonymousUserId))
+            {
+                anonId = anonymousUserId;
+            }
+        }
+        
         if (authRes)
         {
             if (completion.UserId != authenticatedUserId) return Forbid();
-            model.CurrentUserId = authenticatedUserId;
+            viewModel.CurrentUserId = authenticatedUserId;
             var activeBanCurr = await bannedUserRepository.GetUsersActiveBanAsync(authenticatedUserId, cancellationToken);
             var currBanned = activeBanCurr is not null;
-            model.IsCurrentBanned = currBanned;
+            viewModel.IsCurrentBanned = currBanned;
             var currentRating = await ratingRepository.GetUsersRatingAsync(id, authenticatedUserId, cancellationToken);
             if (currentRating != null)
-                model.CurrentRating = entityToDtoService.RatingEntityToDto(currentRating);
+                viewModel.CurrentRating = entityToDtoService.RatingEntityToDto(currentRating);
         }
         else
         {
-            if (anonRes)
-                if (completion.AnonymousUserId != anonymousUserId) return Forbid();
+            if (anonId != null)
+                if (completion.AnonymousUserId != anonId) return Forbid();
             else return BadRequest("Neither anonymous or authenticated user ID were assigned. WTF?");
         }
 
-        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId) return Forbid();
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonId) return Forbid();
         
         var questions = await questionRepository.GetByTestIdAsync(completion.TestId, cancellationToken);
         var answers = await userAnswerRepository.GetByCompletionIdAsync(completion.Id, cancellationToken);
@@ -181,18 +200,26 @@ public class TestController(ITestRepository testRepository,
             apiCompletion.User = entityToDtoService.UserEntityToDto(completion.User);
         }
         
-        model.Completion = apiCompletion;
+        viewModel.Completion = apiCompletion;
         
         var query = commentRepository.GetTestComments(id);
         var pageSize = int.Parse(config["commentPageSize"]);
-        model.CommentsPerPage = pageSize;
+        viewModel.CommentsPerPage = pageSize;
         
         var count = await query.CountAsync(cancellationToken);
-        model.CommentPages = (int)Math.Ceiling((double)count / pageSize);
+        viewModel.CommentPages = (int)Math.Ceiling((double)count / pageSize);
         
         var comments = await query.Take(pageSize).ToListAsync(cancellationToken);
-        model.Comments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
+        viewModel.Comments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
         
-        return View(model);
+        return View(viewModel);
+    }
+
+    [Authorize]
+    public async Task<IActionResult> TestStats(int id, CancellationToken cancellationToken = default)
+    {
+        var query = testCompletionRepository.GetByTestId(id);
+        var count = await query.CountAsync(cancellationToken);
+        return View();
     }
 }

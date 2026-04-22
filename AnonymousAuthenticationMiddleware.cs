@@ -20,14 +20,7 @@ public class AnonymousAuthenticationMiddleware(RequestDelegate next)
                 });
             }
 
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, anonymousId),
-                new Claim(ClaimTypes.Anonymous, "true")
-            };
-
-            var identity = new ClaimsIdentity(claims, "Anonymous");
-            context.User.AddIdentity(identity);
+            context.Items["AnonymousId"] = anonymousId;
         }
         await next(context);
     }

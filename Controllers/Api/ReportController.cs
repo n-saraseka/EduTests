@@ -36,19 +36,24 @@ public class ReportController(IReportsRepository reportsRepository,
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 
         int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
-        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
-
-        if (!isAuthenticated)
+        var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
+        Guid? anonId = null;
+        
+        if (!isAuthenticated && anonUserResult && anonIdObj is string anonIdStr)
         {
-            var existingAnon = await anonymousUserRepository.GetByIdAsync((Guid)anonymousUserId, cancellationToken);
-            if (existingAnon is null)
+            if (Guid.TryParse(anonIdStr, out var anonymousUserId))
             {
-                var anon = new AnonymousUser
+                var existingAnon = await anonymousUserRepository.GetByIdAsync(anonymousUserId, cancellationToken);
+                if (existingAnon is null)
                 {
-                    Id = (Guid)anonymousUserId
-                };
-                anonymousUserRepository.Create(anon);
-                await anonymousUserRepository.SaveChangesAsync(cancellationToken);
+                    var anon = new AnonymousUser
+                    {
+                        Id = anonymousUserId
+                    };
+                    anonymousUserRepository.Create(anon);
+                    await anonymousUserRepository.SaveChangesAsync(cancellationToken);
+                }
+                anonId = anonymousUserId;
             }
         }
 
@@ -63,7 +68,7 @@ public class ReportController(IReportsRepository reportsRepository,
                         return NotFound();
                     
                     existingReport = await reportsRepository.
-                        GetByTestAndReporterIdAsync(test.Id, authenticatedUserId, anonymousUserId, cancellationToken);
+                        GetByTestAndReporterIdAsync(test.Id, authenticatedUserId, anonId, cancellationToken);
                     
                     report = new Report
                     {
@@ -80,7 +85,7 @@ public class ReportController(IReportsRepository reportsRepository,
                         return NotFound();
 
                     existingReport = await reportsRepository.
-                        GetByUserAndReporterIdAsync(user.Id, authenticatedUserId, anonymousUserId, cancellationToken);
+                        GetByUserAndReporterIdAsync(user.Id, authenticatedUserId, anonId, cancellationToken);
 
                     if (user.Id == authenticatedUserId)
                         return BadRequest("Self reporting is not allowed");
@@ -99,7 +104,7 @@ public class ReportController(IReportsRepository reportsRepository,
                         return NotFound();
                     
                     existingReport = await reportsRepository.
-                        GetByCommentAndReporterIdAsync(comment.Id, authenticatedUserId, anonymousUserId, cancellationToken);
+                        GetByCommentAndReporterIdAsync(comment.Id, authenticatedUserId, anonId, cancellationToken);
                     
                     report = new Report
                     {
@@ -116,7 +121,7 @@ public class ReportController(IReportsRepository reportsRepository,
         if (existingReport is not null && DateTime.UtcNow.Subtract(existingReport.DateTime).TotalDays < 1)
             return BadRequest("The entity has been recently reported by user");
         
-        await FinishReportDataAndCreateAsync(report, authenticatedUserId, anonymousUserId, cancellationToken);
+        await FinishReportDataAndCreateAsync(report, authenticatedUserId, anonId, cancellationToken);
                     
         var apiReport = entityToDtoService.ReportEntityToDto(report);
         return Created(string.Empty, apiReport);

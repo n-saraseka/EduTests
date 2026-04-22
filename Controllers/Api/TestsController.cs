@@ -585,19 +585,24 @@ public class TestsController(ITestRepository testRepository,
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 
         int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
-        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
+        Guid? anonId = null;
         
-        if (!isAuthenticated)
+        if (!isAuthenticated && anonUserResult && anonIdObj is string anonIdStr)
         {
-            var existingAnon = await anonymousUserRepository.GetByIdAsync((Guid)anonymousUserId, cancellationToken);
-            if (existingAnon is null)
+            if (Guid.TryParse(anonIdStr, out var anonymousUserId))
             {
-                var anon = new AnonymousUser
+                var existingAnon = await anonymousUserRepository.GetByIdAsync(anonymousUserId, cancellationToken);
+                if (existingAnon is null)
                 {
-                    Id = (Guid)anonymousUserId
-                };
-                anonymousUserRepository.Create(anon);
-                await anonymousUserRepository.SaveChangesAsync(cancellationToken);
+                    var anon = new AnonymousUser
+                    {
+                        Id = anonymousUserId
+                    };
+                    anonymousUserRepository.Create(anon);
+                    await anonymousUserRepository.SaveChangesAsync(cancellationToken);
+                }
+                anonId = anonymousUserId;
             }
         }
         
@@ -607,7 +612,7 @@ public class TestsController(ITestRepository testRepository,
             return Forbid();
         
         var existingCompletions = await testCompletionRepository
-            .GetByTestIdAndUserIdAsync(id, authenticatedUserId, anonymousUserId, cancellationToken);
+            .GetByTestIdAndUserIdAsync(id, authenticatedUserId, anonId, cancellationToken);
         if (existingCompletions.Count == test.AttemptLimit)
             return Forbid();
         
@@ -624,7 +629,7 @@ public class TestsController(ITestRepository testRepository,
         if (isAuthenticated)
             completion.UserId = authenticatedUserId;
         else
-            completion.AnonymousUserId = anonymousUserId;
+            completion.AnonymousUserId = anonId;
         
         testCompletionRepository.Create(completion);
         await testCompletionRepository.SaveChangesAsync(cancellationToken);
@@ -653,13 +658,22 @@ public class TestsController(ITestRepository testRepository,
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 
         int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
-        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
+        Guid? anonId = null;
+        
+        if (!isAuthenticated && anonUserResult && anonIdObj is string anonIdStr)
+        {
+            if (Guid.TryParse(anonIdStr, out var anonymousUserId))
+            {
+                anonId = anonymousUserId;
+            }
+        }
         
         var completion = await testCompletionRepository.GetByIdAsync(completionId, cancellationToken);
         if (completion is null)
             return NotFound();
 
-        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonId)
             return Forbid();
         
         var apiCompletion = entityToDtoService.CompletionEntityToDto(completion, null, null);
@@ -678,10 +692,19 @@ public class TestsController(ITestRepository testRepository,
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 
         int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
-        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
+        Guid? anonId = null;
+        
+        if (!isAuthenticated && anonUserResult && anonIdObj is string anonIdStr)
+        {
+            if (Guid.TryParse(anonIdStr, out var anonymousUserId))
+            {
+                anonId = anonymousUserId;
+            }
+        }
 
         var completion =
-            await testCompletionRepository.GetActiveCompletionAsync(id, authenticatedUserId, anonymousUserId,
+            await testCompletionRepository.GetActiveCompletionAsync(id, authenticatedUserId, anonId,
                 cancellationToken);
         
         var apiCompletion = completion is null ? null : entityToDtoService.CompletionEntityToDto(completion, null, null);
@@ -708,13 +731,22 @@ public class TestsController(ITestRepository testRepository,
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 
         int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
-        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
+        Guid? anonId = null;
+        
+        if (!isAuthenticated && anonUserResult && anonIdObj is string anonIdStr)
+        {
+            if (Guid.TryParse(anonIdStr, out var anonymousUserId))
+            {
+                anonId = anonymousUserId;
+            }
+        }
         
         var completion = await testCompletionRepository.GetByIdAsync(completionId, cancellationToken);
         if (completion is null)
             return NotFound();
 
-        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonId)
             return Forbid();
         
         if (completion.CompletedAt != null)
@@ -753,13 +785,22 @@ public class TestsController(ITestRepository testRepository,
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 
         int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
-        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
+        Guid? anonId = null;
+        
+        if (!isAuthenticated && anonUserResult && anonIdObj is string anonIdStr)
+        {
+            if (Guid.TryParse(anonIdStr, out var anonymousUserId))
+            {
+                anonId = anonymousUserId;
+            }
+        }
         
         var completion = await testCompletionRepository.GetByIdAsync(completionId, cancellationToken);
         if (completion is null)
             return NotFound();
 
-        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonId)
             return Forbid();
         
         if (completion.CompletedAt != null)
@@ -788,7 +829,16 @@ public class TestsController(ITestRepository testRepository,
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 
         int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
-        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
+        Guid? anonId = null;
+        
+        if (!isAuthenticated && anonUserResult && anonIdObj is string anonIdStr)
+        {
+            if (Guid.TryParse(anonIdStr, out var anonymousUserId))
+            {
+                anonId = anonymousUserId;
+            }
+        }
         
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
         if (test is null)
@@ -798,7 +848,7 @@ public class TestsController(ITestRepository testRepository,
         if (completion is null)
             return NotFound();
         
-        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonId)
             return Forbid();
         
         var answer = await userAnswerRepository.GetByIdAsync(answerId, cancellationToken);
@@ -826,7 +876,16 @@ public class TestsController(ITestRepository testRepository,
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 
         int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
-        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
+        Guid? anonId = null;
+        
+        if (!isAuthenticated && anonUserResult && anonIdObj is string anonIdStr)
+        {
+            if (Guid.TryParse(anonIdStr, out var anonymousUserId))
+            {
+                anonId = anonymousUserId;
+            }
+        }
         
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
         if (test is null)
@@ -836,7 +895,7 @@ public class TestsController(ITestRepository testRepository,
         if (completion is null)
             return NotFound();
         
-        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonId)
             return Forbid();
         
         var answers = await userAnswerRepository.GetByCompletionIdAsync(completionId, cancellationToken);
@@ -863,7 +922,16 @@ public class TestsController(ITestRepository testRepository,
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 
         int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
-        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
+        Guid? anonId = null;
+        
+        if (!isAuthenticated && anonUserResult && anonIdObj is string anonIdStr)
+        {
+            if (Guid.TryParse(anonIdStr, out var anonymousUserId))
+            {
+                anonId = anonymousUserId;
+            }
+        }
         
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
         if (test is null)
@@ -873,7 +941,7 @@ public class TestsController(ITestRepository testRepository,
         if (completion is null)
             return NotFound();
         
-        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonId)
             return Forbid();
         
         if (completion.CompletedAt != null)
@@ -919,7 +987,16 @@ public class TestsController(ITestRepository testRepository,
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 
         int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
-        Guid? anonymousUserId = !isAuthenticated ? Guid.Parse(userId) : null;
+        var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
+        Guid? anonId = null;
+        
+        if (!isAuthenticated && anonUserResult && anonIdObj is string anonIdStr)
+        {
+            if (Guid.TryParse(anonIdStr, out var anonymousUserId))
+            {
+                anonId = anonymousUserId;
+            }
+        }
         
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
         if (test is null)
@@ -929,7 +1006,7 @@ public class TestsController(ITestRepository testRepository,
         if (completion is null)
             return NotFound();
         
-        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonymousUserId)
+        if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonId)
             return Forbid();
         
         if (completion.CompletedAt != null)
