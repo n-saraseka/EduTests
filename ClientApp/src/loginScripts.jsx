@@ -48,7 +48,7 @@ class LoginCommand {
 }
 
 async function Login(data, token) {
-    let response = await fetch("api/auth/login", {
+    let response = await fetch("/api/auth/login", {
         method: 'POST',
         headers: {
             'RequestVerificationToken': token,
