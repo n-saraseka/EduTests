@@ -33,8 +33,7 @@ public class UserRatingRepository(DatabaseContext db) : BaseRepository<UserRatin
         var counts = await Set
             .Where(r => ids.Contains(r.TestId))
             .GroupBy(r => r.TestId)
-            .Select(g => new { TestId = g.Key, Count = g.Sum(r => r.IsPositive ? 1 : -1) })
-            .ToDictionaryAsync(x => x.TestId, x => x.Count, cancellationToken);
+            .ToDictionaryAsync(g => g.Key, g => g.Sum(r => r.IsPositive ? 1 : -1), cancellationToken);
         
         foreach (var id in ids.Where(id => !counts.ContainsKey(id)))
             counts[id] = 0;

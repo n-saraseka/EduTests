@@ -10,6 +10,6 @@ public interface ITestCompletionRepository : IRepository<TestCompletion, int>
         CancellationToken cancellationToken = default);
     Task<TestCompletion?> GetActiveCompletionAsync(int testId, int? userId, Guid? anonymousUserId,
         CancellationToken cancellationToken = default);
-
     Task<TestCompletion?> GetWithExtendedDataAsync(int id, CancellationToken cancellationToken = default);
+    public IQueryable<TestCompletion> GetByTestId(int id);
 }

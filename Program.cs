@@ -160,4 +160,9 @@ app.MapControllerRoute(
     pattern: "search",
     defaults: new { controller = "Home", action = "Search"});
 
+app.MapControllerRoute(
+    name: "statistics",
+    pattern: "{controller}/{id}/statistics",
+    defaults: new { controller = "Test",  action = "TestStats"});
+
 app.Run();

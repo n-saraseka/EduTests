@@ -1,0 +1,151 @@
+@model EduTests.Models.TestStatisticsViewModel
+
+@{
+    ViewBag.Title = $"Статистика теста {Model.Test.Name}";
+    var count = Model.Completions.Count;
+    var minTimeSpan = TimeSpan.MinValue;
+    var iqrAvgTimeSpan = TimeSpan.MinValue;
+    var maxTimeSpan = TimeSpan.MinValue;
+
+    var medianPercentageOffset = 0.0;
+    var iqrAvgTimeOffset = 0.0;
+    
+    if (Model.MedianPercentage != null)
+    {
+        medianPercentageOffset = (double)(Model.MedianPercentage / Model.MaxPercentage * 100.0);
+    }
+
+    if (Model.MinTime != null)
+    {
+        minTimeSpan = (TimeSpan)Model.MinTime;
+        iqrAvgTimeSpan = (TimeSpan)Model.InterQuartileAverageTime;
+        maxTimeSpan = (TimeSpan)Model.MaxTime;
+        iqrAvgTimeOffset = iqrAvgTimeSpan.Ticks * 1.0 / maxTimeSpan.Ticks * 100.0;
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/stats.css">
+}
+
+@section Scripts
+{
+    <script>
+        window.__INITIAL_DATA__ = @Html.Raw(Json.Serialize(Model));
+    </script>
+    <script type="module" src="http://localhost:5173/src/statsPageScripts.jsx"></script>
+}
+
+<div id="test">
+    <div id="test-info">
+        <div id="test-info-header">
+            <div id="test-img">
+                <img src="/files/tests/@Model.Test.Id" alt="Изображение теста" id="test-icon">
+            </div>
+            <div id="test-data">
+                <div id="test-title">
+                    <h1>@Model.Test.Name</h1>
+                </div>
+                <span id="created-by">Создан пользователем <img src="/files/users/@Model.Test.User.Id" alt="Аватар" class="test-avatar">
+                    <a asp-controller="User" asp-action="Profile" asp-route-id="@Model.Test.User.Id">@Model.Test.User.Username</a>
+                    <span title="@Model.Test.CreatedAt">@Model.Test.CreatedAt.ToShortDateString()</span></span>
+                @if (Model.Test.Description?.Length > 0)
+                {
+                    <p>@Model.Test.Description</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (count == 0)
+{
+    <p>Ваш тест ещё не был пройден ни одним пользователем. Повторите попытку позже.</p>
+}
+
+else
+{
+    <div class="text-center">
+        <h1>Общая статистика</h1>
+    </div>
+
+    <div id="general-stats">
+        <table>
+            <tr>
+                <td>Процент прохождения</td>
+                <td>
+                    @if (count == 1)
+                    {
+                        <span>@Model.MinPercentage</span>
+                    }
+                    else
+                    {
+                        <div class="general-stat">
+                            <div class="stat-bar"></div>
+                            <div class="stat-measures">
+                                <div class="stat-measure stat-min">
+                                    <span title="Минимум">Мин.</span>
+                                    <span>@Model.MinPercentage</span>
+                                </div>
+                                <div class="stat-measure stat-mid" style="left: @medianPercentageOffset.ToString("0.0000").Replace(",", ".")%">
+                                    <span title="Медиана">Мед.</span>
+                                    <span>@Model.MedianPercentage</span>
+                                </div>
+                                <div class="stat-measure stat-max">
+                                    <span title="Максимум">Макс.</span>
+                                    <span>@Model.MaxPercentage</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td>Время прохождения</td>
+                <td>
+                    @if (count == 1)
+                    {
+                        <span>@minTimeSpan.ToString(@"hh\:mm\:ss")</span>
+                    }
+                    else
+                    {
+                        <div class="general-stat">
+                            <div class="stat-bar"></div>
+                            <div class="stat-measures">
+                                <div class="stat-measure stat-min">
+                                    <span title="Минимум">Мин.</span>
+                                    <span>@minTimeSpan.ToString(@"hh\:mm\:ss")</span>
+                                </div>
+                                <div class="stat-measure stat-mid" style="left: @iqrAvgTimeOffset.ToString("0.0000").Replace(",", ".")%">
+                                    @if (count < 4)
+                                    {
+                                        <span title="Среднее">Ср.</span>
+                                    }
+                                    else
+                                    {
+                                        <span title="Межквартильное среднее">Межквт. ср.</span>
+                                    }
+                                    <span>@iqrAvgTimeSpan.ToString(@"hh\:mm\:ss")</span>
+                                </div>
+                                <div class="stat-measure stat-max">
+                                    <span title="Максимум">Макс.</span>
+                                    <span>@maxTimeSpan.ToString(@"hh\:mm\:ss")</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td>Количество прохождений:</td>
+                <td>@Model.Completions.Count</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="text-center">
+        <h1>Индивидуальная статистика</h1>
+    </div>
+    
+    <div id="individual-stats"></div>
+}

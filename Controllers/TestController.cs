@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using EduTests.Database.Entities;
 using EduTests.Database.Enums;
 using EduTests.Database.Repositories.Interfaces;
 using EduTests.Models;
@@ -162,7 +163,7 @@ public class TestController(ITestRepository testRepository,
         var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
         Guid? anonId = null;
         
-        if (!authRes && anonUserResult && anonIdObj is string anonIdStr)
+        if (anonUserResult && anonIdObj is string anonIdStr)
         {
             if (Guid.TryParse(anonIdStr, out var anonymousUserId))
             {
@@ -184,7 +185,9 @@ public class TestController(ITestRepository testRepository,
         else
         {
             if (anonId != null)
+            {
                 if (completion.AnonymousUserId != anonId) return Forbid();
+            }
             else return BadRequest("Neither anonymous or authenticated user ID were assigned. WTF?");
         }
 
@@ -216,10 +219,67 @@ public class TestController(ITestRepository testRepository,
     }
 
     [Authorize]
-    public async Task<IActionResult> TestStats(int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> TestStats(int id, TestStatisticsViewModel viewModel, CancellationToken cancellationToken = default)
     {
-        var query = testCompletionRepository.GetByTestId(id);
-        var count = await query.CountAsync(cancellationToken);
-        return View();
+        var test = await testRepository.GetByIdWithTagsAsync(id, cancellationToken);
+        if (test == null) return NotFound("Test not found");
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var authRes = int.TryParse(userId, out var authenticatedUserId);
+        if (authRes && test.UserId != authenticatedUserId) return Forbid();
+        
+        var apiTest = entityToDtoService.TestEntityToDto(test);
+        apiTest.User = entityToDtoService.UserEntityToDto(test.User);
+        
+        viewModel.Test = entityToDtoService.TestEntityToDto(test);
+        
+        var completions = await testCompletionRepository.GetByTestId(id).ToListAsync(cancellationToken);
+        var ids = completions.Select(c => c.Id);
+        var answers = await userAnswerRepository.GetByCompletionIdsAsync(ids, cancellationToken);
+        var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
+
+        var apiCompletions = completions.Select(c =>
+            {
+                var completion = entityToDtoService.CompletionEntityToDto(c, answers[c.Id], questions);
+                if (completion.UserId != null) completion.User = entityToDtoService.UserEntityToDto(c.User);
+                return completion;
+            });
+        
+        var count = apiCompletions.Count();
+        if (count > 0)
+        {
+            var orderedByPercentage = apiCompletions
+                .OrderBy(c => c.CompletionPercentage)
+                .Select(c => c.CompletionPercentage)
+                .ToList();
+            
+            viewModel.MinPercentage = orderedByPercentage[0];
+            viewModel.MaxPercentage = orderedByPercentage[count - 1];
+
+            var midpoint = count / 2;
+            if (count % 2 == 0)
+                viewModel.MedianPercentage = (orderedByPercentage.ElementAt(midpoint - 1) + orderedByPercentage.ElementAt(midpoint)) / 2;
+            else
+                viewModel.MedianPercentage = orderedByPercentage.ElementAt(midpoint);
+            
+            var orderedByTime = apiCompletions
+                .OrderBy(c => c.CompletedAt - c.StartedAt)
+                .Select(c => (DateTime)c.CompletedAt - c.StartedAt)
+                .ToList();
+            
+            viewModel.MinTime = orderedByTime[0];
+            viewModel.MaxTime = orderedByTime[count - 1];
+            
+            var interQuartile = count > 3 ? orderedByTime.Take(count / 2).Skip(count / 4).ToList() : orderedByTime.ToList();
+            viewModel.InterQuartileAverageTime = new TimeSpan((long)interQuartile.Average(t => t.Ticks));
+        }
+        
+        var pageSize = int.Parse(config["testStatisticsRows"]);
+        viewModel.PageSize = pageSize;
+        viewModel.Pages = (int)Math.Ceiling((double)count / pageSize);
+        
+        viewModel.Completions = apiCompletions.Take(pageSize).ToList();
+        
+        return View(viewModel);
     }
 }

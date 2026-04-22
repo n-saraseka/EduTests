@@ -7,7 +7,7 @@ public class ApiCompletion
     public ApiUser? User { get; set; }
     public required int TestId { get; set; }
     public ApiTest? Test { get; set; }
-    public List<ApiAnswer> CorrectAnswers { get; set; }
+    public List<ApiAnswer> CorrectAnswers { get; set; } = new();
     public double? CompletionPercentage { get; set; }
     public required DateTime StartedAt { get; set; }
     public DateTime? CompletedAt { get; set; }

@@ -9,6 +9,11 @@ function TestRow({baseTest, onDelete}) {
             <td><a href={`/test/${baseTest.id}/constructor`}>
                 <img src="/files/icons/edit.png" alt="Конструктор" className="edit-icon"/>
             </a></td>
+            <td>
+                <a href={`/test/${baseTest.id}/statistics`}>
+                    <img src="/files/icons/stats.png" alt="Статистика" className="edit-icon"/>
+                </a>
+            </td>
             <td><DeleteButton entityType={"test"} onDelete={onDelete}/></td>
         </tr>
     )
@@ -65,11 +70,12 @@ function TestsTable({userId, baseTests, basePages, rowsPerPage}) {
                         <td colSpan="4">Тест</td>
                         <td></td>
                         <td></td>
+                        <td></td>
                     </tr>
                     </thead>
                     <tbody>
                     {isLoading ? <tr>
-                            <td colSpan={6} className="loading">
+                            <td colSpan={7} className="loading">
                                 <img src="/files/icons/loading.png" alt="Загрузка контента" className="loading-icon"/>
                             </td>
                         </tr>

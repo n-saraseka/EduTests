@@ -28,8 +28,7 @@ public class TestCompletionRepository(DatabaseContext db) : BaseRepository<TestC
         var counts = await Set
             .Where(tc => ids.Contains(tc.TestId) && tc.CompletedAt != null)
             .GroupBy(tc => tc.TestId)
-            .Select(g => new { TestId = g.Key, Count = g.Count() })
-            .ToDictionaryAsync(x => x.TestId, x => x.Count, cancellationToken);
+            .ToDictionaryAsync(g => g.Key, g => g.Count(), cancellationToken);
         
         foreach (var id in ids.Where(id => !counts.ContainsKey(id)))
             counts[id] = 0;
@@ -98,4 +97,15 @@ public class TestCompletionRepository(DatabaseContext db) : BaseRepository<TestC
         .Include(tc => tc.Test)
         .AsSplitQuery()
         .FirstOrDefaultAsync(tc => tc.Id == id, cancellationToken);
+    
+    /// <summary>
+    /// Get all completed <see cref="TestCompletion"/>s for this <see cref="Test"/>
+    /// </summary>
+    /// <param name="id">The <see cref="Test" ID/></param>
+    /// <returns>A <see cref="IQueryable"/> of corresponding <see cref="TestCompletion"/>s</returns>
+    public IQueryable<TestCompletion> GetByTestId(int id) => Set
+        .Include(tc => tc.User)
+        .Include(tc => tc.Test)
+        .AsSplitQuery()
+        .Where(tc => tc.TestId == id && tc.CompletedAt != null);
 }
