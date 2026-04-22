@@ -133,7 +133,6 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
         if (entity.CompletedAt is not null)
         {
             var questionCount = questions.Count;
-            var correctAnswers = 0;
             var correctPercentage = 0.0;
 
             foreach (var answer in userAnswers)
@@ -142,11 +141,12 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
                 if (correspondingQuestion is null)
                     throw new ArgumentNullException(nameof(correspondingQuestion));
                 if (answerVerifierService.Verify(answer, correspondingQuestion, correspondingQuestion.Type))
-                    correctAnswers++;
+                {
+                    completionToReturn.CorrectAnswers.Add(AnswerEntityToDto(answer));
+                }
             }
             
-            completionToReturn.CorrectAnswers = correctAnswers;
-            correctPercentage = correctAnswers * 100.0 / questionCount;
+            correctPercentage = completionToReturn.CorrectAnswers.Count * 100.0 / questionCount;
             completionToReturn.CompletionPercentage = Math.Round(correctPercentage, 2);
         }
 
