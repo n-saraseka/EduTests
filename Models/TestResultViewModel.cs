@@ -2,7 +2,7 @@ using EduTests.ApiObjects;
 
 namespace EduTests.Models;
 
-public class TestResultModel
+public class TestResultViewModel
 {
     public required ApiCompletion Completion { get; set; }
     public List<ApiComment> Comments { get; set; } = new();
