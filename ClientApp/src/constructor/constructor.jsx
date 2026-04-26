@@ -38,7 +38,8 @@ function Constructor({baseTest, user}) {
             test.attemptLimit,
             test.timeLimit,
             test.results,
-            test.password
+            test.password,
+            test.accessType
         );
         let postResult;
         
@@ -118,7 +119,7 @@ function Constructor({baseTest, user}) {
 }
 
 class CreateOrUpdateTestCommand {
-    constructor(name, description, tags, questions, attemptLimit, timeLimit, results, password) {
+    constructor(name, description, tags, questions, attemptLimit, timeLimit, results, password, accessType) {
         this.name = name;
         this.description = description;
         this.tags = tags;
@@ -127,6 +128,7 @@ class CreateOrUpdateTestCommand {
         this.timeLimit = timeLimit;
         this.results = results;
         this.password = password;
+        this.accessType = accessType
     }
 }
 

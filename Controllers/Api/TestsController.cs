@@ -72,7 +72,8 @@ public class TestsController(ITestRepository testRepository,
             Description = command.Description,
             AttemptLimit = command.AttemptLimit,
             TimeLimit = command.TimeLimit,
-            Password = command.Password
+            Password = command.Password,
+            AccessType = command.AccessType
         };
         
         testRepository.Create(test);
@@ -206,6 +207,7 @@ public class TestsController(ITestRepository testRepository,
         test.AttemptLimit = command.AttemptLimit;
         test.TimeLimit = command.TimeLimit;
         test.Password = command.Password;
+        test.AccessType = command.AccessType;
         
         if (command.Questions.Count == 0)
             return BadRequest("No questions were added");

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using EduTests.ApiObjects;
+using EduTests.Database.Enums;
 
 namespace EduTests.Commands.TestCommands;
 
@@ -12,6 +13,7 @@ public class CreateOrUpdateTestCommand
     public int? AttemptLimit { get; set; }
     public TimeSpan? TimeLimit { get; set; }
     public string? Password { get; set; }
+    public AccessType AccessType { get; set; }
     [Required]
     public List<ApiQuestion> Questions { get; set; }
     [Required]
