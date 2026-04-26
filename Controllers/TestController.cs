@@ -71,16 +71,21 @@ public class TestController(ITestRepository testRepository,
         apiTest = await testStatsService.GetTestStatsAsync(apiTest, cancellationToken);
         
         viewModel.Test = apiTest;
-
-        var query = commentRepository.GetTestComments(test.Id);
+        
         var pageSize = int.Parse(config["commentPageSize"]);
         viewModel.CommentsPerPage = pageSize;
         
-        var count = await query.CountAsync(cancellationToken);
-        viewModel.CommentPages = (int)Math.Ceiling((double)count / pageSize);
-        
-        var comments = await query.Take(pageSize).ToListAsync(cancellationToken);
-        viewModel.Comments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
+        var existingCookie = HttpContext.Request.Cookies[$"Verified-{test.Id}"];
+        if (!string.IsNullOrEmpty(existingCookie))
+        {
+            var query = commentRepository.GetTestComments(test.Id);
+            var count = await query.CountAsync(cancellationToken);
+            viewModel.CommentPages = (int)Math.Ceiling((double)count / pageSize);
+
+            var comments = await query.Take(pageSize).ToListAsync(cancellationToken);
+            viewModel.Comments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
+        }
+        else viewModel.CanStartTest = false;
         
         return View(viewModel);
     }

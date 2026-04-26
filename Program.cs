@@ -60,6 +60,12 @@ builder.Services.AddAuthentication("Cookies")
         options.ExpireTimeSpan = TimeSpan.FromDays(30);
     });
 
+builder.Services.AddSession(options => {
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.IdleTimeout = TimeSpan.FromHours(1);
+});
+
 var app = builder.Build();
 
 app.UseStaticFiles();
@@ -69,6 +75,8 @@ app.MapControllers();
 app.UseAuthentication();
 app.UseMiddleware<AnonymousAuthenticationMiddleware>();
 app.UseAuthorization();
+
+app.UseSession();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -12,7 +12,7 @@ commentRoot.render(<Comments baseComments={initialData.comments} basePages={init
                              currentUserId={initialData.currentUserId}/>);
 
 const startRoot = createRoot(document.getElementById('test-start'));
-startRoot.render(<StartTestButton testId={initialData.test.id}/>)
+startRoot.render(<StartTestButton testId={initialData.test.id} hasPassword={initialData.canStartTest}/>)
 
 const reportRoot = createRoot(document.getElementById('report-button'));
 reportRoot.render(<ReportButton entityType={1} entityId={initialData.test.id}/>)

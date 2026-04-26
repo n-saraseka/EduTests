@@ -72,9 +72,13 @@ public class TestsController(ITestRepository testRepository,
             Description = command.Description,
             AttemptLimit = command.AttemptLimit,
             TimeLimit = command.TimeLimit,
-            Password = command.Password,
             AccessType = command.AccessType
         };
+
+        if (command.Password != null)
+        {
+            test.Password = BCrypt.Net.BCrypt.HashPassword(command.Password);
+        }
         
         testRepository.Create(test);
         await testRepository.SaveChangesAsync(cancellationToken);
@@ -206,7 +210,10 @@ public class TestsController(ITestRepository testRepository,
         test.Description = command.Description;
         test.AttemptLimit = command.AttemptLimit;
         test.TimeLimit = command.TimeLimit;
-        test.Password = command.Password;
+        if (command.Password != null)
+        {
+            test.Password = BCrypt.Net.BCrypt.HashPassword(command.Password);
+        }
         test.AccessType = command.AccessType;
         
         if (command.Questions.Count == 0)
@@ -315,12 +322,14 @@ public class TestsController(ITestRepository testRepository,
     /// <returns>A <see cref="ApiRating"/> object</returns>
     [HttpPut("{id}/rating")]
     [Authorize]
-    public async Task<IActionResult> RateTestAsync(int id, RateTestCommand command, 
+    public async Task<IActionResult> RateTestAsync(int id, [FromBody] RateTestCommand command,
         CancellationToken cancellationToken = default)
     {
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
         if (test is null)
             return NotFound();
+
+        if (test.Password != null && HttpContext.Session.GetString($"Verified-{test.Id}") != "true") return Forbid();
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null)
@@ -406,6 +415,8 @@ public class TestsController(ITestRepository testRepository,
         if (test is null)
             return NotFound();
         
+        if (test.Password != null && HttpContext.Session.GetString($"Verified-{test.Id}") != "true") return Forbid();
+        
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null)
             return Unauthorized();
@@ -428,7 +439,7 @@ public class TestsController(ITestRepository testRepository,
         comment = await commentRepository.GetWithLoadedCommenter(comment.Id, cancellationToken);
 
         var apiComment = entityToDtoService.CommentEntityToDto(comment);
-        return CreatedAtAction("GetTestComment", new { id = test.Id, commentId = comment.Id }, apiComment);
+        return CreatedAtAction("GetTestComment", new { id = test.Id, commentId = comment.Id}, apiComment);
     }
 
     /// <summary>
@@ -447,7 +458,9 @@ public class TestsController(ITestRepository testRepository,
         if (test is null)
             return NotFound();
         
-        if (test.AccessType == AccessType.Private)
+        var userRole = User.FindFirstValue(ClaimTypes.Role);
+        
+        if (test.AccessType == AccessType.Private && userRole != "Administrator")
             return Forbid();
         
         var comment = await commentRepository.GetWithLoadedCommenter(id, cancellationToken);
@@ -470,7 +483,7 @@ public class TestsController(ITestRepository testRepository,
     /// <returns>List of <see cref="ApiComment"/>s</returns>
     [HttpGet("{id}/comments")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetTestCommentsAsync(int id, [FromQuery] int page, [FromQuery] int amountPerPage, 
+    public async Task<IActionResult> GetTestCommentsAsync(int id, int page, int amountPerPage,
         CancellationToken cancellationToken = default)
     {
         if (page < 1 || amountPerPage < 1)
@@ -479,6 +492,8 @@ public class TestsController(ITestRepository testRepository,
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
         if (test is null)
             return NotFound();
+        
+        if (test.Password != null && HttpContext.Session.GetString($"Verified-{test.Id}") != "true") return Forbid();
         
         var userRole = User.FindFirstValue(ClaimTypes.Role);
         
@@ -554,6 +569,8 @@ public class TestsController(ITestRepository testRepository,
         if (test is null)
             return NotFound();
         
+        if (test.Password != null && HttpContext.Session.GetString($"Verified-{test.Id}") != "true") return Forbid();
+        
         var userRole = User.FindFirstValue(ClaimTypes.Role);
         
         if (test.AccessType == AccessType.Private && userRole != "Administrator")
@@ -582,6 +599,8 @@ public class TestsController(ITestRepository testRepository,
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
         if (test is null)
             return NotFound();
+        
+        if (test.Password != null && HttpContext.Session.GetString($"Verified-{test.Id}") != "true") return Forbid();
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
@@ -950,14 +969,20 @@ public class TestsController(ITestRepository testRepository,
     /// </summary>
     /// <param name="id">The <see cref="ApiTest"/> ID</param>
     /// <param name="completionId">The <see cref="ApiCompletion"/> ID</param>
-    /// <param name="command"></param>
+    /// <param name="command">The <see cref="AnswerTestCommand"/></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     [HttpPost("{id}/completions/{completionId}/answers")]
     [AllowAnonymous]
-    public async Task<IActionResult> AddTestAnswerAsync(int id, int completionId, 
-        [FromBody] AnswerTestCommand command, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> AddTestAnswerAsync(int id, int completionId, [FromBody] AnswerTestCommand command, 
+        CancellationToken cancellationToken = default)
     {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+        
+        if (test.Password != null && HttpContext.Session.GetString($"Verified-{test.Id}") != "true") return Forbid();
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 
@@ -972,10 +997,6 @@ public class TestsController(ITestRepository testRepository,
                 anonId = anonymousUserId;
             }
         }
-        
-        var test = await testRepository.GetByIdAsync(id, cancellationToken);
-        if (test is null)
-            return NotFound();
         
         var completion = await testCompletionRepository.GetByIdAsync(completionId, cancellationToken);
         if (completion is null)
@@ -1067,5 +1088,34 @@ public class TestsController(ITestRepository testRepository,
         
         var apiAnswer = entityToDtoService.AnswerEntityToDto(answer);
         return Ok(apiAnswer);
+    }
+
+    /// <summary>
+    /// Verify <see cref="ApiTest"/> password
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="command">The <see cref="VerifyPasswordCommand"/></param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="OkResult"/></returns>
+    [HttpPost("{id}/verify_password")]
+    public async Task<IActionResult> VerifyPasswordAsync(int id, [FromBody] VerifyPasswordCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdAsync(id, cancellationToken);
+        if (test is null)
+            return NotFound();
+
+        if (test.Password is null) return BadRequest("Test does not require a password");
+        
+        var verificationResult = BCrypt.Net.BCrypt.Verify(command.Password, test.Password);
+
+        if (!verificationResult) return Forbid();
+
+        if (HttpContext.Session.GetString($"Verified-{test.Id}") != "true")
+        {
+            HttpContext.Session.SetString($"Verified-{test.Id}", "true");
+        }
+        
+        return Ok();
     }
 }

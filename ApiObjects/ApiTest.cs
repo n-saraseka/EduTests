@@ -1,3 +1,5 @@
+using EduTests.Database.Enums;
+
 namespace EduTests.ApiObjects;
 
 public class ApiTest
@@ -17,4 +19,6 @@ public class ApiTest
     public string? DefaultResult { get; set; }
     public required DateTime CreatedAt { get; set; }
     public required DateTime UpdatedAt { get; set; }
+    public required bool HasPassword { get; set; }
+    public required AccessType AccessType { get; set; }
 }

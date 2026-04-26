@@ -49,6 +49,13 @@ function ExtraSettingsTab({test, setTest, fieldNames, lastFocusedField, setLastF
         }
     }
     
+    const changeTestPassword = (event) => {
+        const newPassword = event.target.value;
+        if (test.password !== newPassword) {
+            setTest(prevTest => ({...prevTest, password: newPassword}));
+        }
+    }
+    
     return (<div className="constructor-tab">
         <h1>Дополнительные настройки</h1>
         <div className="test-card">
@@ -73,6 +80,11 @@ function ExtraSettingsTab({test, setTest, fieldNames, lastFocusedField, setLastF
                            onFocus={() => setLastFocusedField(fieldNames[1])} autoFocus={lastFocusedField === fieldNames[1]}
                            id="attempt-limit"/>
                 </>}
+            </div>
+            <div className="test-card-row">
+                <label htmlFor="test-password">Пароль:</label>
+                <input type="password" id="test-password" name="test-password"
+                       defaultValue={test.password === null ? undefined : test.password} onChange={changeTestPassword} autoFocus={true}/>
             </div>
         </div>
     </div>)
