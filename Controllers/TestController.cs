@@ -270,7 +270,10 @@ public class TestController(ITestRepository testRepository,
             viewModel.MinTime = orderedByTime[0];
             viewModel.MaxTime = orderedByTime[count - 1];
             
-            var interQuartile = count > 3 ? orderedByTime.Take(count / 2).Skip(count / 4).ToList() : orderedByTime.ToList();
+            var quarter = (int)Math.Round(count / 4.0,  MidpointRounding.AwayFromZero);
+            var half = (int)Math.Round(count / 2.0,  MidpointRounding.AwayFromZero);
+            
+            var interQuartile = count > 3 ? orderedByTime.Take(half).Skip(quarter).ToList() : orderedByTime.ToList();
             viewModel.InterQuartileAverageTime = new TimeSpan((long)interQuartile.Average(t => t.Ticks));
         }
         
