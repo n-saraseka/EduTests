@@ -60,7 +60,7 @@ function StartTestButton({testId}) {
         </div>)}
         {isModalOpen && (<ConfirmationModal title="Вы уже начали прохождение этого теста. Хотите продолжить?"
                                             onCancel={restartPlaythrough}
-                                            onConfirm={redirectToPlaythrough}/>)}
+                                            onConfirm={() => redirectToPlaythrough(completionId)}/>)}
     </>);
 }
 
