@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@bbob/preset": "^4.3.1",
     "@bbob/preset-react": "^4.3.1",
     "@bbob/react": "^4.3.1",
     "react": "^19.2.4",

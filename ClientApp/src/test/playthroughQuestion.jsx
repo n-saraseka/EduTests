@@ -1,9 +1,18 @@
 import BBCode from '@bbob/react';
+import { createPreset } from '@bbob/preset';
 import presetReact from "@bbob/preset-react";
 
 function PlaythroughQuestion({question, answer, onChange}) {
     const allowedTags = ['b', 'i', 'img', 'center', 'u', 'color', 's', 'quote', 'url', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th'];
-    const plugins = [presetReact()];
+    const preset = presetReact.extend((tags, options) => ({
+        ...tags,
+        center: (node) => ({
+            tag: "span",
+            content: node.content,
+            attrs: {style: {textAlign: "center"}}
+        })
+    }))();
+    const plugins = [preset];
     const editChoiceData = (event, index, type) => {
         switch (type) {
             // Single choice

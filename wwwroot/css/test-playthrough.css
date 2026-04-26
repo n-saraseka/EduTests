@@ -52,6 +52,16 @@
     padding: 1rem;
     border: 1px solid #e5e5e5;
     border-radius: 0.25rem;
+    width: 40%;
+}
+
+.test-question span {
+    display: block;
+}
+
+.test-question span img {   
+    max-width: 100%;
+    display: block;
 }
 
 .test-card-row {
