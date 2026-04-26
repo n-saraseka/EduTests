@@ -1,7 +1,7 @@
 import {useState} from "react";
-import TextareaField from "../inputs/textareaField.jsx";
 import EditButton from "../buttons/editButton.jsx";
 import DeleteButton from "../buttons/deleteButton.jsx";
+import BbcodePreset from "../bbcodePreset.jsx";
 
 function ConstructorQuestion({question, onChange}) {
     // Editing
@@ -265,11 +265,13 @@ function ConstructorQuestion({question, onChange}) {
                 <option value="3">Ввод текста</option>
             </select>
         </div>
-        <div className="test-card-row">
-            <TextareaField text={description} placeholder="Пустое описание" isDisabled={false}
-                           isEditing={isEditingText} handleEdit={handleDescriptionEdit}
-                           onChange={e => setDescription(e.target.value)} onConfirm={descriptionConfirm}
-                           onCancel={descriptionCancel}/>
+        <div className="test-card-row question-description">
+            {isEditingText ? (
+                    <textarea id="edit-text" value={description === null ? undefined : description} onChange={onChange}
+                              placeholder="Введите свой текст..." autoFocus disabled={false}/>)
+                : <BbcodePreset text={description === null ? "Без описания" : description}/>}
+            <EditButton isEditing={isEditingText} onEditToggle={handleDescriptionEdit} 
+                        onConfirm={descriptionConfirm} onCancel={descriptionCancel} isDisabled={false}/>
         </div>
         <QuestionSwitch type={question.type}/>
     </div>);
