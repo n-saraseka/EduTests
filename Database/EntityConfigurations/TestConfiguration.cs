@@ -17,6 +17,12 @@ public class TestConfiguration : IEntityTypeConfiguration<Test>
         builder.HasMany(t => t.Results)
             .WithOne(r => r.Test)
             .HasForeignKey(r => r.TestId);
+        builder.HasMany(t => t.Completions)
+            .WithOne(c => c.Test)
+            .HasForeignKey(t => t.TestId);
+        builder.HasMany(t => t.UserRatings)
+            .WithOne(u => u.Test)
+            .HasForeignKey(t => t.TestId);
         builder
             .HasOne(t => t.User)
             .WithMany()

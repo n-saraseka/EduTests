@@ -26,5 +26,5 @@ commentRoot.render(<Comments commentsPerPage={parseInt(initialData.commentsPerPa
 
 if (document.getElementById('tests')) {
     const testRoot = createRoot(document.getElementById('tests'));
-    testRoot.render(<ProfileTests basePages={initialData.testPages} baseTests={initialData.tests} pageSize={initialData.testPageSize}/>);
+    testRoot.render(<ProfileTests basePages={initialData.testPages} baseTests={initialData.tests} pageSize={initialData.testPageSize} userId={initialData.user.id}/>);
 }

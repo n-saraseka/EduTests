@@ -10,10 +10,6 @@ public class UserRatingConfiguration : IEntityTypeConfiguration<UserRating>
     public void Configure(EntityTypeBuilder<UserRating> builder)
     {
         builder
-            .HasOne(r => r.Test)
-            .WithMany()
-            .HasForeignKey(r => r.TestId);
-        builder
             .HasOne(r => r.User)
             .WithMany()
             .HasForeignKey(r => r.UserId);

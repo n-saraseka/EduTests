@@ -92,8 +92,8 @@ function TestsTable({userId, baseTests, basePages, rowsPerPage}) {
     </>)
 }
 
-function getTests(userId, page, amountPerPage) {
-    return fetch(`/api/tests?userId=${userId}&page=${page}&amountPerPage=${amountPerPage}`);
+function getTests(page, pageSize, userId) {
+    return fetch(`/api/tests?page=${page}&amountPerPage=${pageSize}&userId=${userId}&isProfile=false`);
 }
 
 function deleteTest(id) {

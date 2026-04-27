@@ -10,6 +10,8 @@ public class Test : IEntity<int>, IAuditable
     public List<Tag> Tags { get; set; } = new();
     public List<Question> Questions { get; set; } = new();
     public List<TestResult> Results { get; set; } = new();
+    public List<TestCompletion> Completions { get; set; } = new();
+    public List<UserRating> UserRatings { get; set; } = new();
     public required string Name { get; set; }
     public string? Description { get; set; }
     public string? ThumbnailUrl { get; set; }

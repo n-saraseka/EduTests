@@ -17,10 +17,6 @@ public class TestCompletionConfiguration : IEntityTypeConfiguration<TestCompleti
             .WithMany()
             .HasForeignKey(tc => tc.AnonymousUserId);
         builder
-            .HasOne(tc => tc.Test)
-            .WithMany()
-            .HasForeignKey(tc => tc.TestId);
-        builder
             .ToTable(tc =>
             {
                 tc.HasCheckConstraint("completion_percentage_check", "completion_percentage >= 0 AND completion_percentage <= 100");

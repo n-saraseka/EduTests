@@ -35,6 +35,8 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
         };
 
         testToReturn.User = entity.User != null ? UserEntityToDto(entity.User) : null;
+        testToReturn.CompletionCount = entity.Completions.Count > 0 ? entity.Completions.Count : null;
+        testToReturn.Rating = entity.UserRatings.Count > 0 ? entity.UserRatings.Sum(r => r.IsPositive ? 1 : -1) : null;
 
         return testToReturn;
     }

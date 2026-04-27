@@ -36,6 +36,10 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
             .AsSplitQuery()
             .Where(t => t.Tags.Any(tag => tag.Name == name) && t.AccessType == AccessType.Public);
 
+    /// <summary>
+    /// Get all <see cref="Test"/>s with their tags
+    /// </summary>
+    /// <returns>An <see cref="IQueryable"/> with the <see cref="Test"/>s</returns>
     public IQueryable<Test> GetAllWithTags() => Set
         .Include(t => t.Tags)
         .Include(t => t.User)
@@ -47,7 +51,7 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
     /// </summary>
     /// <param name="id"><see cref="Test"/> ID</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
-    /// <returns>An <see cref="IQueryable"/> with the <see cref="Test"/> and its loaded <see cref="Tag"/>s</returns>
+    /// <returns>The corresponding <see cref="Test"/> or null</returns>
     public Task<Test?> GetByIdWithTagsAsync(int id, CancellationToken cancellationToken = default) =>
         Set.Include(t => t.Tags)
             .Include(t => t.User)
@@ -59,7 +63,7 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
     /// </summary>
     /// <param name="id"><see cref="Test"/> ID</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
-    /// <returns>An <see cref="IQueryable"/> with the <see cref="Test"/> and its loaded <see cref="Tag"/>s, <see cref="Question"/>s</returns>
+    /// <returns>The corresponding <see cref="Test"/> or null</returns>
     public Task<Test?> GetByIdWithExtendedDataAsync(int id, CancellationToken cancellationToken = default) =>
         Set.Include(t => t.Questions)
             .Include(t => t.Tags)
@@ -68,9 +72,26 @@ public class TestRepository(DatabaseContext db) : BaseRepository<Test, int>(db),
             .AsSplitQuery()
             .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
+    /// <summary>
+    /// Get <see cref="Test"/>s by <see cref="User"/> ID
+    /// </summary>
+    /// <param name="userId">The <see cref="User"/> ID</param>
+    /// <returns>An <see cref="IQueryable"/> with the <see cref="Test"/>s</returns>
     public IQueryable<Test> GetByUserId(int userId) => Set
         .Include(t => t.User)
         .Include(t => t.Tags)
         .AsSplitQuery()
         .Where(t => t.UserId == userId);
+    
+    /// <summary>
+    /// Get all <see cref="Test"/>s with their <see cref="User"/>, <see cref="Tag"/>, <see cref="TestCompletion"/>s and <see cref="UserRating"/>s
+    /// </summary>
+    /// <param name="id">The <see cref="Test"/> ID</param>
+    /// <returns>An <see cref="IQueryable"/> with the <see cref="Test"/>s</returns>
+    public IQueryable<Test> GetAllExtended() => Set
+        .Include(t => t.User)
+        .Include(t => t.Tags)
+        .Include(t => t.Completions)
+        .Include(t => t.UserRatings)
+        .AsSplitQuery();
 }

@@ -144,17 +144,26 @@ public class TestsController(ITestRepository testRepository,
     /// <summary>
     /// Get <see cref="ApiTest"/>s
     /// </summary>
-    /// <param name="userId">The <see cref="ApiUser"/> ID</param>
     /// <param name="page">Page number</param>
     /// <param name="amountPerPage">Amount of <see cref="ApiTest"/>s per page</param>
+    /// <param name="userId">The <see cref="ApiUser"/> ID</param>
+    /// <param name="sort">The </param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>List of <see cref="ApiTest"/>s</returns>
-    public async Task<IActionResult> GetTestsAsync(int? userId, int page, int amountPerPage, CancellationToken cancellationToken = default)
+    [AllowAnonymous]
+    public async Task<IActionResult> GetTestsAsync(int page, int amountPerPage, int? userId, int? sort, 
+        bool? isDescending, bool isProfile, CancellationToken cancellationToken = default)
     {
-        var query = testRepository.GetAll();
-        if (userId != null)
+        var query = userId is null ? testRepository.GetAllExtended() : testRepository.GetByUserId(userId.Value);
+        
+        if (isProfile) query = query.Where(t => t.AccessType == AccessType.Public);
+        else
         {
-            query = testRepository.GetByUserId(userId.Value);
+            var idRes = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var idInt);
+            if (!(idRes && idInt == userId))
+            {
+                query = query.Where(t => t.AccessType == AccessType.Public);
+            }
         }
 
         if (page < 1 || amountPerPage < 1) return BadRequest("Invalid pagination parameters");
@@ -175,6 +184,37 @@ public class TestsController(ITestRepository testRepository,
             t.CompletionCount = completions[t.Id];
             return t;
         }).ToList();
+
+        if (sort != null)
+        {
+            switch (sort)
+            {
+                // Sort by date
+                case 0:
+                    apiTests = isDescending == true 
+                        ? apiTests.OrderByDescending(t => t.UpdatedAt) 
+                        : apiTests.OrderBy(t => t.UpdatedAt);
+                    break;
+                // Sort by name
+                case 1:
+                    apiTests = isDescending == true
+                        ? apiTests.OrderByDescending(t => t.Name)
+                        : apiTests.OrderBy(t => t.Name);
+                    break;
+                // Sort by rating
+                case 2:
+                    apiTests = isDescending == true 
+                        ? apiTests.OrderByDescending(t => t.Rating) 
+                        : apiTests.OrderBy(t => t.Rating);
+                    break;
+                // Sort by completions
+                case 3:
+                    apiTests = isDescending == true
+                        ? apiTests.OrderByDescending(t => t.CompletionCount)
+                        : apiTests.OrderBy(t => t.CompletionCount);
+                    break;
+            }
+        }
 
         return Ok(new { tests = apiTests, pages });
     }
