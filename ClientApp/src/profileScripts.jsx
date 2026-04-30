@@ -11,7 +11,7 @@ window.onLoad = () => {
 const commentRoot = createRoot(document.getElementById('comments'));
 const usernameRoot = createRoot(document.getElementById('username'));
 
-usernameRoot.render(<ProfileUsername username={initialData.user.username} userId={initialData.user.id} 
+usernameRoot.render(<ProfileUsername user={initialData.user} 
                                      currentUserId={parseInt(initialData.currentUserId)}
                                      currentUserGroup={initialData.currentUserGroup} 
                                      isBanned={initialData.isBanned}/>);

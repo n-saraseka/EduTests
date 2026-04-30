@@ -369,23 +369,25 @@ public class UsersController(
     }
 
     /// <summary>
-    /// Promote a <see cref="ApiUser"/> to <see cref="UserGroup.Moderator"/>
+    /// Change <see cref="ApiUser"/>'s <see cref="UserGroup"/>
     /// </summary>
     /// <param name="id"><see cref="ApiUser"/> ID</param>
+    /// <param name="command">The <see cref="ChangeUserGroupCommand"/></param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
-    /// <returns>An <see cref="ApiUser"/> object</returns>
-    [HttpPatch("{id}/moderator")]
+    /// <returns>Updated <see cref="ApiUser"/> object</returns>
+    [HttpPatch("{id}/group")]
     [Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> PromoteToModeratorAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ChangeUserGroupAsync(int id, [FromBody] ChangeUserGroupCommand command, 
+        CancellationToken cancellationToken = default)
     {
         var user = await userRepository.GetByIdAsync(id, cancellationToken);
         if (user is null)
             return NotFound();
         
-        if (user.Group == UserGroup.Moderator)
-            return BadRequest("User is already a moderator");
+        if (user.Group == command.UserGroup)
+            return BadRequest("User is already in that group");
         
-        user.Group = UserGroup.Moderator;
+        user.Group = command.UserGroup;
         userRepository.Update(user);
         await userRepository.SaveChangesAsync(cancellationToken);
 

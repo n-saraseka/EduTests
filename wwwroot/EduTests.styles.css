@@ -363,6 +363,11 @@ input:focus {
     height: 1rem;
 }
 
+.edit-icon:hover {
+    opacity: 0.5;
+    cursor: pointer;
+}
+
 .edit-icon.inactive {
     opacity: 0.5;
 }

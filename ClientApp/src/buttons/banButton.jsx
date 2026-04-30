@@ -21,9 +21,9 @@ function BanButton({onBan}) {
 
     return (<>
         <img src="/files/icons/ban.png"
-             alt="Удалить"
+             alt="Заблокировать"
              onClick={openBanModal}
-             className="delete"/>
+             className="edit-icon"/>
         {isBanModalOpen && (<ConfirmationModalWithDate title="Заблокировать пользователя?"
                                                   dateTitle="Дата разблокировки: " 
                                                   dateMin={currDate.toISOString().split("T")[0]}

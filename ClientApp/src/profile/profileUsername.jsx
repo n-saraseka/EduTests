@@ -2,10 +2,11 @@ import ReportButton from "../buttons/reportButton.jsx";
 import BanButton from "../buttons/banButton.jsx";
 import DeleteButton from "../buttons/deleteButton.jsx";
 import BannedLabel from "../bannedLabel.jsx";
+import PromoteButton from "../buttons/promoteButton.jsx";
 
-function ProfileUsername({username, userId, currentUserId, currentUserGroup, isBanned}) {
+function ProfileUsername({user, currentUserId, currentUserGroup, isBanned}) {
     const handleUserDelete = async () => {
-        const result = await deleteUser(userId);
+        const result = await deleteUser(user.id);
         window.location.replace("/home");
     }
     
@@ -13,22 +14,21 @@ function ProfileUsername({username, userId, currentUserId, currentUserGroup, isB
         const banReason = document.getElementById("modal-text").value;
         const dateValue = document.getElementById("modal-date").value;
         
-        console.log(dateValue);
-        
         let unbanDate = (dateValue === '') ? null : new Date(dateValue);
         
         const banCommand = new BanCommand(banReason, unbanDate);
         
-        const result = await banUser(userId, banCommand);
+        const result = await banUser(user.id, banCommand);
     }
     
     return (<>
-        <h2>{username}</h2>
+        <h2>{user.username}</h2>
         {isBanned ? <BannedLabel /> : <>
-            {userId !== currentUserId && <ReportButton entityType={0} entityId={userId}/>}
-            {(["Administrator", "Moderator"].includes(currentUserGroup) && currentUserId !== userId) &&
+            {user.id !== currentUserId && <ReportButton entityType={0} entityId={user.id}/>}
+            {(["Administrator", "Moderator"].includes(currentUserGroup) && currentUserId !== user.id) &&
             <BanButton onBan={handleUserBan}/>}
-            {(currentUserGroup === "Administrator" && currentUserId !== userId) &&
+            {(user.id !== currentUserId && currentUserGroup === "Administrator") && <PromoteButton user={user}/>}
+            {(currentUserGroup === "Administrator" && currentUserId !== user.id) &&
             <DeleteButton entityType={"user"} onDelete={() => handleUserDelete}/>}
         </>}
     </>)
