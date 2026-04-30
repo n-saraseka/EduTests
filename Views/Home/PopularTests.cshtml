@@ -15,20 +15,6 @@
     <script src="~/js/index.js"></script>
 }
 
-@if (Model.PopularTags.Count > 0)
-{
-    <div class="text-center">
-        <h2>Популярные теги</h2>
-    </div>
-    <ul id="popular-tags">
-        @foreach (var tag in Model.PopularTags)
-        {
-            <li>
-                <a asp-controller="Home" asp-action="Index" asp-route-tagName=@tag.Name class="card-tag">@tag.Name</a>
-            </li>
-        }
-    </ul>
-}
 <div class="text-center">
     <h2>Популярные тесты</h2>
 </div>
