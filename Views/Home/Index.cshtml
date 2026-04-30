@@ -13,6 +13,7 @@
         window.__INITIAL_DATA__ = @Html.Raw(Json.Serialize(Model.Tests));
     </script>
     <script src="~/js/index.js"></script>
+    <script type="module" src="http://localhost:5173/src/homeScripts.jsx"></script>
 }
 
 <div class="text-center">
@@ -30,14 +31,17 @@
     <div class="text-center">
         <h2>Популярные теги</h2>
     </div>
-    <ul id="popular-tags">
-        @foreach (var tag in Model.PopularTags)
-        {
-            <li>
-                <a asp-controller="Home" asp-action="Index" asp-route-tagName=@tag.Name class="card-tag">@tag.Name</a>
-            </li>
-        }
-    </ul>
+    <div id="tag-stuff">
+        <ul id="popular-tags">
+            @foreach (var tag in Model.PopularTags)
+            {
+                <li>
+                    <a asp-controller="Home" asp-action="Index" asp-route-tagName=@tag.Name class="card-tag">@tag.Name</a>
+                </li>
+            }
+        </ul>
+        <div id="tag-search-root"></div>
+    </div>
 }
 <div class="text-center">
     <h2>Последние тесты</h2>

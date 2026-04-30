@@ -78,4 +78,19 @@ public class TagsController(ITagRepository tagRepository,
         
         return Ok();
     }
+    
+    /// <summary>
+    /// Search <see cref="ApiTag"/>s
+    /// </summary>
+    /// <param name="query">The search query</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>A list of relevant <see cref="ApiTag"/>s</returns>
+    // For some reason, these queries don't get canceled. Will have to look into that because it could get spammy quick.
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchTagsAsync(string query, CancellationToken cancellationToken = default)
+    {
+        var tags = await tagRepository.SearchAsync(query, cancellationToken);
+        var apiTags = tags.Select(entityToDtoService.TagEntityToDto);
+        return Ok(apiTags);
+    }
 }

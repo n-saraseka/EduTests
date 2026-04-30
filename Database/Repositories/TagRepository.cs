@@ -32,4 +32,9 @@ public class TagRepository(DatabaseContext db) : BaseRepository<Tag, int>(db), I
         Set.Include(t => t.Tests)
             .AsSplitQuery()
             .OrderByDescending(t => t.Tests.Count);
+
+    public Task<List<Tag>> SearchAsync(string query, CancellationToken cancellationToken = default)
+    {
+        return Set.Where(t => t.Name.ToLower().StartsWith(query.ToLower())).ToListAsync(cancellationToken);
+    }
 }

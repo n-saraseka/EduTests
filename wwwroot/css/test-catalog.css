@@ -5,3 +5,42 @@
     padding: 0;
     list-style-type: none;
 }
+
+#tag-stuff {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+#tag-search-root {
+    width: 100%;
+}
+
+#tag-search {
+    width: 100%;
+}
+
+#search-tags {
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+    width: 100%;
+}
+
+#search-tags > li {
+    border-left: 1px solid #e5e5e5;
+    border-right: 1px solid #e5e5e5;
+    background-color: #fcfcfc;
+    width: 100%;
+    padding: 1px 2px;
+}
+
+#search-tags > li:last-child {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+#search-tags > li a {
+    color: #0b0b11;
+    text-decoration: none;
+    font-weight: bold;
+}
