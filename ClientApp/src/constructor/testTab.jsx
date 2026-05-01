@@ -52,14 +52,6 @@ function TestTab({test, setTest, onSetThumbnail}) {
         setTest(oldTest);
     }
     
-    const showTagRemoveButton = (event) => {
-        event.target.after(<DeleteButton entityType="tag" onDelete={() => removeTag(event.target.key)}/>);
-    }
-    
-    const hideTagRemoveButton = (event) => {
-        event.target.nextSibling.remove();
-    }
-    
     const addTag = (event) => {
         event.preventDefault();
         let oldTags = test.tags;

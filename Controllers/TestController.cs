@@ -210,6 +210,13 @@ public class TestController(ITestRepository testRepository,
         
         viewModel.Completion = apiCompletion;
         
+        var appropriateResult = completion.Test.Results
+            .Where(r => r.PercentageThreshold <= apiCompletion.CompletionPercentage)
+            .MaxBy(r => r.PercentageThreshold);
+
+        if (appropriateResult != null) viewModel.ResultString = appropriateResult.Result;
+        else if (completion.Test.DefaultResult != null) viewModel.ResultString = completion.Test.DefaultResult;
+        
         var query = commentRepository.GetTestComments(id);
         var pageSize = int.Parse(config["commentPageSize"]);
         viewModel.CommentsPerPage = pageSize;

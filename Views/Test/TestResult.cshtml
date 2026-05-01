@@ -51,7 +51,13 @@
                     {
                         <span id="completed-at">Пройден <span title="@completedAt">@completedString</span></span>
                     }
-                    <span id="percentage">Результат: @Model.Completion.CompletionPercentage%</span>
+                    <div id="percentage">
+                        <span id="percentage">Результат: @Model.Completion.CompletionPercentage%</span>
+                        @if (Model.ResultString != null)
+                        {
+                            <span id="result"> (@Model.ResultString)</span>
+                        }
+                    </div>
                     <span id="completion-time">Время прохождения: @timeString</span>
                     @if (Model.CurrentUserId is null)
                     {

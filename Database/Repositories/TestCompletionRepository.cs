@@ -95,6 +95,7 @@ public class TestCompletionRepository(DatabaseContext db) : BaseRepository<TestC
     public Task<TestCompletion?> GetWithExtendedDataAsync(int id, CancellationToken cancellationToken = default) => Set
         .Include(tc => tc.User)
         .Include(tc => tc.Test)
+        .ThenInclude(t => t.Results)
         .AsSplitQuery()
         .FirstOrDefaultAsync(tc => tc.Id == id, cancellationToken);
     
