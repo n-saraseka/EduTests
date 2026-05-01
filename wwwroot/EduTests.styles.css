@@ -541,3 +541,22 @@ input:focus {
     height: 1rem;
     border-radius: 50%;
 }
+
+.test-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e5e5e5;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 0.2rem;
+}
+
+.test-card * {
+    margin: 0 0;
+}
+
+.test-card-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}

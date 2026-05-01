@@ -20,6 +20,7 @@ public class Test : IEntity<int>, IAuditable
     public int? AttemptLimit { get; set; }
     public TimeSpan? TimeLimit { get; set; }
     public string? DefaultResult { get; set; }
+    public bool ShowCorrectAnswers { get; set; } = false;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 }

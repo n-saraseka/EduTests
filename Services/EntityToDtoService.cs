@@ -31,7 +31,8 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
             AttemptLimit = entity.AttemptLimit,
             TimeLimit = entity.TimeLimit,
             HasPassword = entity.Password != null,
-            AccessType = entity.AccessType
+            AccessType = entity.AccessType,
+            ShowCorrectAnswers = entity.ShowCorrectAnswers
         };
 
         testToReturn.User = entity.User != null ? UserEntityToDto(entity.User) : null;

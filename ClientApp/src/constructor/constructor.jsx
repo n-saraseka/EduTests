@@ -19,7 +19,9 @@ function Constructor({baseTest, user}) {
             timeLimit: null,
             attemptLimit: null,
             defaultResult: null, 
-            password: null
+            password: null,
+            accessType: 0,
+            showCorrectAnswers: false
         });
     const thumbnailRef = useRef(null);
     const [currentTab, setCurrentTab] = useState(0); // Default to test and questions settings
@@ -39,7 +41,8 @@ function Constructor({baseTest, user}) {
             test.timeLimit,
             test.results,
             test.password,
-            test.accessType
+            test.accessType,
+            test.showCorrectAnswers
         );
         let postResult;
         
@@ -119,7 +122,7 @@ function Constructor({baseTest, user}) {
 }
 
 class CreateOrUpdateTestCommand {
-    constructor(name, description, tags, questions, attemptLimit, timeLimit, results, password, accessType) {
+    constructor(name, description, tags, questions, attemptLimit, timeLimit, results, password, accessType, showCorrectAnswers) {
         this.name = name;
         this.description = description;
         this.tags = tags;
@@ -128,7 +131,8 @@ class CreateOrUpdateTestCommand {
         this.timeLimit = timeLimit;
         this.results = results;
         this.password = password;
-        this.accessType = accessType
+        this.accessType = accessType;
+        this.showCorrectAnswers = showCorrectAnswers;
     }
 }
 

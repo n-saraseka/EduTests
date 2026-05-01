@@ -50,6 +50,7 @@ public class TestController(ITestRepository testRepository,
         return View(viewModel);
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> TestPage(int id, TestPageViewModel viewModel,
         CancellationToken cancellationToken = default)
     {
@@ -74,22 +75,26 @@ public class TestController(ITestRepository testRepository,
         
         var pageSize = int.Parse(config["commentPageSize"]);
         viewModel.CommentsPerPage = pageSize;
-        
-        var existingCookie = HttpContext.Request.Cookies[$"Verified-{test.Id}"];
-        if (!string.IsNullOrEmpty(existingCookie))
-        {
-            var query = commentRepository.GetTestComments(test.Id);
-            var count = await query.CountAsync(cancellationToken);
-            viewModel.CommentPages = (int)Math.Ceiling((double)count / pageSize);
 
-            var comments = await query.Take(pageSize).ToListAsync(cancellationToken);
-            viewModel.Comments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
+        if (test.Password != null)
+        {
+            var existingCookie = HttpContext.Request.Cookies[$"Verified-{test.Id}"];
+            if (!string.IsNullOrEmpty(existingCookie))
+            {
+                var query = commentRepository.GetTestComments(test.Id);
+                var count = await query.CountAsync(cancellationToken);
+                viewModel.CommentPages = (int)Math.Ceiling((double)count / pageSize);
+
+                var comments = await query.Take(pageSize).ToListAsync(cancellationToken);
+                viewModel.Comments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
+            }
+            else viewModel.CanStartTest = false;
         }
-        else viewModel.CanStartTest = false;
         
         return View(viewModel);
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> TestPlaythrough(int id, int playthroughId, TestPlaythroughViewModel model,
         CancellationToken cancellationToken = default)
     {
@@ -155,11 +160,14 @@ public class TestController(ITestRepository testRepository,
         return View(model);
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> TestResult(int id, int playthroughId, TestResultViewModel viewModel,
         CancellationToken cancellationToken = default)
     {
         var completion = await testCompletionRepository.GetWithExtendedDataAsync(playthroughId, cancellationToken);
         if (completion is null) return NotFound("Playthrough not found");
+
+        if (completion.CompletedAt is null) return BadRequest("Playthrough not completed yet");
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -228,6 +236,66 @@ public class TestController(ITestRepository testRepository,
         viewModel.Comments = comments.Select(entityToDtoService.CommentEntityToDto).ToList();
         
         return View(viewModel);
+    }
+
+    public async Task<IActionResult> ResultDetails(int id, int playthroughId, ResultDetailsViewModel model,
+        CancellationToken cancellationToken = default)
+    {
+        var completion = await testCompletionRepository.GetWithExtendedDataAsync(playthroughId, cancellationToken);
+        if (completion is null) return NotFound("Playthrough not found");
+        
+        if (completion.CompletedAt is null) return BadRequest("Playthrough not completed yet");
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        
+        var authRes = int.TryParse(userId, out var authenticatedUserId);
+        var anonUserResult = HttpContext.Items.TryGetValue("AnonymousId", out var anonIdObj);
+        Guid? anonId = null;
+        
+        if (anonUserResult && anonIdObj is string anonIdStr)
+        {
+            if (Guid.TryParse(anonIdStr, out var anonymousUserId))
+            {
+                anonId = anonymousUserId;
+            }
+        }
+
+        if (completion.Test.UserId != authenticatedUserId)
+        {
+            if ((authRes && completion.UserId != authenticatedUserId) 
+                || (anonUserResult && completion.AnonymousUserId != anonId)) return Forbid();
+        }
+        if (!authRes && !anonUserResult) return BadRequest("Neither anonymous or authenticated user ID were assigned. WTF?");
+        
+        var questions = await questionRepository.GetByTestIdAsync(completion.TestId, cancellationToken);
+        var answers = await userAnswerRepository.GetByCompletionIdAsync(completion.Id, cancellationToken);
+        
+        var apiCompletion = entityToDtoService.CompletionEntityToDto(completion, answers, questions);
+        apiCompletion.Test = entityToDtoService.TestEntityToDto(completion.Test);
+        if (completion.UserId != null)
+        {
+            apiCompletion.User = entityToDtoService.UserEntityToDto(completion.User);
+        }
+        
+        model.Completion = apiCompletion;
+        
+        model.Questions = questions.Select(entityToDtoService.QuestionEntityToDto).OrderBy(q => q.OrderIndex).ToList();
+        model.Answers = answers.Select(entityToDtoService.AnswerEntityToDto).ToList();
+        
+        var appropriateResult = completion.Test.Results
+            .Where(r => r.PercentageThreshold <= apiCompletion.CompletionPercentage)
+            .MaxBy(r => r.PercentageThreshold);
+
+        if (appropriateResult != null) model.ResultString = appropriateResult.Result;
+        else if (completion.Test.DefaultResult != null) model.ResultString = completion.Test.DefaultResult;
+        
+        var pageSize = int.Parse(config["testDetailsPageSize"]);
+        var pages = (int)Math.Ceiling((double)questions.Count / pageSize);
+        
+        model.PageSize = pageSize;
+        model.Pages = pages;
+
+        return View(model);
     }
 
     [Authorize]

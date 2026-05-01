@@ -72,7 +72,8 @@ public class TestsController(ITestRepository testRepository,
             Description = command.Description,
             AttemptLimit = command.AttemptLimit,
             TimeLimit = command.TimeLimit,
-            AccessType = command.AccessType
+            AccessType = command.AccessType,
+            ShowCorrectAnswers = command.ShowCorrectAnswers
         };
 
         if (command.Password != null)
@@ -250,6 +251,7 @@ public class TestsController(ITestRepository testRepository,
         test.Description = command.Description;
         test.AttemptLimit = command.AttemptLimit;
         test.TimeLimit = command.TimeLimit;
+        test.ShowCorrectAnswers = command.ShowCorrectAnswers;
         if (command.Password != null)
         {
             test.Password = BCrypt.Net.BCrypt.HashPassword(command.Password);

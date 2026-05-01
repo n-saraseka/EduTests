@@ -14,6 +14,7 @@ public class CreateOrUpdateTestCommand
     public TimeSpan? TimeLimit { get; set; }
     public string? Password { get; set; }
     public AccessType AccessType { get; set; }
+    public bool ShowCorrectAnswers { get; set; }
     [Required]
     public List<ApiQuestion> Questions { get; set; }
     [Required]

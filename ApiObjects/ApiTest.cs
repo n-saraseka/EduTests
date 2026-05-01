@@ -21,4 +21,5 @@ public class ApiTest
     public required DateTime UpdatedAt { get; set; }
     public required bool HasPassword { get; set; }
     public required AccessType AccessType { get; set; }
+    public required bool ShowCorrectAnswers { get; set; }
 }

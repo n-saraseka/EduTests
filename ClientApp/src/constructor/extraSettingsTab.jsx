@@ -56,6 +56,11 @@ function ExtraSettingsTab({test, setTest, fieldNames, lastFocusedField, setLastF
         }
     }
     
+    const showAnswers = (event) => {
+        const newValue = event.target.checked;
+        setTest(prevTest => ({...prevTest, showCorrectAnswers: newValue}));
+    }
+    
     return (<div className="constructor-tab">
         <h1>Дополнительные настройки</h1>
         <div className="test-card">
@@ -85,6 +90,10 @@ function ExtraSettingsTab({test, setTest, fieldNames, lastFocusedField, setLastF
                 <label htmlFor="test-password">Пароль:</label>
                 <input type="password" id="test-password" name="test-password"
                        defaultValue={test.password === null ? undefined : test.password} onChange={changeTestPassword} autoFocus={true}/>
+            </div>
+            <div className="test-card-row">
+                <label htmlFor="test-answers">Показывать правильные ответы:</label>
+                <input type="checkbox" id="test-answers" name="test-answers" onChange={showAnswers} checked={test.showCorrectAnswers === true}/>
             </div>
         </div>
     </div>)

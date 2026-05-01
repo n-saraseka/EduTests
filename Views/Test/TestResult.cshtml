@@ -59,6 +59,10 @@
                         }
                     </div>
                     <span id="completion-time">Время прохождения: @timeString</span>
+                    @if (Model.Completion.Test.ShowCorrectAnswers)
+                    {
+                        <a asp-controller="Test" asp-action="ResultDetails" asp-route-playthroughId="@Model.Completion.Id">Просмотреть детали прохождения</a>
+                    }
                     @if (Model.CurrentUserId is null)
                     {
                         <span><a asp-controller="Account" asp-action="Login">Войдите</a>, чтобы оставить оценку на тест.</span>

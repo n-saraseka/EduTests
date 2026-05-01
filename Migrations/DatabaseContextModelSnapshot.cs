@@ -411,6 +411,10 @@ namespace EduTests.Migrations
                         .HasColumnType("text")
                         .HasColumnName("password");
 
+                    b.Property<bool>("ShowCorrectAnswers")
+                        .HasColumnType("boolean")
+                        .HasColumnName("show_correct_answers");
+
                     b.Property<string>("ThumbnailUrl")
                         .HasColumnType("text")
                         .HasColumnName("thumbnail_url");
