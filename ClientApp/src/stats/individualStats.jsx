@@ -17,6 +17,7 @@ function CompletionRow({baseCompletion}) {
             <td>{parseDate(baseCompletion.completedAt)}</td>
             <td>{baseCompletion.correctAnswers.length}</td>
             <td>{baseCompletion.completionPercentage}</td>
+            <td><a href={`/test/${baseCompletion.testId}/playthrough/${baseCompletion.id}/details`}>Просмотр подробностей</a></td>
         </tr>
     )
 }
@@ -55,11 +56,12 @@ function IndividualStats({testId, baseCompletions, basePages, rowsPerPage}) {
                 <td>Пройден</td>
                 <td>Количество верных ответов</td>
                 <td>Процент верных ответов</td>
+                <td></td>
             </tr>
             </thead>
             <tbody>
             {isLoading ? <tr>
-                    <td colSpan={5} className="loading">
+                    <td colSpan={6} className="loading">
                         <img src="/files/icons/loading.png" alt="Загрузка контента" className="loading-icon"/>
                     </td>
                 </tr>
