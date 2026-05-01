@@ -55,12 +55,12 @@ function ResultDetail({question, answer}) {
         }
     }
     
-    return (<div className="test-card">
+    return (<div className="result-detail">
         <h2>Вопрос №{question.orderIndex}</h2>
-        <div className="test-card-row">
+        <div className="test-question">
             <BbcodePreset text={question.description}/>
+            <QuestionSwitch type={question.type}/>
         </div>
-        <QuestionSwitch type={question.type}/>
     </div>);
 }
 
