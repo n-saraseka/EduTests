@@ -6,6 +6,7 @@ public class TestStatisticsViewModel
 {
     public ApiTest Test { get; set; }
     public List<ApiCompletion> Completions { get; set; } = new();
+    public List<ApiQuestion> Questions { get; set; } = new();
     public int PageSize { get; set; }
     public int Pages { get; set; }
     public TimeSpan? MinTime { get; set; }

@@ -306,7 +306,7 @@ public class TestController(ITestRepository testRepository,
         
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var authRes = int.TryParse(userId, out var authenticatedUserId);
-        if (authRes && test.UserId != authenticatedUserId) return Forbid();
+        if (!(authRes && test.UserId == authenticatedUserId)) return Forbid();
         
         var apiTest = entityToDtoService.TestEntityToDto(test);
         apiTest.User = entityToDtoService.UserEntityToDto(test.User);
@@ -317,6 +317,8 @@ public class TestController(ITestRepository testRepository,
         var ids = completions.Select(c => c.Id);
         var answers = await userAnswerRepository.GetByCompletionIdsAsync(ids, cancellationToken);
         var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
+        
+        viewModel.Questions = questions.Select(entityToDtoService.QuestionEntityToDto).ToList();
 
         var apiCompletions = completions.Select(c =>
             {

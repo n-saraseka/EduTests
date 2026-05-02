@@ -782,7 +782,7 @@ public class TestsController(ITestRepository testRepository,
     
     [HttpGet("{id}/completions/finished")]
     [Authorize]
-    public async Task<IActionResult> GetFinishedCompletionsAsync(int id, int page, int amountPerPage, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetFinishedCompletionsAsync(int id, int? page, int? amountPerPage, CancellationToken cancellationToken = default)
     {
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
         if (test is null)
@@ -794,20 +794,30 @@ public class TestsController(ITestRepository testRepository,
         if (test.UserId != authenticatedUserId) return Forbid();
 
         var query = testCompletionRepository.GetByTestId(id);
+
+        int? pages = null;
+
+        if (page != null && amountPerPage != null)
+        {
+            if (page < 1 || amountPerPage < 1) return BadRequest("Invalid pagination parameters");
+            var count = await query.CountAsync(cancellationToken);
+            pages = (int)Math.Ceiling(count / (double)amountPerPage);
+            var actualPage = Math.Max(Math.Min((int)page, (int)pages), 1);
+            query = query.Skip((actualPage - 1) * (int)amountPerPage).Take((int)amountPerPage);
+        }
         
-        if (page < 1 || amountPerPage < 1) return BadRequest("Invalid pagination parameters");
-        var count = await query.CountAsync(cancellationToken);
-        var pages = (int)Math.Ceiling((double)count / amountPerPage);
-        var actualPage = Math.Max(Math.Min(page, pages), 1);
-        
-        var completions = await query.Skip((actualPage - 1) * amountPerPage).Take(amountPerPage).ToListAsync(cancellationToken);
+        var completions = await query.ToListAsync(cancellationToken);
         var ids = completions.Select(completion => completion.Id);
         
         var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
         var answers = await userAnswerRepository.GetByCompletionIdsAsync(ids, cancellationToken);
         
-        var apiCompletions = completions.Select(c => 
-            entityToDtoService.CompletionEntityToDto(c, answers[c.Id], questions));
+        var apiCompletions = completions.Select(c =>
+            {
+                var completion = entityToDtoService.CompletionEntityToDto(c, answers[c.Id], questions);
+                if (c.UserId != null) completion.User = entityToDtoService.UserEntityToDto(c.User);
+                return completion;
+            }).ToList();
         
         return Ok(new { completions = apiCompletions, pages});
     }

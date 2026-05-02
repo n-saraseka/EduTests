@@ -142,12 +142,15 @@ public class EntityToDtoService(IUserRatingRepository ratingRepository,
 
             foreach (var answer in userAnswers)
             {
+                var answerDto = AnswerEntityToDto(answer);
+                completionToReturn.Answers.Add(answerDto);
+                
                 var correspondingQuestion = questions.FirstOrDefault(q => q.Id == answer.QuestionId);
                 if (correspondingQuestion is null)
                     throw new ArgumentNullException(nameof(correspondingQuestion));
                 if (answerVerifierService.Verify(answer, correspondingQuestion, correspondingQuestion.Type))
                 {
-                    completionToReturn.CorrectAnswers.Add(AnswerEntityToDto(answer));
+                    completionToReturn.CorrectAnswers.Add(answerDto);
                 }
             }
             
