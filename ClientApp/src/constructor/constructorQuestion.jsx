@@ -172,6 +172,125 @@ function ConstructorQuestion({question, onChange}) {
         }
     }
     
+    function SequenceContainer() {
+        const addItem = () => {
+            const newSequence = question.correctData.sequence.concat(["Введите текст"]);
+            onChange({...question, correctData: {...question.correctData, sequence: newSequence}});
+        }
+        
+        const changeSequence = (seq) => {
+            onChange({...question, correctData: {...question.correctData, sequence: seq}});
+        }
+        
+        const deleteItem = (index) => {
+            onChange({...question, correctData: {...question.correctData, sequence: question.correctData.sequence.filter((e, i) => i !== index)}});
+        }
+        
+        return (<>
+            <div className="sequence-items">
+                {question.correctData.sequence.map((e, i) =>
+                    <SequenceItem key={i} baseText={e} index={i} 
+                                  sequence={question.correctData.sequence} onModification={changeSequence} 
+                                  onDeletion={deleteItem}/>)}
+                <button className="btn btn-primary" onClick={addItem}>Добавить</button>
+            </div>
+        </>);
+    }
+    
+    function SequenceItem({baseText, sequence, onModification, onDeletion, index}) {
+        const [isDragged, setIsDragged] = useState(false);
+        const [showEditButtons, setShowEditButtons] = useState(false);
+        const [isEditing, setIsEditing] = useState(false);
+        const [text, setText] = useState(baseText);
+        const [tempText, setTempText] = useState(baseText);
+        const [shadow, setShadow] = useState(null);
+        
+        const handleDragStart = (event) => {
+            event.dataTransfer.setData('text/plain', JSON.stringify({
+                draggedIndex: index,
+                draggedText: text
+            }));
+            setIsDragged(true);
+        }
+
+        const handleDragOver = (event) => {
+            event.preventDefault();
+            if (event.target.classList.contains('sequence-item')) {
+                const potentialElementCoord = event.target.getBoundingClientRect();
+                const center = potentialElementCoord.left + potentialElementCoord.width / 2;
+
+                if (event.clientX < center) {
+                    setShadow('-2px 0 0 0 blue');
+                } else {
+                    setShadow('2px 0 0 0 blue');
+                }
+            }
+        };
+
+        const handleDragLeave = (event) => {
+            event.preventDefault();
+            if (event.target.classList.contains('sequence-item')) {
+                setShadow(null);
+            }
+        };
+        
+        const handleDrop = (event) => {
+            event.preventDefault();
+            if (event.target.classList.contains('sequence-item') && event.dataTransfer.getData('text/plain')) {
+                const draggedData = JSON.parse(event.dataTransfer.getData('text/plain'));
+                const { draggedIndex, draggedText } = draggedData;
+
+                const potentialElementCoord = event.target.getBoundingClientRect();
+                const center = potentialElementCoord.left + potentialElementCoord.width / 2;
+
+                // if cursor is to the left - insert to the left
+                // insert to the right otherwise
+                const cursorPosition = event.clientX;
+                const newSequence = [...sequence];
+                
+                newSequence.splice(draggedIndex, 1);
+                
+                let usedIndex = index;
+                
+                if (draggedIndex < index) {
+                    usedIndex--;
+                }
+
+                if (cursorPosition < center) {
+                    newSequence.splice(usedIndex, 0, draggedText);
+                }
+                else {
+                    newSequence.splice(usedIndex + 1, 0, draggedText);
+                }
+                
+                onModification(newSequence);
+                setIsDragged(false);
+            }
+        }
+        
+        const confirmEdit = () => {
+            setText(tempText);
+            setTempText(text);
+            setIsEditing(false);
+        }
+        
+        return (<div className={`sequence-item${isDragged ? ' dragged' : ''}`} draggable={true} data-index={index}
+                     onDragStart={handleDragStart} onDragEnd={() => setIsDragged(false)} 
+                     onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
+                     onMouseOver={() => setShowEditButtons(true)} onMouseLeave={() => setShowEditButtons(false)} 
+                     style={{boxShadow: shadow}}>
+            {isEditing ? <input type="text" id={`sequence-item-${question.orderIndex}-${index}`} 
+                                defaultValue={tempText} onChange={(event) => setTempText(event.target.value)} autoFocus={true}/>
+            : <div>{text}</div>}
+            {showEditButtons && <>
+                <EditButton isEditing={isEditing} onEditToggle={setIsEditing}
+                            onCancel={() => setIsEditing(false)} onConfirm={confirmEdit}
+                            isDisabled={false}/>
+                <DeleteButton entityType="answer" onDelete={() => onDeletion(index)}/>
+            </>}
+        </div>)
+    }
+    
     function QuestionSwitch({type}) {
         switch(type) {
             // Single choice
@@ -252,6 +371,11 @@ function ConstructorQuestion({question, onChange}) {
                         <button className="btn btn-primary" onClick={() => addAnswer(3)}>Добавить</button>
                     </div>
                 </>
+            case 4:
+                return <>
+                    <p>Последовательность:</p>
+                    <SequenceContainer question={question}/>
+                </>
         }
     }
     
@@ -263,6 +387,7 @@ function ConstructorQuestion({question, onChange}) {
                 <option value="1">Множественный выбор</option>
                 <option value="2">Ввод числа</option>
                 <option value="3">Ввод текста</option>
+                <option value="4">Последовательность</option>
             </select>
         </div>
         <div className="test-card-row question-description">
