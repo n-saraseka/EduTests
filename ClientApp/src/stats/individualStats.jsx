@@ -1,33 +1,14 @@
 import {useState} from "react";
 import Pagination from "../pagination.jsx";
-import DeleteButton from "../buttons/deleteButton.jsx";
+import DownloadXlsxButton from "./downloadXlsxButton.jsx";
+import CompletionRow from "./completionRow.jsx";
 
-function parseDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleString().replace(",", "");
-}
-
-function CompletionRow({baseCompletion}) {
-    return (
-        <tr>
-            <td>{baseCompletion.userId === null ? 
-                <span>Аноним</span>
-                : <a href={`/user/${baseCompletion.userId}`}>{baseCompletion.user.username}</a>}</td>
-            <td>{parseDate(baseCompletion.startedAt)}</td>
-            <td>{parseDate(baseCompletion.completedAt)}</td>
-            <td>{baseCompletion.correctAnswers.length}</td>
-            <td>{baseCompletion.completionPercentage}</td>
-            <td><a href={`/test/${baseCompletion.testId}/playthrough/${baseCompletion.id}/details`}>Просмотр подробностей</a></td>
-        </tr>
-    )
-}
-
-function IndividualStats({testId, baseCompletions, basePages, rowsPerPage}) {
+function IndividualStats({test, questions, baseCompletions, version, basePages, rowsPerPage}) {
     const [completions, setCompletions] = useState(baseCompletions);
     const [page, setPage] = useState(1);
     const [pageCount, setPageCount] = useState(basePages);
     const [isLoading, setIsLoading] = useState(false);
-
+    
     const handlePageChange = async (newPage) => {
         if (isLoading) return;
 
@@ -37,7 +18,7 @@ function IndividualStats({testId, baseCompletions, basePages, rowsPerPage}) {
         setPage(targetPage);
 
         setIsLoading(true);
-        const result = await getCompletions(testId, newPage, rowsPerPage);
+        const result = await getCompletions(test.id, newPage, rowsPerPage, version);
         const newCompletions = await result.json();
         const pages = parseInt(newCompletions.pages);
         if (pages !== pageCount) {
@@ -47,7 +28,10 @@ function IndividualStats({testId, baseCompletions, basePages, rowsPerPage}) {
         setIsLoading(false);
     }
 
-    return (<>
+    return (<div id="individual-stats">
+        <div id="table-settings">
+            <DownloadXlsxButton questions={questions} test={test} version={version}/>
+        </div>
         <table>
             <thead>
             <tr>
@@ -69,11 +53,11 @@ function IndividualStats({testId, baseCompletions, basePages, rowsPerPage}) {
             </tbody>
         </table>
         {basePages > 1 && <Pagination page={page} pageCount={pageCount} onChangePage={handlePageChange}/>}
-    </>)
+    </div>)
 }
 
-function getCompletions(testId, page, amountPerPage) {
-    return fetch(`/api/tests/${testId}/completions/finished?page=${page}&amountPerPage=${amountPerPage}`);
+function getCompletions(testId, page, amountPerPage, version) {
+    return fetch(`/api/tests/${testId}/completions/finished?page=${page}&amountPerPage=${amountPerPage}&version=${version}`);
 }
 
 export default IndividualStats;

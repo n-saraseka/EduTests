@@ -1,16 +1,14 @@
 import { createRoot } from 'react-dom/client';
-import IndividualStats from "./stats/individualStats.jsx";
-import DownloadXlsxButton from "./stats/downloadXlsxButton.jsx";
+import Stats from "./stats/stats.jsx";
 
 const initialData = window.__INITIAL_DATA__;
 
-const stats = document.getElementById('individual-stats');
+const stats = document.getElementById('app');
 if (stats) {
-    const statsRoot = createRoot(document.getElementById('individual-stats'));
+    const statsRoot = createRoot(document.getElementById('app'));
     statsRoot.render(<>
-        <DownloadXlsxButton questions={initialData.questions} test={initialData.test}/>
-        <IndividualStats testId={initialData.test.id} baseCompletions={initialData.completions}
-                         basePages={initialData.pages}
-                         rowsPerPage={initialData.pageSize}/>
+        <Stats test={initialData.test} baseQuestions={initialData.questions} baseCompletions={initialData.completions} 
+               versions={initialData.versions} baseGenStats={initialData.completionStats} 
+               rowsPerPage={initialData.pageSize} basePages={initialData.pages}/>
     </>)
 }

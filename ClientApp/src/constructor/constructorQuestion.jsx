@@ -175,15 +175,26 @@ function ConstructorQuestion({question, onChange}) {
     function SequenceContainer() {
         const addItem = () => {
             const newSequence = question.correctData.sequence.concat(["Введите текст"]);
-            onChange({...question, correctData: {...question.correctData, sequence: newSequence}});
+            const newOptions = shuffleSequence(newSequence);
+            onChange({...question, 
+                data: {...question.data, options: newOptions},
+                correctData: {...question.correctData, sequence: newSequence}});
         }
         
         const changeSequence = (seq) => {
-            onChange({...question, correctData: {...question.correctData, sequence: seq}});
+            const newOptions = shuffleSequence(seq);
+            onChange({...question, 
+                data: {...question.data, options: newOptions}, 
+                correctData: {...question.correctData, sequence: seq}});
         }
         
+        const shuffleSequence = (seq) => seq.sort(() => Math.random() - 0.5);
+        
         const deleteItem = (index) => {
-            onChange({...question, correctData: {...question.correctData, sequence: question.correctData.sequence.filter((e, i) => i !== index)}});
+            const newOptions = question.data.options.filter(o => o !== question.correctData.sequence[index]);
+            onChange({...question, 
+                data: {...question.data, options: newOptions},
+                correctData: {...question.correctData, sequence: question.correctData.sequence.filter((e, i) => i !== index)}});
         }
         
         return (<>
@@ -371,6 +382,7 @@ function ConstructorQuestion({question, onChange}) {
                         <button className="btn btn-primary" onClick={() => addAnswer(3)}>Добавить</button>
                     </div>
                 </>
+            // Sequence
             case 4:
                 return <>
                     <p>Последовательность:</p>
@@ -392,7 +404,8 @@ function ConstructorQuestion({question, onChange}) {
         </div>
         <div className="test-card-row question-description">
             {isEditingText ? (
-                    <textarea id="edit-text" value={description === null ? undefined : description} onChange={onChange}
+                    <textarea id="edit-text" value={description === null ? undefined : description} 
+                              onChange={(e) => setDescription(e.target.value)}
                               placeholder="Введите свой текст..." autoFocus disabled={false}/>)
                 : <BbcodePreset text={description === null ? "Без описания" : description}/>}
             <EditButton isEditing={isEditingText} onEditToggle={handleDescriptionEdit} 

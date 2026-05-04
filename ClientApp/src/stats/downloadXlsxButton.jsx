@@ -1,10 +1,10 @@
 import * as XLSX from 'xlsx';
 
-function DownloadXlsxButton({test, questions}) {
+function DownloadXlsxButton({test, questions, version}) {
     const separator = ',';
     
     const downloadXlsx = async () => {
-        const response = await getCompletions(test.id);
+        const response = await getCompletions(test.id, version);
         if (response.ok) {
             const data = await response.json();
             const completions = data.completions;
@@ -99,8 +99,8 @@ function cleanText(text) {
     return data;
 }
 
-function getCompletions(id) {
-    return fetch(`/api/tests/${id}/completions/finished`);
+function getCompletions(id, version) {
+    return fetch(`/api/tests/${id}/completions/finished?version=${version}`);
 }
 
 export default DownloadXlsxButton;

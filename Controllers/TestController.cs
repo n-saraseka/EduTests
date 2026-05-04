@@ -126,8 +126,15 @@ public class TestController(ITestRepository testRepository,
         if (test == null) return NotFound("Test not found");
 
         model.Test = entityToDtoService.TestEntityToDto(test);
+
+        var latestVersion = test.Questions
+            .Where(q => q.UpdatedAt <= completion.StartedAt)
+            .MaxBy(q => q.UpdatedAt)
+            .UpdatedAt;
         
-        var questions = test.Questions.Select(q =>
+        var questions = test.Questions.Where(q => q.UpdatedAt == latestVersion).ToList();
+        
+        var apiQuestions = questions.Select(q =>
         {
             // this is pretty ugly, maybe refactor so that this uses a service instead
             q.CorrectData.ChosenIndices.Clear();
@@ -144,7 +151,7 @@ public class TestController(ITestRepository testRepository,
             return entityToDtoService.QuestionEntityToDto(q);
         }).ToList();
         
-        model.Questions = questions;
+        model.Questions = apiQuestions;
         
         var answers = await userAnswerRepository.GetByCompletionIdAsync(completion.Id, cancellationToken);
         model.Answers = answers.Select(entityToDtoService.AnswerEntityToDto).ToList();
@@ -268,9 +275,18 @@ public class TestController(ITestRepository testRepository,
         if (!authRes && !anonUserResult) return BadRequest("Neither anonymous or authenticated user ID were assigned. WTF?");
         
         var questions = await questionRepository.GetByTestIdAsync(completion.TestId, cancellationToken);
+        
+        var latestVersion = questions
+            .Where(q => q.UpdatedAt <= completion.StartedAt)
+            .MaxBy(q => q.UpdatedAt)
+            .UpdatedAt;
+        
+        var filteredQuestions = questions.Where(q => q.UpdatedAt == latestVersion).ToList();
+        var apiQuestions = filteredQuestions.Select(entityToDtoService.QuestionEntityToDto).ToList();
+        
         var answers = await userAnswerRepository.GetByCompletionIdAsync(completion.Id, cancellationToken);
         
-        var apiCompletion = entityToDtoService.CompletionEntityToDto(completion, answers, questions);
+        var apiCompletion = entityToDtoService.CompletionEntityToDto(completion, answers, filteredQuestions);
         apiCompletion.Test = entityToDtoService.TestEntityToDto(completion.Test);
         if (completion.UserId != null)
         {
@@ -279,11 +295,11 @@ public class TestController(ITestRepository testRepository,
         
         model.Completion = apiCompletion;
         
-        model.Questions = questions.Select(entityToDtoService.QuestionEntityToDto).OrderBy(q => q.OrderIndex).ToList();
+        model.Questions = apiQuestions.OrderBy(q => q.OrderIndex).ToList();
         model.Answers = answers.Select(entityToDtoService.AnswerEntityToDto).ToList();
         
         var appropriateResult = completion.Test.Results
-            .Where(r => r.PercentageThreshold <= apiCompletion.CompletionPercentage)
+            .Where(r => r.PercentageThreshold <= apiCompletion.CompletionPercentage && r.UpdatedAt <= completion.StartedAt)
             .MaxBy(r => r.PercentageThreshold);
 
         if (appropriateResult != null) model.ResultString = appropriateResult.Result;
@@ -313,14 +329,20 @@ public class TestController(ITestRepository testRepository,
         
         viewModel.Test = entityToDtoService.TestEntityToDto(test);
         
-        var completions = await testCompletionRepository.GetByTestId(id).ToListAsync(cancellationToken);
-        var ids = completions.Select(c => c.Id);
-        var answers = await userAnswerRepository.GetByCompletionIdsAsync(ids, cancellationToken);
         var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
         
-        viewModel.Questions = questions.Select(entityToDtoService.QuestionEntityToDto).ToList();
+        var allVersions = questions.DistinctBy(q => q.UpdatedAt).Select(q => q.UpdatedAt);
+        var latestVersion = allVersions.Max();
+        viewModel.Versions = allVersions.OrderDescending().ToList();
+        
+        var completions = await testCompletionRepository.GetByTestId(id).ToListAsync(cancellationToken);
+        var relevantCompletions = completions.Where(c => c.StartedAt >= latestVersion);
+        var ids = relevantCompletions.Select(c => c.Id);
+        var answers = await userAnswerRepository.GetByCompletionIdsAsync(ids, cancellationToken);
+        
+        viewModel.Questions = questions.Where(q => q.UpdatedAt == latestVersion).Select(entityToDtoService.QuestionEntityToDto).ToList();
 
-        var apiCompletions = completions.Select(c =>
+        var apiCompletions = relevantCompletions.Select(c =>
             {
                 var completion = entityToDtoService.CompletionEntityToDto(c, answers[c.Id], questions);
                 if (completion.UserId != null) completion.User = entityToDtoService.UserEntityToDto(c.User);
@@ -328,6 +350,7 @@ public class TestController(ITestRepository testRepository,
             });
         
         var count = apiCompletions.Count();
+        viewModel.CompletionStats.CompletionCount = count;
         if (count > 0)
         {
             var orderedByPercentage = apiCompletions
@@ -335,28 +358,28 @@ public class TestController(ITestRepository testRepository,
                 .Select(c => c.CompletionPercentage)
                 .ToList();
             
-            viewModel.MinPercentage = orderedByPercentage[0];
-            viewModel.MaxPercentage = orderedByPercentage[count - 1];
+            viewModel.CompletionStats.MinPercentage = orderedByPercentage[0];
+            viewModel.CompletionStats.MaxPercentage = orderedByPercentage[count - 1];
 
             var midpoint = count / 2;
             if (count % 2 == 0)
-                viewModel.MedianPercentage = (orderedByPercentage.ElementAt(midpoint - 1) + orderedByPercentage.ElementAt(midpoint)) / 2;
+                viewModel.CompletionStats.MedianPercentage = (orderedByPercentage.ElementAt(midpoint - 1) + orderedByPercentage.ElementAt(midpoint)) / 2;
             else
-                viewModel.MedianPercentage = orderedByPercentage.ElementAt(midpoint);
+                viewModel.CompletionStats.MedianPercentage = orderedByPercentage.ElementAt(midpoint);
             
             var orderedByTime = apiCompletions
                 .OrderBy(c => c.CompletedAt - c.StartedAt)
                 .Select(c => (DateTime)c.CompletedAt - c.StartedAt)
                 .ToList();
             
-            viewModel.MinTime = orderedByTime[0];
-            viewModel.MaxTime = orderedByTime[count - 1];
+            viewModel.CompletionStats.MinTime = orderedByTime[0];
+            viewModel.CompletionStats.MaxTime = orderedByTime[count - 1];
             
             var quarter = (int)Math.Round(count / 4.0,  MidpointRounding.AwayFromZero);
             var half = (int)Math.Round(count / 2.0,  MidpointRounding.AwayFromZero);
             
             var interQuartile = count > 3 ? orderedByTime.Take(half).Skip(quarter).ToList() : orderedByTime.ToList();
-            viewModel.InterQuartileAverageTime = new TimeSpan((long)interQuartile.Average(t => t.Ticks));
+            viewModel.CompletionStats.InterQuartileAverageTime = new TimeSpan((long)interQuartile.Average(t => t.Ticks));
         }
         
         var pageSize = int.Parse(config["testStatisticsRows"]);

@@ -6,6 +6,8 @@ function ResultDetails({baseQuestions, baseAnswers, basePages, answersPerPage}) 
     const [currentPage, setCurrentPage] = useState(1);
     const [questions, setQuestions] = useState(baseQuestions.slice(0, answersPerPage));
     
+    console.log(questions, baseAnswers);
+    
     const changePage = (page) => {
         if (page !== currentPage) {
             setCurrentPage(page);

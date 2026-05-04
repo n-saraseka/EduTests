@@ -9,10 +9,6 @@ public class TestStatisticsViewModel
     public List<ApiQuestion> Questions { get; set; } = new();
     public int PageSize { get; set; }
     public int Pages { get; set; }
-    public TimeSpan? MinTime { get; set; }
-    public TimeSpan? InterQuartileAverageTime { get; set; }
-    public TimeSpan? MaxTime { get; set; }
-    public double? MinPercentage { get; set; }
-    public double? MedianPercentage { get; set; }
-    public double? MaxPercentage { get; set; }
+    public ApiCompletionStats CompletionStats { get; set; } = new();
+    public required List<DateTime> Versions { get; set; }
 }

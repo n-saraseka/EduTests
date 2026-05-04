@@ -148,7 +148,9 @@ public class TestsController(ITestRepository testRepository,
     /// <param name="page">Page number</param>
     /// <param name="amountPerPage">Amount of <see cref="ApiTest"/>s per page</param>
     /// <param name="userId">The <see cref="ApiUser"/> ID</param>
-    /// <param name="sort">The </param>
+    /// <param name="sort">The sorting method</param>
+    /// <param name="isDescending">Whether to sort in descending order</param>
+    /// <param name="isProfile">Whether the tests are used for the profile catalog or the homepage catalog</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>List of <see cref="ApiTest"/>s</returns>
     [AllowAnonymous]
@@ -281,9 +283,6 @@ public class TestsController(ITestRepository testRepository,
                 return BadRequest("One or more questions are invalid");
             }
         
-        var existingQuestions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
-        questionRepository.DeleteBulk(existingQuestions);
-        
         questions = questions.Select(q =>
         {
             q.TestId = test.Id;
@@ -305,9 +304,6 @@ public class TestsController(ITestRepository testRepository,
         test.Tags.Clear();
         foreach (var tag in allTags)
             test.Tags.Add(tag);
-        
-        var existingResults = await testResultRepository.GetByTestIdAsync(id, cancellationToken);
-        testResultRepository.DeleteBulk(existingResults);
         
         var results = command.Results.Select(r => new TestResult
         {
@@ -601,29 +597,34 @@ public class TestsController(ITestRepository testRepository,
     /// Get <see cref="ApiQuestion"/>s from a <see cref="ApiTest"/>
     /// </summary>
     /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="version">The <see cref="ApiTest"/> version datetime</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
     /// <returns>A List of <see cref="ApiQuestion"/>s</returns>
     [HttpGet("{id}/questions")]
-    [AllowAnonymous]
-    public async Task<IActionResult> GetTestQuestionsAsync(int id, CancellationToken cancellationToken = default)
+    [Authorize]
+    public async Task<IActionResult> GetTestQuestionsAsync(int id, DateTime version, CancellationToken cancellationToken = default)
     {
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
         if (test is null)
             return NotFound();
         
-        if (test.Password != null && HttpContext.Session.GetString($"Verified-{test.Id}") != "true") return Forbid();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
         
-        var userRole = User.FindFirstValue(ClaimTypes.Role);
+        var userIdInt = int.Parse(userId);
         
-        if (test.AccessType == AccessType.Private && userRole != "Administrator")
+        if (test.UserId != userIdInt)
             return Forbid();
         
         var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
+
+        var filteredQuestions = questions.Where(q => q.UpdatedAt == version);
         
-        if (questions.Count == 0)
+        if (!filteredQuestions.Any())
             return NoContent();
 
-        var apiQuestions = questions.Select(entityToDtoService.QuestionEntityToDto).ToList();
+        var apiQuestions = filteredQuestions.Select(entityToDtoService.QuestionEntityToDto).ToList();
         
         return Ok(apiQuestions);
     }
@@ -780,9 +781,18 @@ public class TestsController(ITestRepository testRepository,
         return Ok(apiCompletion);
     }
     
+    /// <summary>
+    /// Get finished <see cref="ApiCompletion"/>s
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="version">The <see cref="ApiTest"/> ID</param>
+    /// <param name="page">Page number</param>
+    /// <param name="amountPerPage">Amount of <see cref="ApiTest"/>s per page</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns>A list of <see cref="ApiCompletion"/>s</returns>
     [HttpGet("{id}/completions/finished")]
     [Authorize]
-    public async Task<IActionResult> GetFinishedCompletionsAsync(int id, int? page, int? amountPerPage, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetFinishedCompletionsAsync(int id, DateTime version, int? page, int? amountPerPage, CancellationToken cancellationToken = default)
     {
         var test = await testRepository.GetByIdAsync(id, cancellationToken);
         if (test is null)
@@ -794,6 +804,8 @@ public class TestsController(ITestRepository testRepository,
         if (test.UserId != authenticatedUserId) return Forbid();
 
         var query = testCompletionRepository.GetByTestId(id);
+
+        query = query.Where(c => c.StartedAt >= version);
 
         int? pages = null;
 
@@ -878,7 +890,7 @@ public class TestsController(ITestRepository testRepository,
     }
 
     /// <summary>
-    /// Delete a unfinished <see cref="ApiCompletion"/>
+    /// Delete an unfinished <see cref="ApiCompletion"/>
     /// </summary>
     /// <param name="id">The <see cref="ApiTest"/> ID</param>
     /// <param name="completionId">The <see cref="ApiCompletion"/> ID</param>
@@ -1169,5 +1181,76 @@ public class TestsController(ITestRepository testRepository,
         }
         
         return Ok();
+    }
+
+    /// <summary>
+    /// Get <see cref="ApiTest"/> completion stats
+    /// </summary>
+    /// <param name="id">The <see cref="ApiTest"/> ID</param>
+    /// <param name="version">The relevant <see cref="ApiTest"/> version</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe</param>
+    /// <returns><see cref="ApiCompletionStats"/> object</returns>
+    [HttpGet("{id}/completion_stats")]
+    [Authorize]
+    public async Task<IActionResult> GetTestCompletionStatsAsync(int id, DateTime version, CancellationToken cancellationToken = default)
+    {
+        var test = await testRepository.GetByIdWithTagsAsync(id, cancellationToken);
+        if (test == null) return NotFound("Test not found");
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+        int? authenticatedUserId = isAuthenticated ? int.Parse(userId) : null;
+
+        if (test.UserId != authenticatedUserId) return Forbid();
+        
+        var completions = await testCompletionRepository.GetByTestId(id).Where(c => c.StartedAt >= version).ToListAsync(cancellationToken);
+        var ids = completions.Select(c => c.Id);
+        var answers = await userAnswerRepository.GetByCompletionIdsAsync(ids, cancellationToken);
+        
+        var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
+
+        var apiCompletions = completions.Select(c =>
+        {
+            var completion = entityToDtoService.CompletionEntityToDto(c, answers[c.Id], questions);
+            if (completion.UserId != null) completion.User = entityToDtoService.UserEntityToDto(c.User);
+            return completion;
+        });
+
+        var completionStats = new ApiCompletionStats();
+        
+        var count = apiCompletions.Count();
+        completionStats.CompletionCount = count;
+        if (count > 0)
+        {
+            var orderedByPercentage = apiCompletions
+                .OrderBy(c => c.CompletionPercentage)
+                .Select(c => c.CompletionPercentage)
+                .ToList();
+            
+            completionStats.MinPercentage = orderedByPercentage[0];
+            completionStats.MaxPercentage = orderedByPercentage[count - 1];
+
+            var midpoint = count / 2;
+            if (count % 2 == 0)
+                completionStats.MedianPercentage = (orderedByPercentage.ElementAt(midpoint - 1) + orderedByPercentage.ElementAt(midpoint)) / 2;
+            else
+                completionStats.MedianPercentage = orderedByPercentage.ElementAt(midpoint);
+            
+            var orderedByTime = apiCompletions
+                .OrderBy(c => c.CompletedAt - c.StartedAt)
+                .Select(c => (DateTime)c.CompletedAt - c.StartedAt)
+                .ToList();
+            
+            completionStats.MinTime = orderedByTime[0];
+            completionStats.MaxTime = orderedByTime[count - 1];
+            
+            var quarter = (int)Math.Round(count / 4.0,  MidpointRounding.AwayFromZero);
+            var half = (int)Math.Round(count / 2.0,  MidpointRounding.AwayFromZero);
+            
+            var interQuartile = count > 3 ? orderedByTime.Take(half).Skip(quarter).ToList() : orderedByTime.ToList();
+            completionStats.InterQuartileAverageTime = new TimeSpan((long)interQuartile.Average(t => t.Ticks));
+        }
+
+        return Ok(completionStats);
     }
 }

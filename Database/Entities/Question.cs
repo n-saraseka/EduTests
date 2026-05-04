@@ -2,7 +2,7 @@ using EduTests.Database.Enums;
 
 namespace EduTests.Database.Entities;
 
-public class Question : IEntity<int>
+public class Question : IEntity<int>, IAuditable
 {
     public int Id { get; set; }
     public Test Test { get; set; }
@@ -12,4 +12,6 @@ public class Question : IEntity<int>
     public required string Description { get; set; }
     public required QuestionData Data { get; set; }
     public required QuestionData CorrectData { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }
