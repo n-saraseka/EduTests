@@ -10,8 +10,6 @@ function StartTestButton({testId, hasPassword}) {
     const [successfulVerification, setSuccessfulVerification] = useState(hasPassword);
     const [error, setError] = useState(null);
     
-    console.log(successfulVerification);
-    
     const handleStart = async () => {
         if (!successfulVerification) {
             setIsPasswordModalOpen(true);

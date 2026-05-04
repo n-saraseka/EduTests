@@ -43,8 +43,16 @@ public class TestController(ITestRepository testRepository,
         else return Unauthorized();
         
         var apiTest = entityToDtoService.TestEntityToDto(test);
-        apiTest.Questions = test.Questions.Select(entityToDtoService.QuestionEntityToDto).ToList();
-        apiTest.Results = test.Results.Select(entityToDtoService.TestResultEntityToDto).ToList();
+        
+        var latestVersion = test.Questions
+            .MaxBy(q => q.UpdatedAt)
+            .UpdatedAt;
+
+        var relevantQuestions = test.Questions.Where(q => q.UpdatedAt == latestVersion);
+        var relevantResults = test.Results.Where(r => r.UpdatedAt == latestVersion);
+        
+        apiTest.Questions = relevantQuestions.Select(entityToDtoService.QuestionEntityToDto).ToList();
+        apiTest.Results = relevantResults.Select(entityToDtoService.TestResultEntityToDto).ToList();
         viewModel.Test = apiTest;
         
         return View(viewModel);
@@ -214,9 +222,17 @@ public class TestController(ITestRepository testRepository,
         if (completion.UserId != authenticatedUserId && completion.AnonymousUserId != anonId) return Forbid();
         
         var questions = await questionRepository.GetByTestIdAsync(completion.TestId, cancellationToken);
+        
+        var latestVersion = questions
+            .Where(q => q.UpdatedAt <= completion.StartedAt)
+            .MaxBy(q => q.UpdatedAt)
+            .UpdatedAt;
+        
+        var relevantQuestions = questions.Where(q => q.UpdatedAt == latestVersion).ToList();
+        
         var answers = await userAnswerRepository.GetByCompletionIdAsync(completion.Id, cancellationToken);
         
-        var apiCompletion = entityToDtoService.CompletionEntityToDto(completion, answers, questions);
+        var apiCompletion = entityToDtoService.CompletionEntityToDto(completion, answers, relevantQuestions);
         apiCompletion.Test = entityToDtoService.TestEntityToDto(completion.Test);
         if (completion.UserId != null)
         {
@@ -226,7 +242,7 @@ public class TestController(ITestRepository testRepository,
         viewModel.Completion = apiCompletion;
         
         var appropriateResult = completion.Test.Results
-            .Where(r => r.PercentageThreshold <= apiCompletion.CompletionPercentage)
+            .Where(r => r.PercentageThreshold <= apiCompletion.CompletionPercentage && r.UpdatedAt == latestVersion)
             .MaxBy(r => r.PercentageThreshold);
 
         if (appropriateResult != null) viewModel.ResultString = appropriateResult.Result;
@@ -299,7 +315,7 @@ public class TestController(ITestRepository testRepository,
         model.Answers = answers.Select(entityToDtoService.AnswerEntityToDto).ToList();
         
         var appropriateResult = completion.Test.Results
-            .Where(r => r.PercentageThreshold <= apiCompletion.CompletionPercentage && r.UpdatedAt <= completion.StartedAt)
+            .Where(r => r.PercentageThreshold <= apiCompletion.CompletionPercentage && r.UpdatedAt == latestVersion)
             .MaxBy(r => r.PercentageThreshold);
 
         if (appropriateResult != null) model.ResultString = appropriateResult.Result;

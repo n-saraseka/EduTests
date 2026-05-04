@@ -188,7 +188,10 @@ function ConstructorQuestion({question, onChange}) {
                 correctData: {...question.correctData, sequence: seq}});
         }
         
-        const shuffleSequence = (seq) => seq.sort(() => Math.random() - 0.5);
+        const shuffleSequence = (seq) => {
+            const copy = [...seq];
+            return copy.sort(() => Math.random() - 0.5);
+        };
         
         const deleteItem = (index) => {
             const newOptions = question.data.options.filter(o => o !== question.correctData.sequence[index]);
@@ -282,6 +285,8 @@ function ConstructorQuestion({question, onChange}) {
         const confirmEdit = () => {
             setText(tempText);
             setTempText(text);
+            const newSequence = sequence.map((e, i) => i === index ? tempText : e);
+            onModification(newSequence);
             setIsEditing(false);
         }
         

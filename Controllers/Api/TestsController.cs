@@ -802,10 +802,18 @@ public class TestsController(ITestRepository testRepository,
         var authenticatedUserId = int.Parse(userId);
 
         if (test.UserId != authenticatedUserId) return Forbid();
+        
+        var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
+        var nextVersion = questions
+            .DistinctBy(q => q.UpdatedAt)
+            .FirstOrDefault(q => q.UpdatedAt > version);
+        
+        var relevantQuestions = questions.Where(q => q.UpdatedAt == version).ToList();
 
         var query = testCompletionRepository.GetByTestId(id);
 
         query = query.Where(c => c.StartedAt >= version);
+        if (nextVersion != null) query = query.Where(c => c.StartedAt <= nextVersion.UpdatedAt);
 
         int? pages = null;
 
@@ -821,12 +829,11 @@ public class TestsController(ITestRepository testRepository,
         var completions = await query.ToListAsync(cancellationToken);
         var ids = completions.Select(completion => completion.Id);
         
-        var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
         var answers = await userAnswerRepository.GetByCompletionIdsAsync(ids, cancellationToken);
         
         var apiCompletions = completions.Select(c =>
             {
-                var completion = entityToDtoService.CompletionEntityToDto(c, answers[c.Id], questions);
+                var completion = entityToDtoService.CompletionEntityToDto(c, answers[c.Id], relevantQuestions);
                 if (c.UserId != null) completion.User = entityToDtoService.UserEntityToDto(c.User);
                 return completion;
             }).ToList();
@@ -876,16 +883,23 @@ public class TestsController(ITestRepository testRepository,
             return BadRequest("The completion is already finished");
         
         var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
+        
+        var latestVersion = test.Questions
+            .Where(q => q.UpdatedAt <= completion.StartedAt)
+            .MaxBy(q => q.UpdatedAt)
+            .UpdatedAt;
+        
+        var relevantQuestions = questions.Where(q => q.UpdatedAt == latestVersion).ToList();
         var userAnswers = await userAnswerRepository.GetByCompletionIdAsync(completionId, cancellationToken);
         
-        if (questions.Count != userAnswers.Count)
+        if (relevantQuestions.Count != userAnswers.Count)
             return BadRequest("Not all questions have been answered");
         
         completion.CompletedAt = DateTime.UtcNow;
         testCompletionRepository.Update(completion);
         await testCompletionRepository.SaveChangesAsync(cancellationToken);
         
-        var apiCompletion =  entityToDtoService.CompletionEntityToDto(completion, userAnswers, questions);
+        var apiCompletion =  entityToDtoService.CompletionEntityToDto(completion, userAnswers, relevantQuestions);
         return Ok(apiCompletion);
     }
 
@@ -1203,11 +1217,17 @@ public class TestsController(ITestRepository testRepository,
 
         if (test.UserId != authenticatedUserId) return Forbid();
         
-        var completions = await testCompletionRepository.GetByTestId(id).Where(c => c.StartedAt >= version).ToListAsync(cancellationToken);
+        var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
+        var nextVersion = questions
+            .DistinctBy(q => q.UpdatedAt)
+            .FirstOrDefault(q => q.UpdatedAt > version);
+
+        var query = testCompletionRepository.GetByTestId(id).Where(c => c.StartedAt >= version);
+        if (nextVersion != null) query = query.Where(c => c.StartedAt <= nextVersion.UpdatedAt);
+        
+        var completions = await query.ToListAsync(cancellationToken);
         var ids = completions.Select(c => c.Id);
         var answers = await userAnswerRepository.GetByCompletionIdsAsync(ids, cancellationToken);
-        
-        var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
         
         var relevantQuestions = questions.Where(q => q.UpdatedAt == version).ToList();
 

@@ -17,10 +17,10 @@ public class NumberInputQValidator : IQuestionValidator
             || data.RightColumn.Count != 0
             || data.Options.Count != 0
             || data.ValidAnswers.Count != 0
+            || data.ValidIndices.Count != 0
+            || data.ChosenIndices.Count != 0
             || data.Sequence.Count != 0
-            || data.TextAnswer != null
-            || data.ValidIndices != null
-            || data.ChosenIndices != null)
+            || data.TextAnswer != null)
             throw new ArgumentException(
                 $"{nameof(data)} should only have the number filled out");
     }

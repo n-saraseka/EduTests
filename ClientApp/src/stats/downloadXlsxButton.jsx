@@ -54,6 +54,10 @@ function DownloadXlsxButton({test, questions, version}) {
                         case 3:
                             answerString = cleanText(correspondingAnswer.answer.textAnswer);
                             break;
+                        // Sequence
+                        case 4:
+                            answerString = correspondingAnswer.answer.sequence.map(o => cleanText(o)).join("; ");
+                            break;
                     }
                     
                     if (isCorrect) {

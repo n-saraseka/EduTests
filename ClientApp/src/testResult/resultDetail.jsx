@@ -52,6 +52,20 @@ function ResultDetail({question, answer}) {
                         <span> (Правильный ответ: {question.correctData.textAnswer})</span>
                     </div>
                 </div>)
+            case 4:
+                return (<div id="answers">
+                    <span>Ваша последовательность:</span>
+                    <div className="sequence-items">
+                        {answer.answer.sequence.map((e, i) =>
+                            <div className="sequence-item" key={i}>{e}</div>)}
+                    </div>
+                    <hr/>
+                    <span>Правильная последовательность:</span>
+                    <div className="sequence-items">
+                        {question.correctData.sequence.map((e, i) =>
+                            <div className="sequence-item" key={i}>{e}</div>)}
+                    </div>
+                </div>)
         }
     }
     

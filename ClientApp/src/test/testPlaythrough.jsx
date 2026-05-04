@@ -50,7 +50,7 @@ function TestPlaythrough({baseQuestions, baseAnswers, baseLastUnanswered, baseTe
             const answersJson = await answersResponse.json();
             const existingAnswer = answersJson.find(a => a.questionId === currentAnswer.questionId);
             if (existingAnswer === undefined) {
-                const command = new AddAnswerCommand(currentAnswer.questionId, currentAnswer.data);
+                const command = new AddAnswerCommand(currentAnswer.questionId, currentAnswer.answer);
                 const addResponse = await addAnswer(completion.testId, completion.id, command);
                 if (addResponse.ok) {
                     const answer = await addResponse.json();
@@ -58,7 +58,7 @@ function TestPlaythrough({baseQuestions, baseAnswers, baseLastUnanswered, baseTe
                 }
             }
             else {
-                const command = new EditTestAnswerCommand(currentAnswer.data);
+                const command = new EditTestAnswerCommand(currentAnswer.answer);
                 const editResponse = await editAnswer(completion.testId, completion.id, currentAnswer.id, command);
             }
         }
@@ -67,7 +67,7 @@ function TestPlaythrough({baseQuestions, baseAnswers, baseLastUnanswered, baseTe
     const finishTest = async () => {
         await submitAnswer();
         await finishCompletion(completion.testId, completion.id);
-        window.location.href = `/test/${completion.testId}/playthrough/${completion.id}/result`;
+        setTimeout(() => window.location.href = `/test/${completion.testId}/playthrough/${completion.id}/result`, 10000000);
     }
     
     return (<>

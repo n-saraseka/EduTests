@@ -579,3 +579,18 @@ input:focus {
     max-width: 100%;
     display: block;
 }
+
+.sequence-items {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.sequence-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border: 1px solid #e5e5e5;
+    border-radius: 0.2rem;
+}

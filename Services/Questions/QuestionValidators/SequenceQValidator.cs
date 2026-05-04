@@ -16,10 +16,10 @@ public class SequenceQValidator : IQuestionValidator
             || data.LeftColumn.Count != 0
             || data.RightColumn.Count != 0
             || data.ValidAnswers.Count != 0
+            || data.ValidIndices.Count != 0
+            || data.ChosenIndices.Count != 0
             || data.TextAnswer != null
-            || data.NumberAnswer != null
-            || data.ValidIndices != null
-            || data.ChosenIndices != null)
+            || data.NumberAnswer != null)
             throw new ArgumentException(
                 $"{nameof(data)} should only have the sequence filled out");
     }
