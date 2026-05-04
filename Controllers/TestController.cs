@@ -334,17 +334,19 @@ public class TestController(ITestRepository testRepository,
         var allVersions = questions.DistinctBy(q => q.UpdatedAt).Select(q => q.UpdatedAt);
         var latestVersion = allVersions.Max();
         viewModel.Versions = allVersions.OrderDescending().ToList();
+
+        var relevantQuestions = questions.Where(q => q.UpdatedAt == latestVersion).ToList();
         
         var completions = await testCompletionRepository.GetByTestId(id).ToListAsync(cancellationToken);
         var relevantCompletions = completions.Where(c => c.StartedAt >= latestVersion);
         var ids = relevantCompletions.Select(c => c.Id);
         var answers = await userAnswerRepository.GetByCompletionIdsAsync(ids, cancellationToken);
         
-        viewModel.Questions = questions.Where(q => q.UpdatedAt == latestVersion).Select(entityToDtoService.QuestionEntityToDto).ToList();
+        viewModel.Questions = relevantQuestions.Select(entityToDtoService.QuestionEntityToDto).ToList();
 
         var apiCompletions = relevantCompletions.Select(c =>
             {
-                var completion = entityToDtoService.CompletionEntityToDto(c, answers[c.Id], questions);
+                var completion = entityToDtoService.CompletionEntityToDto(c, answers[c.Id], relevantQuestions);
                 if (completion.UserId != null) completion.User = entityToDtoService.UserEntityToDto(c.User);
                 return completion;
             });

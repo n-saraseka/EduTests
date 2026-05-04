@@ -1208,10 +1208,12 @@ public class TestsController(ITestRepository testRepository,
         var answers = await userAnswerRepository.GetByCompletionIdsAsync(ids, cancellationToken);
         
         var questions = await questionRepository.GetByTestIdAsync(id, cancellationToken);
+        
+        var relevantQuestions = questions.Where(q => q.UpdatedAt == version).ToList();
 
         var apiCompletions = completions.Select(c =>
         {
-            var completion = entityToDtoService.CompletionEntityToDto(c, answers[c.Id], questions);
+            var completion = entityToDtoService.CompletionEntityToDto(c, answers[c.Id], relevantQuestions);
             if (completion.UserId != null) completion.User = entityToDtoService.UserEntityToDto(c.User);
             return completion;
         });
