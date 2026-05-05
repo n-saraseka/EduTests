@@ -8,7 +8,7 @@ function CompletionRow({baseCompletion}) {
             <td>{parseDate(baseCompletion.completedAt)}</td>
             <td>{baseCompletion.correctAnswers.length}</td>
             <td>{baseCompletion.completionPercentage}</td>
-            <td><a href={`/test/${baseCompletion.testId}/playthrough/${baseCompletion.id}/details`}>Просмотр подробностей</a></td>
+            <td><a href={`/testplaythrough/${baseCompletion.id}/details`}>Просмотр подробностей</a></td>
         </tr>
     )
 }

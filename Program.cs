@@ -150,18 +150,18 @@ app.MapControllerRoute(
 
 app.MapControllerRoute(
     name: "playthrough",
-    pattern: "{controller}/{id}/playthrough/{playthroughId}",
-    defaults: new { controller = "Test", action = "TestPlaythrough" });
+    pattern: "{controller}/{id}",
+    defaults: new { controller = "TestPlaythrough", action = "TestPlaythrough" });
 
 app.MapControllerRoute(
     name: "result",
-    pattern: "{controller}/{id}/playthrough/{playthroughId}/result",
-    defaults: new { controller = "Test", action = "TestResult" });
+    pattern: "{controller}/{id}/result",
+    defaults: new { controller = "TestPlaythrough", action = "TestResult" });
 
 app.MapControllerRoute(
     name: "playthrough_details",
-    pattern: "{controller}/{id}/playthrough/{playthroughId}/details",
-    defaults: new { controller = "Test", action = "ResultDetails" });
+    pattern: "{controller}/{id}/details",
+    defaults: new { controller = "TestPlaythrough", action = "ResultDetails" });
 
 app.MapControllerRoute(
     name: "popular",

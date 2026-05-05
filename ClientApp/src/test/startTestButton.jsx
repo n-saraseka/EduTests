@@ -41,7 +41,7 @@ function StartTestButton({testId, hasPassword}) {
     }
     
     const redirectToPlaythrough = (id) => {
-        window.location.href = `/test/${testId}/playthrough/${id}`;
+        window.location.href = `/testplaythrough/${id}`;
     }
     
     const startPlaythrough = async () => {

@@ -471,6 +471,11 @@ input:focus {
     gap: 0.5rem;
 }
 
+#test-title h1 a {
+    text-decoration: none;
+    color: #0b0b11;
+}
+
 /* Test */
 #test {
     width: 80%;

@@ -7,6 +7,8 @@ function TestPlaythrough({baseQuestions, baseAnswers, baseLastUnanswered, baseTe
     const [currentAnswer, setCurrentAnswer] = useState(getAnswerByQuestionId(currentQuestion.id));
     const [currentCompletionPercentage, setCurrentCompletionPercentage] = useState(currentQuestion.orderIndex / baseQuestions.length * 100);
     
+    console.log(currentQuestion);
+    
     const updateAnswer = (updatedAnswer) => {
         const existingAnswer = getAnswerByQuestionId(updatedAnswer.questionId);
         if (existingAnswer === undefined) {
@@ -45,12 +47,31 @@ function TestPlaythrough({baseQuestions, baseAnswers, baseLastUnanswered, baseTe
     }
     
     const submitAnswer = async () => {
+        let newAnswer;
+        if (currentAnswer === undefined) {
+            switch (currentQuestion.type) {
+                // Sequence
+                case 4:
+                    newAnswer = {questionId: currentQuestion.id, answer: {sequence: currentQuestion.data.options}};
+                    break;
+                // Match pairs
+                case 5:
+                    newAnswer = {questionId: currentQuestion.id, answer: {
+                        pairs: currentQuestion.data.leftColumn.map((p, i) => {
+                            return {left: currentQuestion.data.leftColumn[i], right: currentQuestion.data.rightColumn[i]};
+                        })}};
+                    break;
+                default:
+                    return;
+            }
+        }
+        else newAnswer = currentAnswer;
         const answersResponse = await getAnswers(completion.testId, completion.id);
         if (answersResponse.ok) {
             const answersJson = await answersResponse.json();
             const existingAnswer = answersJson.find(a => a.questionId === currentAnswer.questionId);
             if (existingAnswer === undefined) {
-                const command = new AddAnswerCommand(currentAnswer.questionId, currentAnswer.answer);
+                const command = new AddAnswerCommand(newAnswer.questionId, newAnswer.answer);
                 const addResponse = await addAnswer(completion.testId, completion.id, command);
                 if (addResponse.ok) {
                     const answer = await addResponse.json();
@@ -58,8 +79,8 @@ function TestPlaythrough({baseQuestions, baseAnswers, baseLastUnanswered, baseTe
                 }
             }
             else {
-                const command = new EditTestAnswerCommand(currentAnswer.answer);
-                const editResponse = await editAnswer(completion.testId, completion.id, currentAnswer.id, command);
+                const command = new EditTestAnswerCommand(newAnswer.answer);
+                const editResponse = await editAnswer(completion.testId, completion.id, newAnswer.id, command);
             }
         }
     }
@@ -67,7 +88,7 @@ function TestPlaythrough({baseQuestions, baseAnswers, baseLastUnanswered, baseTe
     const finishTest = async () => {
         await submitAnswer();
         await finishCompletion(completion.testId, completion.id);
-        setTimeout(() => window.location.href = `/test/${completion.testId}/playthrough/${completion.id}/result`, 10000000);
+        window.location.href = `/testplaythrough/${completion.id}/result`;
     }
     
     return (<>

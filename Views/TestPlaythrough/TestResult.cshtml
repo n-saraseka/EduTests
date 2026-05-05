@@ -38,7 +38,7 @@
                 </div>
                 <div id="test-data">
                     <div id="test-title">
-                        <h1>@Model.Completion.Test.Name</h1>
+                        <h1><a asp-controller="Test" asp-action="TestPage" asp-route-id="@Model.Completion.TestId">@Model.Completion.Test.Name</a></h1>
                         <div id="report-button"></div>
                     </div>
                     @if (Model.Completion.UserId != null)
@@ -61,7 +61,7 @@
                     <span id="completion-time">Время прохождения: @timeString</span>
                     @if (Model.Completion.Test.ShowCorrectAnswers)
                     {
-                        <a asp-controller="Test" asp-action="ResultDetails" asp-route-playthroughId="@Model.Completion.Id">Просмотреть детали прохождения</a>
+                        <a asp-controller="TestPlaythrough" asp-action="ResultDetails" asp-route-id="@Model.Completion.Id">Просмотреть детали прохождения</a>
                     }
                     @if (Model.CurrentUserId is null)
                     {

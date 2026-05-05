@@ -52,6 +52,7 @@ function ResultDetail({question, answer}) {
                         <span> (Правильный ответ: {question.correctData.textAnswer})</span>
                     </div>
                 </div>)
+            // Sequence
             case 4:
                 return (<div id="answers">
                     <span>Ваша последовательность:</span>
@@ -65,6 +66,43 @@ function ResultDetail({question, answer}) {
                         {question.correctData.sequence.map((e, i) =>
                             <div className="sequence-item" key={i}>{e}</div>)}
                     </div>
+                </div>)
+            // Match pairs
+            case 5:
+                return (<div id="answers">
+                    <span>Ваши пары:</span>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Левый столбец</th>
+                                <th>Правый столбец</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {answer.answer.pairs.map(p => 
+                                <tr>
+                                    <td>{p.left}</td>
+                                    <td>{p.right}</td>
+                                </tr>)}
+                        </tbody>
+                    </table>
+                    <hr/>
+                    <span>Правильные пары:</span>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Левый столбец</th>
+                            <th>Правый столбец</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {question.correctData.pairs.map(p =>
+                            <tr>
+                                <td>{p.left}</td>
+                                <td>{p.right}</td>
+                            </tr>)}
+                        </tbody>
+                    </table>
                 </div>)
         }
     }
