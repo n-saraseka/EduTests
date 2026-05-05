@@ -2,11 +2,8 @@ import ConstructorMatchPairsRow from "./constructorMatchPairsRow.jsx";
 
 function ConstructorMatchPairsContainer({question, onChange}) {
     const removePair = (index) => {
-        const pair = [question.correctData.pairs[index]];
-        // This is bad in case of repeating text. Don't have the time and motivation to figure out a correct way of doing this
-        const leftColumn = question.data.leftColumn.filter(a => a !== pair[0]);
-        const rightColumn = question.data.rightColumn.filter(a => a !== pair[1]);
         const newPairs = question.correctData.pairs.filter((p, i) => i !== index);
+        const leftColumn = newPairs.map((p) => p.left), rightColumn = newPairs.map((p) => p.right);
 
         onChange({...question,
             data: {...question.data, leftColumn: shuffleColumn(leftColumn), rightColumn: shuffleColumn(rightColumn)},
