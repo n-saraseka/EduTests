@@ -58,6 +58,17 @@ builder.Services.AddAuthentication("Cookies")
         options.LogoutPath = "/Account/logout";
         options.AccessDeniedPath = "/Account/accessDenied";
         options.ExpireTimeSpan = TimeSpan.FromDays(30);
+        options.Events.OnRedirectToLogin = context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        };
+
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
+        };
     });
 
 builder.Services.AddSession(options => {
@@ -68,26 +79,26 @@ builder.Services.AddSession(options => {
 
 var app = builder.Build();
 
+app.UseStatusCodePagesWithReExecute("/{0}");
+app.UseExceptionHandler("/500");
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
+
 app.UseStaticFiles();
+app.UseHttpsRedirection();
+
 app.UseRouting();
-app.MapControllers();
+
+app.UseSession();
 
 app.UseAuthentication();
 app.UseMiddleware<AnonymousAuthenticationMiddleware>();
 app.UseAuthorization();
 
-app.UseSession();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-
+app.MapControllers();
 app.MapStaticAssets();
 
 app.MapControllerRoute(
