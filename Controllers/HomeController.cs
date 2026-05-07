@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using EduTests.Database.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using EduTests.Models;
@@ -36,7 +35,7 @@ public class HomeController(ITestRepository testRepository,
             var testCardTagCount = int.Parse(config["testCardTagCount"]);
             foreach (var test in apiTests)
             {
-                test.Tags = test.Tags.Take(testCardTagCount).ToList();
+                test.Tags = test.Tags?.Take(testCardTagCount).ToList();
             }
         }
 
@@ -79,7 +78,7 @@ public class HomeController(ITestRepository testRepository,
             var testCardTagCount = int.Parse(config["testCardTagCount"]);
             foreach (var test in apiTests)
             {
-                test.Tags = test.Tags.Take(testCardTagCount).ToList();
+                test.Tags = test.Tags?.Take(testCardTagCount).ToList();
             }
         }
 
@@ -124,7 +123,7 @@ public class HomeController(ITestRepository testRepository,
             var testCardTagCount = int.Parse(config["testCardTagCount"]);
             foreach (var test in apiTests)
             {
-                test.Tags = test.Tags.Take(testCardTagCount).ToList();
+                test.Tags = test.Tags?.Take(testCardTagCount).ToList();
             }
         }
 
@@ -138,11 +137,5 @@ public class HomeController(ITestRepository testRepository,
     public IActionResult Privacy()
     {
         return View();
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
