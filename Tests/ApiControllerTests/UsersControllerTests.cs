@@ -75,7 +75,7 @@ public class UsersControllerTests
     public async Task Register_DuplicateLogin_ReturnsBadRequest()
     {
         // Arrange
-        var command = new RegistrationCommand { Login = "existing" };
+        var command = new RegistrationCommand { Login = "existing", Password = "test" };
         _userRepositoryMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Duplicate"));
 
@@ -117,12 +117,12 @@ public class UsersControllerTests
         var user = new User
         {
             Id = 1,
-            Login = "test",
+            Login = "user_login",
             Username = "test",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword("test"),
             Group = UserGroup.User
         };
-        var command = new ChangeUsernameCommand { Username = "NewName" };
+        var command = new ChangeUsernameCommand { Username = "NewName", };
 
         SetupUserClaims(userId.ToString(), login, "User");
         _userRepositoryMock.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(user);
@@ -231,9 +231,17 @@ public class UsersControllerTests
             PasswordHash = BCrypt.Net.BCrypt.HashPassword("test"),
             Group = UserGroup.User
         };
+        var bannedUser = new BannedUser
+        {
+            Id = 1,
+            BannedById = 1,
+            UserBannedId = 2,
+            DateBanned = DateTime.Now,
+            BanReason = "test"
+        };
         _userRepositoryMock.Setup(x => x.GetByIdAsync(2, It.IsAny<CancellationToken>())).ReturnsAsync(user);
         _bannedUserRepositoryMock.Setup(x => x.GetUsersActiveBanAsync(2, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(It.IsAny<BannedUser>());
+            .ReturnsAsync(bannedUser);
 
         // Act
         var result = await _controller.BanUserAsync(2, new BanUserCommand());
