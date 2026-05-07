@@ -124,13 +124,21 @@ public class FilesController(IWebHostEnvironment env,
         return File(fileBytes, mimeType, fileName);
     }
 
-    private bool IsValidFileType(IFormFile file) {
+    private bool IsValidFileType(IFormFile file)
+    {
+        var length = file.Length;
+        if (length < 4) return false;
         using var readStr = file.OpenReadStream();
-        var buffer = new byte[10];
-        readStr.ReadExactly(buffer, 0 , 10);
+        var buffer = new byte[Math.Min(length, 8)];
+        readStr.ReadExactly(buffer, 0, buffer.Length);
         foreach (var sig in _validSignatures)
-            if (buffer.Take(sig.Length).SequenceEqual(sig))
-                return true;
+        {
+            if (sig.Length <= length)
+            {
+                if (buffer.Take(sig.Length).SequenceEqual(sig))
+                    return true;
+            }
+        }
         return false;
     }
 
