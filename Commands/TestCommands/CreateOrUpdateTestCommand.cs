@@ -15,8 +15,6 @@ public class CreateOrUpdateTestCommand
     public string? Password { get; set; }
     public AccessType AccessType { get; set; }
     public bool ShowCorrectAnswers { get; set; }
-    [Required]
-    public List<ApiQuestion> Questions { get; set; }
-    [Required]
-    public List<ApiTestResult> Results { get; set; }
+    [Required] public List<ApiQuestion> Questions { get; set; } = new();
+    [Required] public List<ApiTestResult> Results { get; set; } = new();
 }
