@@ -12,15 +12,17 @@ public class TextInputAValidator : IAnswerValidator
     /// <exception cref="ArgumentException">If the data hadn't been filled out correctly</exception>
     public void CheckFields(QuestionData data)
     {
-        if (data.Options.Count != 0
-            || data.ValidAnswers.Count != 0
-            || data.Sequence.Count != 0
-            || data.Pairs.Count != 0
-            || data.ValidIndices.Count != 0
+        if (data.Pairs.Count != 0
+            || data.LeftColumn.Count != 0
+            || data.RightColumn.Count != 0
             || data.ChosenIndices.Count != 0
-            || data.NumberAnswer != null)
-            throw new ArgumentException(
-                $"{nameof(data)} should only have the text filled out");
+            || data.ValidIndices.Count != 0
+            || data.Options.Count != 0
+            || data.Sequence.Count != 0
+            || data.ValidAnswers.Count != 0
+            || data.NumberAnswer != null
+            || data.Tolerance != null)
+            throw new ArgumentException($"{nameof(data)} should only have the text answer or valid answers filled out");
     }
 
     /// <summary>
@@ -32,7 +34,6 @@ public class TextInputAValidator : IAnswerValidator
     public void Validate(QuestionData answerData, QuestionData questionData)
     {
         CheckFields(answerData);
-        CheckFields(questionData);
         if (answerData.TextAnswer is null)
             throw new ArgumentNullException($"{nameof(answerData.TextAnswer)} must not be null");
     }

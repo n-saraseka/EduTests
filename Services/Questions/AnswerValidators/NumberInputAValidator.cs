@@ -12,13 +12,16 @@ public class NumberInputAValidator : IAnswerValidator
     /// <exception cref="ArgumentException">If the data hadn't been filled out correctly</exception>
     public void CheckFields(QuestionData data)
     {
-        if (data.Options.Count != 0
+        if (data.Pairs.Count != 0
+            || data.LeftColumn.Count != 0
+            || data.RightColumn.Count != 0
+            || data.Options.Count != 0
             || data.ValidAnswers.Count != 0
             || data.Sequence.Count != 0
-            || data.Pairs.Count != 0
+            || data.ValidIndices.Count != 0
+            || data.ChosenIndices.Count != 0
             || data.TextAnswer != null
-            || data.ValidIndices != null
-            || data.ChosenIndices != null)
+            || data.Tolerance != null)
             throw new ArgumentException(
                 $"{nameof(data)} should only have the number filled out");
     }
@@ -32,7 +35,6 @@ public class NumberInputAValidator : IAnswerValidator
     public void Validate(QuestionData answerData, QuestionData questionData)
     {
         CheckFields(answerData);
-        CheckFields(questionData);
         if (answerData.NumberAnswer is null)
             throw new ArgumentNullException($"{nameof(answerData.NumberAnswer)} must not be null");
     }

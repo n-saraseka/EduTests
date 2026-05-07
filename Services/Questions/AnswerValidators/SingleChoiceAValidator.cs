@@ -12,13 +12,15 @@ public class SingleChoiceAValidator : IAnswerValidator
     /// <exception cref="ArgumentException">If the data hadn't been filled out correctly</exception>
     public void CheckFields(QuestionData data)
     {
-        if (data.Pairs.Count != 0
+        if (data.Options.Count != 0
+            ||data.Pairs.Count != 0
             || data.LeftColumn.Count != 0
             || data.RightColumn.Count != 0
             || data.ValidAnswers.Count != 0
             || data.Sequence.Count != 0
             || data.TextAnswer != null
-            || data.NumberAnswer != null)
+            || data.NumberAnswer != null
+            || data.Tolerance != null)
             throw new ArgumentException(
                 $"{nameof(data)} should only have single or multiple choice related fields filled out");
     }
@@ -33,10 +35,9 @@ public class SingleChoiceAValidator : IAnswerValidator
     public void Validate(QuestionData answerData, QuestionData questionData)
     {
         CheckFields(answerData);
-        CheckFields(questionData);
         if (answerData.ChosenIndices.Count != 1)
             throw new ArgumentException($"{nameof(answerData.ChosenIndices)} must have exactly one item");
-        if (answerData.ChosenIndices.Min() < 0 || answerData.ChosenIndices.Max() > questionData.Options.Count)
+        if (answerData.ChosenIndices.Min() < 0 || answerData.ChosenIndices.Max() > questionData.Options.Count - 1)
             throw new ArgumentOutOfRangeException($"{nameof(answerData.ChosenIndices)}");
     }
 }
