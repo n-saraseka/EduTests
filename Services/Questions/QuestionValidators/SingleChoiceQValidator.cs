@@ -36,9 +36,9 @@ public class SingleChoiceQValidator : IQuestionValidator
         CheckFields(correctData);
         if (data.Options.Count is < 2 or > 10)
             throw new ArgumentOutOfRangeException($"{nameof(data.Options)} must have between 2 and 10 items");
-        if (correctData.ValidIndices.Min() < 0 || correctData.ValidIndices.Max() > data.Options.Count - 1)
-            throw new ArgumentOutOfRangeException($"{nameof(correctData.ValidIndices)}");
         if (correctData.ValidIndices.Count != 1)
             throw new ArgumentException($"{nameof(correctData.ValidIndices)} should have exactly one item");
+        if (correctData.ValidIndices.Min() < 0 || correctData.ValidIndices.Max() > data.Options.Count - 1)
+            throw new ArgumentOutOfRangeException($"{nameof(correctData.ValidIndices)}");
     }
 }

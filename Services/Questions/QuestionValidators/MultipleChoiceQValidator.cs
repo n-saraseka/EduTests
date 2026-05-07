@@ -37,10 +37,13 @@ public class MultipleChoiceQValidator : IQuestionValidator
         if (data.Options.Count is < 2 or > 10)
             throw new ArgumentOutOfRangeException($"{nameof(data.Options)} must have between 2 and 10 items");
         
-        if (correctData.ValidIndices.Min() < 0 || correctData.ValidIndices.Max() > data.Options.Count - 1)
-            throw new ArgumentOutOfRangeException($"{nameof(correctData.ValidIndices)}");
+        if (correctData.ValidIndices.Distinct().Count() != correctData.ValidIndices.Count)
+            throw new ArgumentException($"{nameof(correctData.ValidIndices)} must all be unique");
         
         if (correctData.ValidIndices.Count > data.Options.Count)
             throw new ArgumentException($"{nameof(correctData.ValidIndices)} should have less or equal to {nameof(data.Options)} amount of items");
+        
+        if (correctData.ValidIndices.Min() < 0 || correctData.ValidIndices.Max() > data.Options.Count - 1)
+            throw new ArgumentOutOfRangeException($"{nameof(correctData.ValidIndices)}");
     }
 }

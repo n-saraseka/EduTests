@@ -37,8 +37,9 @@ public class SequenceQValidator : IQuestionValidator
         CheckFields(correctData);
         if (data.Options.Count <= 1)
             throw new ArgumentException($"{nameof(data.Options)} must have at least two items");
-        if (correctData.Sequence.Count != data.Options.Count ||
-            correctData.Sequence.Any(s => !data.Options.Contains(s)))
+        if (correctData.Sequence.Count != data.Options.Count 
+            || correctData.Sequence.Any(s => !data.Options.Contains(s)) 
+            || data.Options.Any(s => !correctData.Sequence.Contains(s)))
             throw new ArgumentException($"{nameof(correctData.Sequence)} items must match {nameof(data.Options)}");
     }
 }
