@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
-namespace EduTests.Tests;
+namespace EduTests.Tests.ApiControllerTests;
 
 [TestFixture]
 public class AuthControllerTests

@@ -8,13 +8,12 @@ using EduTests.Database.Enums;
 using EduTests.Database.Repositories.Interfaces;
 using EduTests.Services;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MockQueryable;
 using Moq;
 using NUnit.Framework;
 
-namespace EduTests.Tests;
+namespace EduTests.Tests.ApiControllerTests;
 
 [TestFixture]
 public class UsersControllerTests

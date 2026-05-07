@@ -11,7 +11,7 @@ using MockQueryable;
 using Moq;
 using NUnit.Framework;
 
-namespace EduTests.Tests;
+namespace EduTests.Tests.ApiControllerTests;
 
 [TestFixture]
 public class ReportControllerTests
