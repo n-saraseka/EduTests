@@ -176,7 +176,7 @@ public class TestController(ITestRepository testRepository,
             var quarter = (int)Math.Round(count / 4.0,  MidpointRounding.AwayFromZero);
             var half = (int)Math.Round(count / 2.0,  MidpointRounding.AwayFromZero);
             
-            var interQuartile = count > 3 ? orderedByTime.Take(half).Skip(quarter).ToList() : orderedByTime.ToList();
+            var interQuartile = count > 3 ? orderedByTime.Skip(quarter).Take(half).ToList() : orderedByTime.ToList();
             viewModel.CompletionStats.InterQuartileAverageTime = new TimeSpan((long)interQuartile.Average(t => t.Ticks));
         }
         
