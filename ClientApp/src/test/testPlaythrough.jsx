@@ -7,8 +7,6 @@ function TestPlaythrough({baseQuestions, baseAnswers, baseLastUnanswered, baseTe
     const [currentAnswer, setCurrentAnswer] = useState(getAnswerByQuestionId(currentQuestion.id));
     const [currentCompletionPercentage, setCurrentCompletionPercentage] = useState(currentQuestion.orderIndex / baseQuestions.length * 100);
     
-    console.log(currentQuestion);
-    
     const updateAnswer = (updatedAnswer) => {
         const existingAnswer = getAnswerByQuestionId(updatedAnswer.questionId);
         if (existingAnswer === undefined) {

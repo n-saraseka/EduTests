@@ -121,31 +121,6 @@ function Constructor({baseTest, user}) {
     </>)
 }
 
-class CreateOrUpdateTestCommand {
-    constructor(name, description, tags, questions, attemptLimit, timeLimit, results, password, accessType, showCorrectAnswers) {
-        this.name = name;
-        this.description = description;
-        this.tags = tags;
-        this.questions = questions;
-        this.attemptLimit = attemptLimit;
-        this.timeLimit = timeLimit;
-        this.results = results;
-        this.password = password;
-        this.accessType = accessType;
-        this.showCorrectAnswers = showCorrectAnswers;
-    }
-}
-
-function createTest(command) {
-    return fetch('/api/tests', {
-        method: "POST",
-        body: JSON.stringify(command),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    });
-}
-
 function updateTest(command, id) {
     return fetch(`/api/tests/${id}`, {
         method: "PATCH",
@@ -163,6 +138,31 @@ function uploadTestImage(file, id) {
     return fetch(`/files/tests/${id}`, {
         method: 'PATCH',
         body: formData
+    });
+}
+
+export class CreateOrUpdateTestCommand {
+    constructor(name, description, tags, questions, attemptLimit, timeLimit, results, password, accessType, showCorrectAnswers) {
+        this.name = name;
+        this.description = description;
+        this.tags = tags;
+        this.questions = questions;
+        this.attemptLimit = attemptLimit;
+        this.timeLimit = timeLimit;
+        this.results = results;
+        this.password = password;
+        this.accessType = accessType;
+        this.showCorrectAnswers = showCorrectAnswers;
+    }
+}
+
+export function createTest(command) {
+    return fetch('/api/tests', {
+        method: "POST",
+        body: JSON.stringify(command),
+        headers: {
+            "Content-Type": "application/json"
+        }
     });
 }
 

@@ -64,7 +64,7 @@ function ProfileTests({baseTests, basePages, pageSize, userId}) {
     </>)
 }
 
-function getTests(page, pageSize, userId, sort) {
+export function getTests(page, pageSize, userId, sort) {
     return fetch(`/api/tests?page=${page}&amountPerPage=${pageSize}&userId=${userId}&sort=${sort}&isDescending=true&isProfile=true`);
 }
 
