@@ -35,7 +35,7 @@ function TestsTable({userId, baseTests, basePages, rowsPerPage}) {
         setPage(targetPage);
 
         setIsLoading(true);
-        const result = await getTests(userId, newPage, rowsPerPage);
+        const result = await getTests(page, rowsPerPage, userId);
         const newTests = await result.json();
         const pages = parseInt(newTests.pages);
         if (pages !== pageCount) {
@@ -51,7 +51,7 @@ function TestsTable({userId, baseTests, basePages, rowsPerPage}) {
         setIsLoading(true);
         const deleteResult = await deleteTest(testId);
         if (deleteResult.ok) {
-            const result = await getTests(userId, page, rowsPerPage);
+            const result = await getTests(page, rowsPerPage, userId);
             const newTests = await result.json();
             const pages = parseInt(newTests.pages);
             if (pages !== pageCount) {
