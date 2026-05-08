@@ -16,13 +16,13 @@ public class QuestionData
     public List<MatchingPair> Pairs { get; set; } = new();
     
     // number input
-    public double? Tolerance;
-    public double? NumberAnswer;
+    public double? Tolerance { get; set; }
+    public double? NumberAnswer { get; set; }
     
     // sequence
     public List<string> Sequence { get; set; } = new();
     
     // text input
-    public string? TextAnswer;
-    public List<string> ValidAnswers = new();
+    public string? TextAnswer { get; set; }
+    public List<string> ValidAnswers { get; set; } = new();
 }
