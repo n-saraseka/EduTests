@@ -32,32 +32,32 @@ function ConstructorMatchPairsItem({question, onChange, baseText, isLeft, index}
             const draggedData = JSON.parse(event.dataTransfer.getData('text/plain'));
             const { draggedIndex, draggedText } = draggedData;
             const targetIsLeft = target.getAttribute("data-left") === "true";
+            let pairs = [...question.correctData.pairs];
 
             if (targetIsLeft === isLeft) {
                 const targetIndex = parseInt(target.getAttribute("data-index"));
-                const targetText = target.querySelector("span").innerText;
-                let pairs = [...question.correctData.pairs];
+                const targetText = isLeft ? pairs[targetIndex].left : pairs[targetIndex].right;
                 if (isLeft) {
                     pairs = pairs.map((p, i) => {
                         if (i === draggedIndex) {
-                            p.left = targetText;
+                            return { ...p, left: targetText };
                         }
                         if (i === targetIndex) {
-                            p.left = draggedText;
+                            return { ...p, left: draggedText };
                         }
                         return p;
-                    })
+                    });
                 }
                 else {
                     pairs = pairs.map((p, i) => {
                         if (i === draggedIndex) {
-                            p.right = targetText;
+                            return { ...p, right: targetText };
                         }
                         if (i === targetIndex) {
-                            p.right = draggedText;
+                            return { ...p, right: draggedText };
                         }
                         return p;
-                    })
+                    });
                 }
                 const leftColumn = pairs.map((p) => p.left), rightColumn = pairs.map((p) => p.right);
 

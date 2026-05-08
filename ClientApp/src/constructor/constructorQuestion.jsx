@@ -69,7 +69,7 @@ function ConstructorQuestion({question, onChange}) {
     const editNumberTolerance = (event) => {
         const newTolerance = parseFloat(event.target.value);
         if (question.data.tolerance !== newTolerance) {
-            onChange({...question, data: {...question.data, tolerance: newTolerance}});
+            onChange({...question, correctData: {...question.correctData, tolerance: newTolerance}});
         }
     }
     
@@ -229,7 +229,7 @@ function ConstructorQuestion({question, onChange}) {
                     </div>
                     <div className="test-card-row">
                         <label htmlFor="answer">Погрешность: </label>
-                        <input type="number" id="answer" name="answer" defaultValue={question.data.tolerance}
+                        <input type="number" id="answer" name="answer" defaultValue={question.correctData.tolerance}
                                onChange={editNumberTolerance}/>
                     </div>
                 </>
