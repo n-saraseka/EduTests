@@ -48,7 +48,7 @@ function DownloadXlsxButton({test, questions, version}) {
                             break;
                         // Number input
                         case 2:
-                            answerString = cleanText(correspondingAnswer.answer.numberAnswer);
+                            answerString = correspondingAnswer.answer.numberAnswer;
                             break;
                         // Text input
                         case 3:
@@ -58,6 +58,9 @@ function DownloadXlsxButton({test, questions, version}) {
                         case 4:
                             answerString = correspondingAnswer.answer.sequence.map(o => cleanText(o)).join("; ");
                             break;
+                        // Match pairs
+                        case 5:
+                            answerString = correspondingAnswer.answer.pairs.map(p => `${cleanText(p.left)} - ${cleanText(p.right)}`).join("; ");
                     }
                     
                     if (isCorrect) {
