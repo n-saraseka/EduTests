@@ -30,6 +30,7 @@
     <ul class="header-navigation auth-navigation">
         @if (User.Identity.IsAuthenticated)
         {
+            <li><input type="text" maxlength="64" class="searchbar" placeholder="Поиск..."></li>
             <li><img id="nav-avatar" src="/files/users/@userId" alt="Profile picture"/></li>
             <li><a href="/user/@userId" class="nav-link">@userName</a></li>
             <li><a href="/user/@userId/my_account" class="nav-link">
