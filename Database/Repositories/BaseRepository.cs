@@ -85,10 +85,12 @@ public class BaseRepository<T, TKey>(DatabaseContext db) : IRepository<T, TKey>
         var entries = db.ChangeTracker.Entries()
             .Where(e => e is { Entity: IAuditable, State: EntityState.Added or EntityState.Modified });
 
+        var now = DateTime.UtcNow;
+        
         foreach (var entry in entries)
         {
             var auditable = (IAuditable)entry.Entity;
-            var now = DateTime.UtcNow;
+            
             
             if (entry.State == EntityState.Added)
             {
