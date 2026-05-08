@@ -97,8 +97,7 @@ function TestTab({test, setTest, onSetThumbnail}) {
             sequence: [],
             textAnswer: null,
             validAnswers: [],
-            validIndices: [],
-            orderIndex: newQuestions.length + 1,
+            validIndices: []
         };
         newQuestions.push({
             orderIndex: newQuestions.length + 1,
