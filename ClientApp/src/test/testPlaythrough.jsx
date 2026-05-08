@@ -6,6 +6,7 @@ function TestPlaythrough({baseQuestions, baseAnswers, baseLastUnanswered, baseTe
     const [currentQuestion, setCurrentQuestion] = useState(getQuestionByOrderIndex(baseLastUnanswered));
     const [currentAnswer, setCurrentAnswer] = useState(getAnswerByQuestionId(currentQuestion.id));
     const [currentCompletionPercentage, setCurrentCompletionPercentage] = useState(currentQuestion.orderIndex / baseQuestions.length * 100);
+    console.log(currentAnswer);
     
     const updateAnswer = (updatedAnswer) => {
         const existingAnswer = getAnswerByQuestionId(updatedAnswer.questionId);
@@ -30,17 +31,19 @@ function TestPlaythrough({baseQuestions, baseAnswers, baseLastUnanswered, baseTe
     const changeQuestion = async (index) => {
         if (index !== currentQuestion.orderIndex) {
             await submitAnswer();
+            let newQuestion;
             if (index < 1) {
-                setCurrentQuestion(getQuestionByOrderIndex(1))
+                newQuestion = getQuestionByOrderIndex(1);
             }
             else if (index > baseQuestions.length) {
-                setCurrentQuestion(getQuestionByOrderIndex(baseQuestions.length))
+                newQuestion = getQuestionByOrderIndex(baseQuestions.length);
             }
             else {
-                setCurrentQuestion(getQuestionByOrderIndex(index))
+                newQuestion = getQuestionByOrderIndex(index);
             }
-            setCurrentCompletionPercentage(currentQuestion.orderIndex / baseQuestions.length * 100);
-            setCurrentAnswer(getAnswerByQuestionId(currentQuestion.id));
+            setCurrentQuestion(newQuestion);
+            setCurrentCompletionPercentage(newQuestion.orderIndex / baseQuestions.length * 100);
+            setCurrentAnswer(getAnswerByQuestionId(newQuestion.id));
         }
     }
     
@@ -67,18 +70,22 @@ function TestPlaythrough({baseQuestions, baseAnswers, baseLastUnanswered, baseTe
         const answersResponse = await getAnswers(completion.testId, completion.id);
         if (answersResponse.ok) {
             const answersJson = await answersResponse.json();
-            const existingAnswer = answersJson.find(a => a.questionId === currentAnswer.questionId);
+            const existingAnswer = currentAnswer === undefined ? undefined : answersJson.find(a => a.questionId === currentAnswer.questionId);
             if (existingAnswer === undefined) {
                 const command = new AddAnswerCommand(newAnswer.questionId, newAnswer.answer);
                 const addResponse = await addAnswer(completion.testId, completion.id, command);
                 if (addResponse.ok) {
                     const answer = await addResponse.json();
                     const answerWithId = {...currentAnswer, id: answer.id};
+                    setCurrentAnswer(answerWithId);
                 }
             }
             else {
                 const command = new EditTestAnswerCommand(newAnswer.answer);
                 const editResponse = await editAnswer(completion.testId, completion.id, newAnswer.id, command);
+                if (editResponse.ok) {
+                    setCurrentAnswer(newAnswer);
+                }
             }
         }
     }

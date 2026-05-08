@@ -47,9 +47,9 @@ function ResultDetail({question, answer}) {
                     <div className="test-card-row">
                         <span>Ответ: </span>
                         <span style={{
-                            color: answer.answer.textAnswer === question.correctData.textAnswer ? 'green' : 'red'}}>
+                            color: question.correctData.validAnswers.find(a => a === answer.answer.textAnswer) ? 'green' : 'red'}}>
                             {answer.answer.textAnswer}</span>
-                        <span> (Правильный ответ: {question.correctData.textAnswer})</span>
+                        <span> (Возможный ответ: {question.correctData.validAnswers[0]})</span>
                     </div>
                 </div>)
             // Sequence

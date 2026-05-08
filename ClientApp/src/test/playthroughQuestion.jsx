@@ -10,34 +10,30 @@ function PlaythroughQuestion({question, answer, onChange}) {
         switch (type) {
             // Single choice
             case 0:
-                onChange({questionId: question.id, answer: {chosenIndices: [index]}});
+                onChange({...answer, questionId: question.id, answer: {chosenIndices: [index]}});
                 break;
             // Multiple choice
             case 1:
-                let indices = answer.answer.chosenIndices;
+                let indices = answer === undefined ? [] : answer.answer.chosenIndices;
                 if (event.target.checked) {
                     indices.push(index);
                 }
                 else {
                     indices = indices.filter(i => i !== index);
                 }
-                onChange({questionId: question.id, answer: {validIndices: indices}});
+                onChange({...answer, questionId: question.id, answer: {chosenIndices: indices}});
                 break;
         }
     }
     
     const editNumberAnswer = (event) => {
         const newAnswer = parseInt(event.target.value);
-        if (newAnswer !== answer.answer.numberAnswer) {
-            onChange({questionId: question.id, data: {numberAnswer: newAnswer}});
-        }
+        onChange({...answer, questionId: question.id, answer: {numberAnswer: newAnswer}});
     }
 
     const editTextAnswer = (event) => {
         const newAnswer = event.target.value;
-        if (newAnswer !== answer.answer.textAnswer) {
-            onChange({questionId: question.id, answer: {textAnswer: newAnswer}});
-        }
+        onChange({...answer, questionId: question.id, answer: {textAnswer: newAnswer}});
     }
 
     function QuestionSwitch({type}) {
@@ -68,14 +64,14 @@ function PlaythroughQuestion({question, answer, onChange}) {
                     <div className="test-card-row">
                         <label htmlFor="answer">Правильный ответ: </label>
                         <input type="number" id="answer" name="answer" defaultValue={answer === undefined ? "" : answer.answer.numberAnswer}
-                               onChange={editNumberAnswer}/>
+                               onChange={editNumberAnswer} autoFocus={true}/>
                     </div>
                 </div>);
             // Text input
             case 3:
                 return (<div id="answers">
                     <input type="text" id="answer" name="answer" defaultValue={answer === undefined ? "" : answer.answer.textAnswer}
-                           onChange={editTextAnswer}/>
+                           onChange={editTextAnswer} autoFocus={true}/>
                 </div>)
             // Sequence
             case 4:
@@ -83,6 +79,7 @@ function PlaythroughQuestion({question, answer, onChange}) {
                     <PlaythroughSequenceContainer question={question} onChange={onChange} 
                                                   sequence={answer === undefined ? question.data.options : answer.answer.sequence}/>
                 </div>)
+            // Match pairs
             case 5:
                 return (<div id="asnwers">
                     <PlaythroughMatchPairsContainer question={question} answer={answer} onChange={onChange}/>

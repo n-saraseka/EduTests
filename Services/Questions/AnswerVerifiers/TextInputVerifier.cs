@@ -15,6 +15,6 @@ public class TextInputVerifier : IVerifier
     /// don't have the <see cref="QuestionData.TextAnswer"/> filled out</exception>
     public bool Verify(QuestionData answerData, QuestionData correctData)
     { 
-        return answerData.TextAnswer.Equals(correctData.TextAnswer);
+        return correctData.ValidAnswers.Contains(answerData.TextAnswer);
     }
 }

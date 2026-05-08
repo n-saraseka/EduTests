@@ -15,6 +15,7 @@ public class NumberInputVerifier : IVerifier
     /// don't have the <see cref="QuestionData.NumberAnswer"/> filled out</exception>
     public bool Verify(QuestionData answerData, QuestionData correctData)
     {
-        return answerData.NumberAnswer.Equals(correctData.NumberAnswer);
+        return correctData.NumberAnswer - correctData.Tolerance >= answerData.NumberAnswer 
+                && correctData.NumberAnswer + correctData.Tolerance <= answerData.NumberAnswer;
     }
 }

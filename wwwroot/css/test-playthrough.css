@@ -51,6 +51,10 @@
     align-items: center;
 }
 
+.test-question {
+    width: 80%;
+}
+
 #progress-bar {
     height: 1.5rem;
     width: 100%;

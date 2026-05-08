@@ -1,5 +1,4 @@
 import {useState} from "react";
-import EditButton from "../buttons/editButton.jsx";
 
 function PlaythroughMatchPairsItem({question, answer, onChange, baseText, isLeft, index}) {
     const [isDragged, setIsDragged] = useState(false);
@@ -28,41 +27,41 @@ function PlaythroughMatchPairsItem({question, answer, onChange, baseText, isLeft
             const draggedData = JSON.parse(event.dataTransfer.getData('text/plain'));
             const { draggedIndex, draggedText } = draggedData;
             const targetIsLeft = target.getAttribute("data-left") === "true";
+            let pairs = answer !== undefined
+                ? answer.answer.pairs
+                : question.data.leftColumn.map((a, i) => {
+                    return {
+                        left: question.data.leftColumn[i],
+                        right: question.data.rightColumn[i]
+                    }});
 
             if (targetIsLeft === isLeft) {
                 const targetIndex = parseInt(target.getAttribute("data-index"));
-                const targetText = target.innerText;
-                let pairs = answer !== undefined 
-                    ? answer.answer.pairs
-                    : question.data.leftColumn.map((a, i) => {
-                        return {
-                            left: question.data.leftColumn[i],
-                            right: question.data.rightColumn[i]
-                        }});
+                const targetText = isLeft ? pairs[targetIndex].left : pairs[targetIndex].right;
                 if (isLeft) {
                     pairs = pairs.map((p, i) => {
                         if (i === draggedIndex) {
-                            p.left = targetText;
+                            return { ...p, left: targetText };
                         }
                         if (i === targetIndex) {
-                            p.left = draggedText;
+                            return { ...p, left: draggedText };
                         }
                         return p;
-                    })
+                    });
                 }
                 else {
                     pairs = pairs.map((p, i) => {
                         if (i === draggedIndex) {
-                            p.right = targetText;
+                            return { ...p, right: targetText };
                         }
                         if (i === targetIndex) {
-                            p.right = draggedText;
+                            return { ...p, right: draggedText };
                         }
                         return p;
-                    })
+                    });
                 }
 
-                onChange({questionId: question.id, answer: {pairs: pairs}});
+                onChange({...answer, questionId: question.id, answer: {pairs: pairs}});
             }
             setIsDragged(false);
         }

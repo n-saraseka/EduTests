@@ -12,7 +12,7 @@ function PlaythroughMatchPairsContainer({question, answer, onChange}) {
             <tbody>
             {answer !== undefined 
                 ? answer.answer.pairs.map((pair, i) => 
-                    (<PlaythroughMatchPairsRow question={question} onChange={onChange} key={i} leftColumn={pair.left} 
+                    (<PlaythroughMatchPairsRow question={question} answer={answer} onChange={onChange} key={i} leftColumn={pair.left} 
                                            rightColumn={pair.right} index={i}/>)) : 
                 question.data.leftColumn.map((answer, i) =>
                     (<PlaythroughMatchPairsRow question={question} onChange={onChange} key={i} 
