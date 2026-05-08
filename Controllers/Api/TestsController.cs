@@ -453,13 +453,14 @@ public class TestsController(ITestRepository testRepository,
         if (test is null)
             return NotFound();
         
-        if (test.Password != null && HttpContext.Session.GetString($"Verified-{test.Id}") != "true") return Forbid();
-        
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null)
             return Unauthorized();
         
         var userIdInt = int.Parse(userId);
+        
+        if (test.Password != null && HttpContext.Session.GetString($"Verified-{test.Id}") != "true" 
+                                  && test.UserId != userIdInt) return Forbid();
         
         if (test.AccessType == AccessType.Private && test.UserId != userIdInt)
             return Forbid();
@@ -531,7 +532,14 @@ public class TestsController(ITestRepository testRepository,
         if (test is null)
             return NotFound();
         
-        if (test.Password != null && HttpContext.Session.GetString($"Verified-{test.Id}") != "true") return Forbid();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null)
+            return Unauthorized();
+        
+        var userIdInt = int.Parse(userId);
+        
+        if (test.Password != null && HttpContext.Session.GetString($"Verified-{test.Id}") != "true" 
+                                  && test.UserId != userIdInt) return Forbid();
         
         var userRole = User.FindFirstValue(ClaimTypes.Role);
         
